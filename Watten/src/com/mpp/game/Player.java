@@ -1,4 +1,4 @@
-package com.mpp.watten;
+package com.mpp.game;
 
 public class Player {
 

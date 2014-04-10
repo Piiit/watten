@@ -1,4 +1,4 @@
-package com.mpp.watten;
+package com.mpp.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
