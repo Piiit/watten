@@ -66,7 +66,7 @@ public class Card extends Image {
 				System.out.println("Touch Down Card: " + cardValue.name() + " " + cardSuit.name());
 				touchPrevPosX = x;
 				touchPrevPosY = y;
-				System.out.println("Mouse Pos: " + x +", " + y + "   Card Pos: " + getX() + ", "+ getY());
+				System.out.println("Mouse Position: " + x +", " + y + "   Card Pos: " + getX() + ", "+ getY());
 				return true;
 			}
 
