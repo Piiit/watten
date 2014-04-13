@@ -3,14 +3,16 @@ package com.mpp.network;
 import java.io.*; 
 import java.net.*; 
 
+import com.mpp.tools.MessageAction;
+
 public class Client implements Runnable 
 { 
 
 	private Socket socket;
 	private boolean close = false;
 
-	private DataOutputStream dout; 
-	private DataInputStream din; 
+	private ObjectOutputStream dout; 
+	private ObjectInputStream din; 
 
 	public Client( String host, int port ) { 
 
@@ -19,30 +21,70 @@ public class Client implements Runnable
 
 			System.out.println( "connected to "+socket ); 
 
-			din = new DataInputStream( socket.getInputStream() ); 
-			dout = new DataOutputStream( socket.getOutputStream() ); 
+			din = new ObjectInputStream( socket.getInputStream() ); 
+			dout = new ObjectOutputStream( socket.getOutputStream() ); 
 
 			new Thread( this ).start(); 
+			
 		} catch( IOException ie ) { System.out.println( ie ); } 
 	} 
 
-	public void processMessage( String message ) { 
+	public void processMessage( Message message ) { 
 		try { 
-
-			dout.writeUTF( message ); 
-			if(message.equals("/quit"))
+			
+			System.out.println("hier 2");
+			 
+//			dout = new ObjectOutputStream( socket.getOutputStream() );
+			
+			System.out.println("hier 3");
+			System.out.println(message);
+			System.out.println("test 1");
+			dout.writeUnshared( message );
+			System.out.println("test 2");
+			//din = new ObjectInputStream( socket.getInputStream() );
+			//dout.reset();
+		
+			if((message.getAction() == MessageAction.CHAT && message.getMessage().equals("/quit")) || message.getAction() == MessageAction.LOGOUT)
 				close = true;
 		} catch( IOException ie ) { System.out.println( ie ); } 
 	} 
 
 	public void run() { 
 		try { 
-
+			
+			
 			boolean forever = true;
-			while (forever) { 
+			while (forever) {
+				
 
-				String message = din.readUTF();
-				System.out.println(message);
+				din = new ObjectInputStream( socket.getInputStream() ); 
+				dout = new ObjectOutputStream( socket.getOutputStream() ); 
+				
+				System.out.println("test");
+				Message message = null;
+				
+				try {
+					
+					message = (Message) din.readObject();
+					
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+				
+				System.out.println("read"+message);
+				
+				if(message.getAction() == MessageAction.LOGIN){
+					message = new Message(MessageAction.LOGIN);
+					message.setName("patrick"+System.currentTimeMillis());
+					System.out.println("hier");
+					processMessage(message);
+				}
+				
+				if(message.getAction() == MessageAction.CHAT) {
+			
+					System.out.println(message.getMessage());
+				}
+				
 				if(close == true)
 				{
 					forever = false;
