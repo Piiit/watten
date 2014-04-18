@@ -2,11 +2,9 @@ package com.mpp.network;
 
 import java.io.*; 
 import java.net.*; 
-
 import com.mpp.tools.MessageAction;
 
-public class Client implements Runnable 
-{ 
+public class Client implements Runnable { 
 
 	private Socket socket;
 	private boolean close = false;
@@ -14,7 +12,7 @@ public class Client implements Runnable
 	private ObjectOutputStream dout; 
 	private ObjectInputStream din; 
 
-	public Client( String host, int port ) { 
+	public Client( String host, int port ) throws Exception { 
 
 		try {
 			socket = new Socket( host, port ); 
@@ -26,52 +24,49 @@ public class Client implements Runnable
 
 			new Thread( this ).start(); 
 			
-		} catch( IOException ie ) { System.out.println( ie ); } 
+		} catch( Exception e ) { 
+			System.out.println( e );
+			throw e;
+		} 
 	} 
 
-	public void processMessage( Message message ) { 
-		try { 
-			
-			System.out.println("hier 2");
-			 
-//			dout = new ObjectOutputStream( socket.getOutputStream() );
-			
-			System.out.println("hier 3");
-			System.out.println(message);
-			System.out.println("test 1");
-			dout.writeUnshared( message );
-			System.out.println("test 2");
-			//din = new ObjectInputStream( socket.getInputStream() );
-			//dout.reset();
+	public void processMessage( Message message ) throws Exception { 
+		System.out.println(message);
 		
-			if((message.getAction() == MessageAction.CHAT && message.getMessage().equals("/quit")) || message.getAction() == MessageAction.LOGOUT)
-				close = true;
-		} catch( IOException ie ) { System.out.println( ie ); } 
+		dout = new ObjectOutputStream( socket.getOutputStream() ); 
+		dout.writeObject(message);
+		dout.close();
+	
+		if((message.getAction() == MessageAction.CHAT && message.getMessage().equals("/quit")) || message.getAction() == MessageAction.LOGOUT)
+			close = true;
 	} 
 
 	public void run() { 
 		try { 
-			
+			din = new ObjectInputStream( socket.getInputStream() ); 
+			dout = new ObjectOutputStream( socket.getOutputStream() ); 
 			
 			boolean forever = true;
-			while (forever) {
-				
-
-				din = new ObjectInputStream( socket.getInputStream() ); 
-				dout = new ObjectOutputStream( socket.getOutputStream() ); 
-				
-				System.out.println("test");
+			while (forever && !socket.isClosed()) {
 				Message message = null;
+				Object object = null;
 				
+//				Thread.sleep(10000);
 				try {
-					
-					message = (Message) din.readObject();
-					
-				} catch (ClassNotFoundException e) {
+					object = din.readObject();
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				
-				System.out.println("read"+message);
+				System.out.println("read: "+object);
+				
+				if(object == null) {
+					continue;
+				}
+				
+				if(object instanceof Message) {
+					message = (Message)object;
+				}
 				
 				if(message.getAction() == MessageAction.LOGIN){
 					message = new Message(MessageAction.LOGIN);
@@ -91,6 +86,8 @@ public class Client implements Runnable
 					socket.close();
 				}
 			} 
-		} catch( IOException ie ) { System.out.println( ie ); } 
+		} catch(Exception e) {
+			e.printStackTrace();
+		} 
 	}
 } 

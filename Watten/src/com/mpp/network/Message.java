@@ -6,6 +6,8 @@ import com.mpp.tools.MessageAction;
 
 public class Message implements Serializable{
 	
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public String toString() {
 		return "Message [action=" + action + ", message=" + message + ", name="
@@ -16,8 +18,21 @@ public class Message implements Serializable{
 	private String message;
 	private String name;
 	
+	public Message() {
+	}
+	
 	public Message(MessageAction action){
-		this.setAction(action);
+		this(action, null, null);
+	}
+
+	public Message(MessageAction action, String message){
+		this(action, message, null);
+	}
+	
+	public Message(MessageAction action, String message, String name){
+		setAction(action);
+		setMessage(message);
+		setName(name);
 	}
 
 	public MessageAction getAction() {

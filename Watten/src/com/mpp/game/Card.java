@@ -5,24 +5,23 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.mpp.tools.Suit;
-import com.mpp.tools.Value;
+import com.mpp.tools.Rank;
 
 public class Card extends Image {
 
 	Texture tex;
 	Sprite sprite;
 	Suit cardSuit;
-	Value cardValue;
+	Rank cardValue;
 	float touchPrevPosX;
 	float touchPrevPosY;
 
-	public Card(Suit _cardSuit, Value _cardValue) {
+	public Card(Suit _cardSuit, Rank _cardValue) {
 		super(new Texture(Gdx.files.internal("data/weli.jpg")));
 		tex = new Texture(Gdx.files.internal("data/weli.jpg"));
 		tex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
@@ -44,7 +43,7 @@ public class Card extends Image {
 	public Suit getCardsSuit(){
 		return cardSuit;
 	}
-	 public Value getCardValue(){
+	 public Rank getCardValue(){
 		 return cardValue;
 	 }
 	
