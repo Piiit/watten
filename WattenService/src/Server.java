@@ -8,9 +8,9 @@ public class Server {
 
 	private ServerSocket serversocket; 
 
-	public Hashtable<Socket, DataOutputStream> outputStreams = new Hashtable<Socket, DataOutputStream>(); 
+	public Hashtable<Socket, ObjectOutputStream> outputStreams = new Hashtable<Socket, ObjectOutputStream>(); 
 
-	final private int MAX_CONNECTIONS  = 3;
+	final private int MAX_CONNECTIONS  = 4;
 	
 	private int count = 0;
 
@@ -34,8 +34,8 @@ public class Server {
 
 			System.out.println( "Connection from "+socket ); 
 
-			DataOutputStream dout = new DataOutputStream( socket.getOutputStream() ); 
-
+			ObjectOutputStream dout = new ObjectOutputStream( socket.getOutputStream() ); 
+			dout.writeUTF("HHHH");
 
 			if(count < MAX_CONNECTIONS)
 			{
@@ -50,7 +50,7 @@ public class Server {
 		} 
 	} 
 
-	Enumeration<DataOutputStream> getOutputStreams() { 
+	Enumeration<ObjectOutputStream> getOutputStreams() { 
 
 
 		return outputStreams.elements(); 
@@ -60,9 +60,9 @@ public class Server {
 
 		synchronized( outputStreams ) { 
 			
-			for (Enumeration<DataOutputStream> e = getOutputStreams(); e.hasMoreElements(); ) { 
+			for (Enumeration<ObjectOutputStream> e = getOutputStreams(); e.hasMoreElements(); ) { 
 				
-				DataOutputStream dout = e.nextElement(); 
+				ObjectOutputStream dout = e.nextElement(); 
 			
 				try { 
 					dout.writeUTF(message ); 
