@@ -12,7 +12,7 @@ public class Main {
 		cfg.width = 800;
 		cfg.height = 600;
 		
-		new LwjglApplication(new Game(), cfg);
+		new LwjglApplication(new WattenGame(), cfg);
 		
 //		Client client = new Client("localhost",5555);
 //		

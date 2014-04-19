@@ -5,83 +5,135 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.tools.Suit;
 import com.mpp.tools.Rank;
+import com.mpp.ui.CardTable;
+import com.mpp.watten.WattenGame;
 
 public class Card extends Image {
 
-	Texture tex;
-	Sprite sprite;
+	Texture frontTexture; // Later get as parameter directly from helper class
+							// creating image, reduce load
+	Texture backTexture; // Later get as parameter directly from helper class
+							// creating image, reduce load
+	Image frontImage;
+	Image backImage;
 	Suit cardSuit;
-	Rank cardValue;
-	float touchPrevPosX;
-	float touchPrevPosY;
+	Rank cardRank;
+	boolean facingDown;
+	boolean played;
+	Player owningPlayer;
+	Cell parentCell;
 
-	public Card(Suit _cardSuit, Rank _cardValue) {
-		super(new Texture(Gdx.files.internal("data/weli.jpg")));
-		tex = new Texture(Gdx.files.internal("data/weli.jpg"));
-		tex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		this.setHeight(tex.getHeight());
-		this.setWidth(tex.getWidth());
+	public Card(Suit _cardSuit, Rank _cardRank, boolean facingDown,
+			Player owningPlayer) {
+		super();
+		cardSuit = _cardSuit;
+		cardRank = _cardRank;
+		this.facingDown = facingDown;
+		this.owningPlayer = owningPlayer;
+		played = false;
+
+		frontTexture = new Texture(Gdx.files.internal("data/weli.jpg"));
+		frontTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+
+		frontImage = new Image(frontTexture);
+
+		backTexture = new Texture(Gdx.files.internal("data/cardback.png"));
+		backTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		backImage = new Image(backTexture);
+
 		this.setBounds(0, 0, getWidth(), getHeight());
 		this.setTouchable(Touchable.enabled);
-		this.setPosition(50, 50);
-		sprite = new Sprite(tex);
-		cardSuit = _cardSuit;
-		cardValue = _cardValue;
+
+		evaluateCardFacing();
+
 		addActionListener();
-		
+
 	}
-	
-	public void playCard(){
-		//Add card to playing field
+
+	/*
+	 * Checks if card is facing up or down and changes drawable image according
+	 * to position
+	 */
+
+	private void evaluateCardFacing() {
+		if (facingDown)
+			this.setDrawable(backImage.getDrawable());
+		else
+			this.setDrawable(frontImage.getDrawable());
+
+		this.setSize(CardTable.getCardWidth(), CardTable.getCardHeight());
 	}
-	public Suit getCardsSuit(){
+
+	// So players which are not selecting can't see their cards
+	public void flipCard() {
+		facingDown = !facingDown;
+		evaluateCardFacing();
+
+	}
+
+	// When card clicked
+	public void playCard() {
+		// Add card to playing field
+		owningPlayer.playCard(this);
+	}
+
+	public Suit getCardsSuit() {
 		return cardSuit;
 	}
-	 public Rank getCardValue(){
-		 return cardValue;
-	 }
-	
-	public void changePosition(float xOffset, float yOffset){
-		this.setPosition(getX()+xOffset, getY()+yOffset);
+
+	public Rank getCardRank() {
+		return cardRank;
+	}
+
+	public void moveCardTo(float xOffset, float yOffset) {
+		this.addAction(Actions.moveTo(xOffset, yOffset, 2));
 	}
 
 	@Override
 	public void draw(Batch batch, float alpha) {
-//		sprite.draw(batch, alpha);
 		super.draw(batch, alpha);
-		
+
+	}
+
+	public void setParentCell(Cell cell) {
+		parentCell = cell;
+	}
+
+	//Remove it from parent cell
+	public void removeFromParent() {
+		parentCell.setWidget(null);
+		parentCell = null;
 	}
 
 	private void addActionListener() {
 		this.addListener(new InputListener() {
 			public boolean touchDown(InputEvent event, float x, float y,
 					int pointer, int button) {
-				System.out.println("Touch Down Card: " + cardValue.name() + " " + cardSuit.name());
-				touchPrevPosX = x;
-				touchPrevPosY = y;
-				System.out.println("Mouse Position: " + x +", " + y + "   Card Pos: " + getX() + ", "+ getY());
+				System.out.println("Touch Down Card: " + cardRank.name() + " "
+						+ cardSuit.name());
+
+				System.out.println("Facing down: " + facingDown);
 				return true;
 			}
 
-			public void touchDragged(InputEvent event, float x, float y,
-					int pointer) {
-				changePosition(x-touchPrevPosX, y-touchPrevPosY);
-				touchPrevPosX = x;
-				touchPrevPosY = y;		
-
-			}
-
 			public void touchUp(InputEvent event, float x, float y,
-					
-					int pointer, int button) {
-				System.out.println("Touch Up Card: " + cardValue.name() + " " + cardSuit.name());
 
+			int pointer, int button) {
+				
+				if (!played) {
+					playCard();
+					played = true;
+				}
 
 			}
 		});
