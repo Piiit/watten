@@ -228,4 +228,29 @@ public class SimpleXML {
 		nodePointer = n;
 	}
 	
+	private int indent = 0;
+	private String indentedOutput = "";
+	
+	private void toStringIndented(Node node) {
+		indentedOutput += String.format("%" + (indent == 0 ? "" : indent * 4) + "s<%s>", "", node.getName());
+		if(node.hasChildren()) {
+			indentedOutput += "\n";
+			for (Node child : node.getChildren()) {
+				indent++;
+				toStringIndented(child);
+				indent--;
+			}
+			indentedOutput += String.format("%" + (indent == 0 ? "" : indent * 4) + "s</%s>\n", "", node.getName());
+		} else {
+			indentedOutput += String.format("%s</%s>\n", node.getData(), node.getName());
+		}
+	}
+	
+	public String toStringIntented() {
+		indent = 0;
+		indentedOutput = "";
+		toStringIndented(root);
+		return indentedOutput;
+	}
+	
 }

@@ -71,11 +71,11 @@ public class MultipleCards implements Loadable {
 	
 	/**
 	 * Get the card indicated by the passed index
-	 * @param idx passed index
+	 * @param index passed index
 	 * @return card
 	 */
-	public Card getCardById(int idx) {
-		return cards.get(idx);
+	public Card getCard(int index) {
+		return cards.get(index);
 	}
 	
 	/**
@@ -130,7 +130,7 @@ public class MultipleCards implements Loadable {
 			}
 			i++;
 		}
-		throw new Exception("Card " + card + " not found");
+		throw new Exception("Card " + card.toStringDebug() + " not found");
 	}
 
 	/**
@@ -180,10 +180,7 @@ public class MultipleCards implements Loadable {
 		String output = SimpleXML.createTag("index", index);
 		
 		for (Card c : cards) {
-			output += c.serialize() + ',';
-		}
-		if (output.endsWith(",")) {
-			output = output.substring(0,output.length()-1);
+			output += c.serialize();
 		}
 		return SimpleXML.createTag("cards", output);
 	}
@@ -213,6 +210,14 @@ public class MultipleCards implements Loadable {
 		String output = "";
 		for (Card c : cards) {
 			output += c;
+		}
+		return output;
+	}
+	
+	public String toStringFaceUp() {
+		String output = "";
+		for (Card c : cards) {
+			output += c.toStringFaceUp();
 		}
 		return output;
 	}

@@ -1,5 +1,7 @@
 package cards;
 
+import xml.SimpleXML;
+
 import com.mpp.tools.Rank;
 import com.mpp.tools.Suit;
 
@@ -46,8 +48,13 @@ public class Card implements Comparable<Card> {
 		if (faceDown) {
 			return "{?-FACE-DOWN-?}";
 		}
+		return toStringFaceUp();
+	}
+	
+	public String toStringFaceUp() {
 		return "{" + suit + ":" + rank + "}";
 	}
+
 	
 	public boolean isFaceDown() {
 		return faceDown;
@@ -80,7 +87,15 @@ public class Card implements Comparable<Card> {
 	}
 
 	public String serialize() {
-		return suit + ":" + rank + "";
+		return SimpleXML.createTag("card", 
+				SimpleXML.createTag("suit", suit.toString()) + 
+				SimpleXML.createTag("rank", rank.toString()) + 
+				SimpleXML.createTag("facedown", Boolean.toString(faceDown))
+				);
+	}
+
+	public String toStringDebug() {
+		return "{" + suit + ":" + rank + ":" + (faceDown ? "face down" : "face up") + "}";
 	}
 
 }
