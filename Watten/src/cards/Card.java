@@ -2,8 +2,6 @@ package cards;
 
 import xml.SimpleXML;
 
-import com.mpp.tools.Rank;
-import com.mpp.tools.Suit;
 
 public class Card implements Comparable<Card> {
 	

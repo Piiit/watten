@@ -71,7 +71,7 @@ public class SimpleXML {
 				case TAG_ENTER:
 					addNode(new Node(t.getData()));
 					currentTag = t.getData();
-					break;
+				break;
 				case TAG_EXIT:
 					if (t.getData().compareToIgnoreCase(currentTag) != 0) {
 						throw new ParseException("Expected </" + currentTag + ">, but </" + t.getData() + "> found!", -1);
@@ -80,12 +80,16 @@ public class SimpleXML {
 					if (nodePointer != null) {
 						currentTag = nodePointer.getName();
 					}
-					break;
+				break;
 				case TAG_DATA:
 					if (nodePointer != null) {
 						nodePointer.setData(t.getData());
 					}
-					break;
+				break;
+				case EOF:
+				break;
+				default:
+				break;
 			}
 		} while (t.getType() != Token.Type.EOF);
 	}

@@ -1,6 +1,4 @@
 package cards;
-import com.mpp.tools.Rank;
-import com.mpp.tools.Suit;
 import xml.Loadable;
 import xml.Node;
 import xml.SimpleXML;
