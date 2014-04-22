@@ -1,9 +1,10 @@
 package com.mpp.game;
 
+import cards.Rank;
+import cards.Suit;
+
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.tablelayout.Cell;
-import com.mpp.tools.Rank;
-import com.mpp.tools.Suit;
 import com.mpp.ui.PlayedCardArea;
 import com.mpp.ui.PlayerInfoTable;
 

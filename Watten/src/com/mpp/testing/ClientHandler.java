@@ -8,6 +8,9 @@ import java.net.Socket;
 import java.util.Vector;
 import java.util.concurrent.Semaphore;
 
+import logic.Player;
+import logic.Watten;
+
 public class ClientHandler extends Thread {
 	
 	//vector should do the job, but just to be sure, I use semaphores.
