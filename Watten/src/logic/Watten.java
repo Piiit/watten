@@ -2,9 +2,7 @@ package logic;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import logic.Table.Position;
-
 import cards.Card;
 import cards.Deck;
 import cards.MultipleCards;
@@ -32,8 +30,6 @@ public class Watten {
 	private int maxPoints = 2;
 	private Deck deck;
 	private Table table;
-	private Suit bestCardSuit;
-	private Rank bestCardRank;
 	private Position cardDealerPosition = null;
 	private int team1Tricks = 0;
 	private int team2Tricks = 0;
@@ -56,6 +52,9 @@ public class Watten {
 	}
 	
 	public Player getTurnWinner() {
+		if(turnWinnerPosition == null) {
+			return null;
+		}
 		return table.getPlayer(turnWinnerPosition);
 	}
 	
@@ -164,8 +163,8 @@ public class Watten {
 	 */
 	private void stateTurnEntry() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.TURN_START);
-		bestCardRank = null;
-		bestCardSuit = null;
+		Card.setBestCardRank(null);
+		Card.setBestCardSuit(null);
 		firstCardsSuit = null;
 		table.setCurrentPlayer(turnWinnerPosition);
 		table.resetCardList();
@@ -220,12 +219,12 @@ public class Watten {
 
 		//If first player throws a card with the same suit as the best card's suit, other players must throw a best suit card as well
 		//if existent, except "Guater" or "Rechter"
-		if(firstCardsSuit == bestCardSuit && card.getSuit() != bestCardSuit) {
+		if(firstCardsSuit == Card.getBestCardSuit() && card.getSuit() != Card.getBestCardSuit()) {
 			boolean hasSuitCard = false;
 			MultipleCards hand = table.getCurrentPlayer().getHand();
 			for(int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
 				Card c = hand.getCard(cardIndex);
-				if(c.getSuit() == bestCardSuit && !isGuater(c) && !isRechter(c)) {
+				if(c.getSuit() == Card.getBestCardSuit() && !c.isGuater() && !c.isRechter()) {
 					hasSuitCard = true;
 				}
 			}
@@ -252,14 +251,14 @@ public class Watten {
 	
 	public MultipleCards getAllowedCards() throws Exception {
 		MultipleCards hand = table.getCurrentPlayer().getHand();
-		if(firstCardsSuit != bestCardSuit) {
+		if(firstCardsSuit != Card.getBestCardSuit()) {
 			return hand;
 		}
 		
 		MultipleCards allowedCards = new MultipleCards();
 		for(int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
 			Card c = hand.getCard(cardIndex);
-			if(c.getSuit() == bestCardSuit) {
+			if(c.getSuit() == Card.getBestCardSuit()) {
 				allowedCards.addCard(c);
 			}
 		}
@@ -325,89 +324,16 @@ public class Watten {
 
 	public void stateSelectBestCardSuit(Suit suit) throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.SELECT_SUIT);
-		bestCardSuit = suit;
+		Card.setBestCardSuit(suit);
 		setStatus(WattenFeature.SELECT_SUIT);
 		setConstraints(WattenFeature.PLAY_CARD, WattenFeature.BET);
 	}
 	
 	public void stateSelectBestCardRank(Rank rank) throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.SELECT_RANK);
-		bestCardRank = rank;
+		Card.setBestCardRank(rank);
 		setStatus(WattenFeature.SELECT_RANK);
 		setConstraints(WattenFeature.SELECT_SUIT);
-	}
-	
-	public boolean isGuater(Card card) {
-		if(card.getRank() != Rank.WELI && card.getSuit() == bestCardSuit) {
-			int index = bestCardRank.getIndex() + 1;
-			if(index > 8) {
-				index = 1;
-			}
-			if(card.getRank() == Rank.get(index)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public boolean isRechter(Card card) {
-		if(card.getRank() != Rank.WELI && card.getSuit() == bestCardSuit && card.getRank() == bestCardRank) {
-			return true;
-		}
-		return false;
-	}
-	
-	public boolean isBlinder(Card card) {
-		if(card.getRank() != Rank.WELI && card.getSuit() != bestCardSuit && card.getRank() == bestCardRank) {
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Returns the better card, where card1 is considered to be thrown first...
-	 * @param card1
-	 * @param card2
-	 * @return
-	 */
-	private Card getBetterCardChronological(Card card1, Card card2) {
-		if(isGuater(card1)) {
-			return card1;
-		}
-		if(isGuater(card2)) {
-			return card2;
-		}
-		if(isRechter(card1)) {
-			return card1;
-		}
-		if(isRechter(card2)) {
-			return card2;
-		}
-		if(isBlinder(card1)) {
-			return card1;
-		}
-		if(isBlinder(card2)) {
-			return card2;
-		}
-		if(card1.getSuit() == bestCardSuit && card2.getSuit() == bestCardSuit) {
-			if(card1.getRank().getIndex() > card2.getRank().getIndex()) {
-				return card1;
-			}
-			return card2;
-		}
-		if(card1.getSuit() == bestCardSuit) {
-			return card1;
-		}
-		if(card2.getSuit() == bestCardSuit) {
-			return card2;
-		}
-		if(card1.getSuit() == card2.getSuit()) {
-			if(card1.getRank().getIndex() > card2.getRank().getIndex()) {
-				return card1;
-			}
-			return card2;
-		}
-		return card1;
 	}
 	
 	private void stateTurnExit() throws Exception {
@@ -426,15 +352,15 @@ public class Watten {
 		
 		Card bestCard = card1;
 		int bestPlayerIndex = 0;
-		if(getBetterCardChronological(card1, card2) == card2) {
+		if(card1.isBetterCardChronological(card2) == false) {
 			bestCard = card2;
 			bestPlayerIndex = 1;
 		}
-		if(getBetterCardChronological(bestCard, card3) == card3) {
+		if(bestCard.isBetterCardChronological(card3) == false) {
 			bestCard = card3;
 			bestPlayerIndex = 2;
 		}
-		if(getBetterCardChronological(bestCard, card4) == card4) {
+		if(bestCard.isBetterCardChronological(card4) == false) {
 			bestCard = card4;
 			bestPlayerIndex = 3;
 		}
@@ -492,7 +418,7 @@ public class Watten {
 				getName(), 
 				maxPoints,
 				getStatus(),
-				"" + bestCardSuit + ":" + bestCardRank, 
+				"" + Card.getBestCardSuit() + ":" + Card.getBestCardRank(), 
 				getTurnTricksTeam1(),
 				getTurnTricksTeam2(),
 				getTurnWinner() == null ? "n/a" : getTurnWinner().getName(),
