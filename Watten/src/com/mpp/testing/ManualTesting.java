@@ -1,9 +1,9 @@
 package com.mpp.testing;
 
+import xml.SimpleXML;
 import logic.Player;
 import logic.Watten;
 import logic.WattenFeature;
-
 import cards.Rank;
 import cards.Suit;
 
@@ -50,6 +50,7 @@ public class ManualTesting {
 //						System.out.println(watten.getTable().getCurrentPlayer().getHand().toStringFaceUp());
 //						int selectCard = UserInterface.inputFieldInteger(watten.getTable().getCurrentPlayer().getName() + ": Card?");
 //						watten.playCard(watten.getTable().getCurrentPlayer().getHand().getCard(selectCard));
+						
 						watten.stateTurnPlayCard(watten.getAllowedCards().getCard());
 					break;
 					case SURRENDER_OR_HOLD:
@@ -64,6 +65,11 @@ public class ManualTesting {
 				} else {
 					System.out.println(watten.toStringInfo());
 				}
+				
+				SimpleXML xml = new SimpleXML(watten.getTable().serialize());
+				xml.parse();
+				System.out.println(xml.toStringIntented());
+				
 			};
 			
 			System.out.println("Done. Winners are " + watten.getWinnersAsString());

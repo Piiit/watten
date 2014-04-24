@@ -1,5 +1,7 @@
 package logic;
 
+import xml.SimpleXML;
+
 public enum WattenFeature {
 	INIT(0), SELECT_RANK(1), SELECT_SUIT(2), 
 	PLAY_CARD(3), BET (4), TURN_FINISHED(5), 
@@ -21,4 +23,12 @@ public enum WattenFeature {
 		return WattenFeature.values()[index];
 	}
 	
+	public String serialize() {
+		return SimpleXML.createTag("action", this.toString().toLowerCase());
+	}
+	
+	public static String serialize(WattenFeature feature) {
+		return SimpleXML.createTag("action", feature.toString().toLowerCase());
+	}
+
 }

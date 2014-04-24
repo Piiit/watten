@@ -176,6 +176,7 @@ public class MultipleCards implements Loadable {
 	/**
 	 * Serialize all cards and the index pointer.
 	 */
+	@Override
 	public String serialize() {
 		String output = SimpleXML.createTag("index", index);
 		
@@ -188,6 +189,7 @@ public class MultipleCards implements Loadable {
 	/**
 	 * Load all cards from a XML tree node.
 	 */
+	@Override
 	public void load(Node n) {
 		if (n == null) {
 			throw new NullPointerException("MultipleCards: Parameter must be a valid node!");

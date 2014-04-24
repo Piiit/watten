@@ -424,7 +424,7 @@ public class Watten {
 				getName(), 
 				maxPoints,
 				getStatus(),
-				bestCard.toStringFaceUp(), 
+				bestCard == null ? "n/a" : bestCard.toStringFaceUp(), 
 				getTurnTricksTeam1(),
 				getTurnTricksTeam2(),
 				getTurnWinner() == null ? "n/a" : getTurnWinner().getName(),

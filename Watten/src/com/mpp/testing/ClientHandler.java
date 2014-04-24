@@ -8,8 +8,11 @@ import java.net.Socket;
 import java.util.Vector;
 import java.util.concurrent.Semaphore;
 
+import cards.Card;
+import xml.SimpleXML;
 import logic.Player;
 import logic.Watten;
+import logic.WattenFeature;
 
 public class ClientHandler extends Thread {
 	
@@ -93,7 +96,18 @@ public class ClientHandler extends Thread {
 		broadcast("<" + player.getName() + "> left the chat room...");
 	}
 	
-	private boolean handleProtocol(String line) throws InterruptedException {
+	private Watten getGame(Player player) {
+		for(Watten game : games) {
+			try {
+				game.getTable().getPlayer(player.getName());
+				return game;
+			} catch(Exception e) {
+			}
+		}
+		return null;
+	}
+	
+	private boolean handleProtocol(String line) throws Exception {
 		if (line == null) {
 			return false;
 		}
@@ -104,9 +118,29 @@ public class ClientHandler extends Thread {
 		
 		String cmd = parts[0].toUpperCase();
 		int i = 0;
-		String gameName = "";
-
+		Watten currentGame = getGame(player);
+		String gameName = currentGame == null ? "" : currentGame.getName();
+		
+		broadcastAndOutput(WattenFeature.GAME_FINISHED.serialize());
+		
+		SimpleXML xml = new SimpleXML(line);
+		xml.parse();
+		if(xml.root.getName().equals("card")) {
+			Card c = new Card();
+			c.load(xml.root);
+		}
+		
 		switch(cmd) {
+			case "S":
+				try {
+					currentGame.start();
+					broadcastAndOutput(gameName + " started!");
+					broadcastAndOutput("Current player = " + currentGame.getTable().getCurrentPlayer());
+				} catch (Exception e1) {
+					e1.printStackTrace();
+					output.println("Can not start game " + gameName + ": " + e1.getMessage());
+				}
+			break;
 			case "Q": 
 				output.println("*** Bye " + player.getName() + "***");
 				return true;
@@ -176,6 +210,7 @@ public class ClientHandler extends Thread {
 				output.println("R [name]    : New nick name");
 				output.println("L           : list all games");
 				output.println("C [text]    : broadcasts some chat to all players");
+				output.println("S           : start the game");
 				output.println("--------------------------------------");
 			break;
 			case "C":
@@ -225,6 +260,13 @@ public class ClientHandler extends Thread {
 			}
 		}
 	}
+	
+	private void broadcastAndOutput(String text) {
+		for(ClientHandler client : clients) {
+			client.output.println(text);
+		}
+	}
+
 	
 	private boolean nameExists(String name) {
 		for(ClientHandler client : clients) {
