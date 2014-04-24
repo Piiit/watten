@@ -140,12 +140,12 @@ public class Table implements Loadable {
 		if(isFreeSeat(Position.get(currentPlayerIndex))) {
 			throw new Exception("No player on this seat!");
 		}
-		System.out.println("Current player is " + playerList[currentPlayerIndex].getName());
 		return playerList[currentPlayerIndex];
 	}
 	
 	public void setCurrentPlayer(Position position) {
 		currentPlayerIndex = position.getIndex();
+		System.out.println("Current player is " + playerList[currentPlayerIndex].getName());
 	}
 	
 	public Card getCurrentPlayerCard() {

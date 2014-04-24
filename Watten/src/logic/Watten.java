@@ -8,6 +8,7 @@ import cards.Deck;
 import cards.MultipleCards;
 import cards.Rank;
 import cards.Suit;
+import cards.WattenCardTools;
 
 
 /**
@@ -35,6 +36,7 @@ public class Watten {
 	private int team2Tricks = 0;
 	private int team1Points = 0;
 	private int team2Points = 0;
+	private Card bestCard = null;
 	private int lastBetTeamNumber = NOTEAM; 
 	private Position turnWinnerPosition = null;
 	private WattenFeature status;
@@ -163,8 +165,12 @@ public class Watten {
 	 */
 	private void stateTurnEntry() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.TURN_START);
-		Card.setBestCardRank(null);
-		Card.setBestCardSuit(null);
+		if(bestCard == null) {
+			bestCard = new Card();
+		} else {
+			bestCard.setSuit(null);
+			bestCard.setRank(null);
+		}
 		firstCardsSuit = null;
 		table.setCurrentPlayer(turnWinnerPosition);
 		table.resetCardList();
@@ -219,12 +225,12 @@ public class Watten {
 
 		//If first player throws a card with the same suit as the best card's suit, other players must throw a best suit card as well
 		//if existent, except "Guater" or "Rechter"
-		if(firstCardsSuit == Card.getBestCardSuit() && card.getSuit() != Card.getBestCardSuit()) {
+		if(firstCardsSuit == bestCard.getSuit() && card.getSuit() != bestCard.getSuit()) {
 			boolean hasSuitCard = false;
 			MultipleCards hand = table.getCurrentPlayer().getHand();
 			for(int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
 				Card c = hand.getCard(cardIndex);
-				if(c.getSuit() == Card.getBestCardSuit() && !c.isGuater() && !c.isRechter()) {
+				if(c.getSuit() == bestCard.getSuit() && !WattenCardTools.isGuater(c, bestCard) && !WattenCardTools.isRechter(c, bestCard)) {
 					hasSuitCard = true;
 				}
 			}
@@ -251,14 +257,14 @@ public class Watten {
 	
 	public MultipleCards getAllowedCards() throws Exception {
 		MultipleCards hand = table.getCurrentPlayer().getHand();
-		if(firstCardsSuit != Card.getBestCardSuit()) {
+		if(firstCardsSuit != bestCard.getSuit()) {
 			return hand;
 		}
 		
 		MultipleCards allowedCards = new MultipleCards();
 		for(int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
 			Card c = hand.getCard(cardIndex);
-			if(c.getSuit() == Card.getBestCardSuit()) {
+			if(c.getSuit() == bestCard.getSuit()) {
 				allowedCards.addCard(c);
 			}
 		}
@@ -324,14 +330,14 @@ public class Watten {
 
 	public void stateSelectBestCardSuit(Suit suit) throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.SELECT_SUIT);
-		Card.setBestCardSuit(suit);
+		bestCard.setSuit(suit);
 		setStatus(WattenFeature.SELECT_SUIT);
 		setConstraints(WattenFeature.PLAY_CARD, WattenFeature.BET);
 	}
 	
 	public void stateSelectBestCardRank(Rank rank) throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.SELECT_RANK);
-		Card.setBestCardRank(rank);
+		bestCard.setRank(rank);
 		setStatus(WattenFeature.SELECT_RANK);
 		setConstraints(WattenFeature.SELECT_SUIT);
 	}
@@ -350,18 +356,18 @@ public class Watten {
 		Card card4 = table.getCurrentPlayerCard();
 		table.nextPlayer();
 		
-		Card bestCard = card1;
+		Card betterCard = card1;
 		int bestPlayerIndex = 0;
-		if(card1.isBetterCardChronological(card2) == false) {
-			bestCard = card2;
+		if(WattenCardTools.isBetterCardChronological(card1, card2, bestCard) == false) {
+			betterCard = card2;
 			bestPlayerIndex = 1;
 		}
-		if(bestCard.isBetterCardChronological(card3) == false) {
-			bestCard = card3;
+		if(WattenCardTools.isBetterCardChronological(betterCard, card3, bestCard) == false) {
+			betterCard = card3;
 			bestPlayerIndex = 2;
 		}
-		if(bestCard.isBetterCardChronological(card4) == false) {
-			bestCard = card4;
+		if(WattenCardTools.isBetterCardChronological(betterCard, card4, bestCard) == false) {
+			betterCard = card4;
 			bestPlayerIndex = 3;
 		}
 		
@@ -418,7 +424,7 @@ public class Watten {
 				getName(), 
 				maxPoints,
 				getStatus(),
-				"" + Card.getBestCardSuit() + ":" + Card.getBestCardRank(), 
+				bestCard.toStringFaceUp(), 
 				getTurnTricksTeam1(),
 				getTurnTricksTeam2(),
 				getTurnWinner() == null ? "n/a" : getTurnWinner().getName(),
