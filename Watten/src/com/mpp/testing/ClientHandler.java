@@ -123,12 +123,12 @@ public class ClientHandler extends Thread {
 		
 		broadcastAndOutput(WattenFeature.GAME_FINISHED.serialize());
 		
-		SimpleXML xml = new SimpleXML(line);
-		xml.parse();
-		if(xml.root.getName().equals("card")) {
-			Card c = new Card();
-			c.load(xml.root);
-		}
+//		SimpleXML xml = new SimpleXML(line);
+//		xml.parse();
+//		if(xml.root.getName().equals("card")) {
+//			Card c = new Card();
+//			c.load(xml.root);
+//		}
 		
 		switch(cmd) {
 			case "S":
@@ -154,6 +154,12 @@ public class ClientHandler extends Thread {
 					i++;
 				}
 				try {
+					for(Watten g : games) {
+						if(g.getName().equalsIgnoreCase(gameName)) {
+							output.println("You can not create the game " + gameName + ". A game with this name already exists!");
+							return false;
+						}
+					}
 					gamesPermit.acquire();
 					games.add(new Watten(gameName));
 					gamesPermit.release();
