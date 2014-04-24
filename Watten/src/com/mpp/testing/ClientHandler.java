@@ -123,7 +123,7 @@ public class ClientHandler extends Thread {
 					gamesPermit.acquire();
 					games.add(new Watten(gameName));
 					gamesPermit.release();
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				output.println("You created the game " + gameName);

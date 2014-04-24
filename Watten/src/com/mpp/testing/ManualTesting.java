@@ -10,10 +10,11 @@ import cards.Suit;
 public class ManualTesting {
 
 	public static void main(String[] args) {
-		Watten watten = new Watten("test");
-		watten.setMaxPoints(18);
 		
 		try {
+			Watten watten = new Watten("test");
+			watten.setMaxPoints(18);
+
 			watten.getTable().addPlayer(new Player("Matthäus"));
 			watten.getTable().addPlayer(new Player("Patrick"));
 			watten.getTable().addPlayer(new Player("Peter"));

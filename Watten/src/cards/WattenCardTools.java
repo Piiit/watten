@@ -2,7 +2,7 @@ package cards;
 
 public class WattenCardTools {
 	
-	public static Card getGuater(Card bestCard) {
+	public static Card getGuater(Card bestCard) throws Exception {
 		if(bestCard.getRank() == Rank.WELI) {
 			return null;
 		}
@@ -17,8 +17,8 @@ public class WattenCardTools {
 		return bestCard;
 	}
 	
-	public static boolean isGuater(Card card, Card bestCard) {
-		if(card == null) {
+	public static boolean isGuater(Card card, Card bestCard) throws Exception {
+		if(card == null || bestCard == null) {
 			throw new NullPointerException("Card can not be null!");
 		}
 		return (getGuater(bestCard).equals(card));
@@ -46,8 +46,9 @@ public class WattenCardTools {
 	 * @param card1
 	 * @param card2
 	 * @return
+	 * @throws Exception 
 	 */
-	public static boolean isBetterCardChronological(Card card, Card card2, Card bestCard) {
+	public static boolean isBetterCardChronological(Card card, Card card2, Card bestCard) throws Exception {
 		if(isGuater(card, bestCard)) {
 			return true;
 		}

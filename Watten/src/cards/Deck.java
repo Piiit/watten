@@ -7,8 +7,9 @@ public class Deck extends MultipleCards implements Loadable {
 
 	/** 
 	 * Generate the whole deck of cards (One of each suit/rank pair, except for WELI, which exists only once!)
+	 * @throws Exception 
 	 */
-	public Deck () {
+	public Deck () throws Exception {
 		Rank ranksArray[] = Rank.values();
 		Suit suitsArray[] = Suit.values();
 		

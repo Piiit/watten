@@ -10,17 +10,20 @@ public class Card implements Comparable<Card>, Loadable {
 	private Rank rank;
 	boolean faceDown;
 	
-	public Card (Suit suit, Rank rank, boolean faceDown) {
+	public Card (Suit suit, Rank rank, boolean faceDown) throws Exception {
+		if(rank == Rank.WELI && suit != Suit.BELLS) {
+			throw new Exception("WELI must have BELLS as suit!");
+		}
 		this.rank = rank;
 		this.suit = suit;
 		this.faceDown = faceDown;
 	}
 	
-	public Card (Suit suit, Rank rank) {
+	public Card (Suit suit, Rank rank) throws Exception {
 		this(suit, rank, true);
 	}
 	
-	public Card () {
+	public Card () throws Exception {
 		this(null, null, true);
 	}
 	

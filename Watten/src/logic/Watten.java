@@ -44,7 +44,7 @@ public class Watten {
 	private Suit firstCardsSuit = null;
 	private int lastBet;
 	
-	public Watten(String name) {
+	public Watten(String name) throws Exception {
 		this.name = name;
 		deck = new Deck();
 		table = new Table();
