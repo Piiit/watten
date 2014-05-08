@@ -210,9 +210,9 @@ public class ClientHandler extends Thread {
 				int i = 0;
 				for(Watten game : games) {
 					i++;
-					gameList += i + " : " + game.getName();
+					gameList += i + " : " + game.getName() + "\n";
 				}
-				sendResponse(command, "type", "ACK", "message", "--- LIST OF GAMES --------------------" + gameList);
+				sendResponse(command, "type", "ACK", "message", "--- LIST OF GAMES --------------------\n" + gameList);
 			break;
 			case "help":
 				sendResponse(command, "type", "ACK", "message", 
