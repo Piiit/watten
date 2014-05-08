@@ -1,4 +1,4 @@
-package com.mpp.testing;
+package com.mpp.tools;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 

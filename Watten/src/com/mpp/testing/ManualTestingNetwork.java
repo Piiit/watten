@@ -1,5 +1,8 @@
 package com.mpp.testing;
 
+import com.mpp.network.Client;
+import com.mpp.network.Server;
+
 public class ManualTestingNetwork {
 
 	public static void main(String[] args) {

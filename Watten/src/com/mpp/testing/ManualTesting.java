@@ -1,11 +1,12 @@
 package com.mpp.testing;
 
-import xml.SimpleXML;
-import logic.Player;
-import logic.Watten;
-import logic.WattenFeature;
-import cards.Rank;
-import cards.Suit;
+import com.mpp.tools.UserInterface;
+import com.mpp.tools.xml.SimpleXML;
+import com.mpp.watten.cards.Rank;
+import com.mpp.watten.cards.Suit;
+import com.mpp.watten.logic.Player;
+import com.mpp.watten.logic.Watten;
+import com.mpp.watten.logic.WattenFeature;
 
 public class ManualTesting {
 

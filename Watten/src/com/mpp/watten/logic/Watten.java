@@ -1,14 +1,15 @@
-package logic;
+package com.mpp.watten.logic;
 
 import java.util.ArrayList;
 import java.util.List;
-import logic.Table.Position;
-import cards.Card;
-import cards.Deck;
-import cards.MultipleCards;
-import cards.Rank;
-import cards.Suit;
-import cards.WattenCardTools;
+
+import com.mpp.tools.PlayerLocation;
+import com.mpp.watten.cards.Card;
+import com.mpp.watten.cards.Deck;
+import com.mpp.watten.cards.MultipleCards;
+import com.mpp.watten.cards.Rank;
+import com.mpp.watten.cards.Suit;
+import com.mpp.watten.cards.WattenCardTools;
 
 
 /**
@@ -31,14 +32,14 @@ public class Watten {
 	private int maxPoints = 2;
 	private Deck deck;
 	private Table table;
-	private Position cardDealerPosition = null;
+	private PlayerLocation cardDealerPlayerLocation = null;
 	private int team1Tricks = 0;
 	private int team2Tricks = 0;
 	private int team1Points = 0;
 	private int team2Points = 0;
 	private Card bestCard = null;
 	private int lastBetTeamNumber = NOTEAM; 
-	private Position turnWinnerPosition = null;
+	private PlayerLocation turnWinnerPlayerLocation = null;
 	private WattenFeature status;
 	private List<WattenFeature> allowedStates = new ArrayList<WattenFeature>();
 	private Suit firstCardsSuit = null;
@@ -54,10 +55,10 @@ public class Watten {
 	}
 	
 	public Player getTurnWinner() {
-		if(turnWinnerPosition == null) {
+		if(turnWinnerPlayerLocation == null) {
 			return null;
 		}
-		return table.getPlayer(turnWinnerPosition);
+		return table.getPlayer(turnWinnerPlayerLocation);
 	}
 	
 	public int getTurnTricksTeam1() {
@@ -77,18 +78,18 @@ public class Watten {
 	}
 	
 	public int getTeam(Player player) {
-		return getTeam(table.getPlayerPosition(player));
+		return getTeam(table.getPlayerPlayerLocation(player));
 	}
 	
-	public int getTeam(Position position) {
-		if(position == Position.NORTH || position == Position.SOUTH) {
+	public int getTeam(PlayerLocation playerLocation) {
+		if(playerLocation == PlayerLocation.North || playerLocation == PlayerLocation.South) {
 			return TEAM1;
 		} 
 		return TEAM2; 
 	}
 	
 	public int getTeam() throws Exception {
-		return getTeam(table.getPlayerPosition(table.getCurrentPlayer()));
+		return getTeam(table.getPlayerPlayerLocation(table.getCurrentPlayer()));
 	}
 	
 	public void start() throws Exception {
@@ -102,7 +103,7 @@ public class Watten {
 		}
 		team1Points = 0;
 		team2Points = 0;
-		turnWinnerPosition = Position.NORTH;
+		turnWinnerPlayerLocation = PlayerLocation.North;
 		
 		setStatus(WattenFeature.GAME_START);
 		setConstraints(WattenFeature.ROUND_START);
@@ -139,10 +140,10 @@ public class Watten {
 		team2Tricks = 0;
 		lastBet = 2;
 		lastBetTeamNumber = NOTEAM;
-		if(cardDealerPosition == null || cardDealerPosition.getIndex() + 1 > 3) {
-			cardDealerPosition = Position.NORTH;
+		if(cardDealerPlayerLocation == null || cardDealerPlayerLocation.getIndex() + 1 > 3) {
+			cardDealerPlayerLocation = PlayerLocation.North;
 		} else {
-			cardDealerPosition = Position.get(cardDealerPosition.getIndex() + 1);
+			cardDealerPlayerLocation = PlayerLocation.get(cardDealerPlayerLocation.getIndex() + 1);
 		}
 
 		//Deal cards...
@@ -172,7 +173,7 @@ public class Watten {
 			bestCard.setRank(null);
 		}
 		firstCardsSuit = null;
-		table.setCurrentPlayer(turnWinnerPosition);
+		table.setCurrentPlayer(turnWinnerPlayerLocation);
 		table.resetCardList();
 		setStatus(WattenFeature.TURN_START);
 		setConstraints(WattenFeature.SELECT_RANK);
@@ -345,7 +346,7 @@ public class Watten {
 	private void stateTurnExit() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.TURN_FINISHED);
 		
-		table.setCurrentPlayer(cardDealerPosition);
+		table.setCurrentPlayer(cardDealerPlayerLocation);
 		
 		Card card1 = table.getCurrentPlayerCard();
 		table.nextPlayer();
@@ -371,13 +372,13 @@ public class Watten {
 			bestPlayerIndex = 3;
 		}
 		
-		bestPlayerIndex = (cardDealerPosition.getIndex() + bestPlayerIndex) % 4;
-		if(Position.get(bestPlayerIndex) == Position.NORTH || Position.get(bestPlayerIndex) == Position.SOUTH) {
+		bestPlayerIndex = (cardDealerPlayerLocation.getIndex() + bestPlayerIndex) % 4;
+		if(PlayerLocation.get(bestPlayerIndex) == PlayerLocation.North || PlayerLocation.get(bestPlayerIndex) == PlayerLocation.South) {
 			team1Tricks++;
 		} else {
 			team2Tricks++;
 		}
-		turnWinnerPosition = Position.get(bestPlayerIndex);
+		turnWinnerPlayerLocation = PlayerLocation.get(bestPlayerIndex);
 		
 		setStatus(WattenFeature.TURN_FINISHED);
 		
@@ -397,9 +398,9 @@ public class Watten {
 		}
 		
 		if(getPointsTeam1() >= getMaxPoints()) {
-			return new Player[]{table.getPlayer(Position.NORTH), table.getPlayer(Position.SOUTH)};
+			return new Player[]{table.getPlayer(PlayerLocation.North), table.getPlayer(PlayerLocation.South)};
 		}
-		return new Player[]{table.getPlayer(Position.WEST), table.getPlayer(Position.EAST)};
+		return new Player[]{table.getPlayer(PlayerLocation.West), table.getPlayer(PlayerLocation.East)};
 	}
 
 	public String getWinnersAsString() {

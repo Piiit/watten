@@ -1,7 +1,7 @@
-package cards;
-import xml.Loadable;
-import xml.Node;
-import xml.SimpleXML;
+package com.mpp.watten.cards;
+import com.mpp.tools.xml.Loadable;
+import com.mpp.tools.xml.Node;
+import com.mpp.tools.xml.SimpleXML;
 
 public class Deck extends MultipleCards implements Loadable {
 

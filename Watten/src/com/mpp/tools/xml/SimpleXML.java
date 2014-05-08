@@ -1,4 +1,4 @@
-package xml;
+package com.mpp.tools.xml;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -59,8 +59,8 @@ public class SimpleXML {
 	 * Parse the input string by jumping from one token to the next and build a tree with nodes.
 	 * This tree can also have nested nodes and empty nodes, but throws an exception if the order isn't 
 	 * correct.
-	 * @see xml.Node
-	 * @see xml.Token
+	 * @see com.mpp.tools.xml.Node
+	 * @see com.mpp.tools.xml.Token
 	 * @throws ParseException if a tag exits which has never started or started in wrong order.
 	 */
 	public void parse() throws ParseException {

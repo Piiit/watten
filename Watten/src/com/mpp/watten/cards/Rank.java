@@ -1,4 +1,4 @@
-package cards;
+package com.mpp.watten.cards;
 
 public enum Rank {
 	

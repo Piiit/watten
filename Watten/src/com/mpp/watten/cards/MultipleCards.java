@@ -1,11 +1,11 @@
-package cards;
+package com.mpp.watten.cards;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import xml.Loadable;
-import xml.Node;
-import xml.SimpleXML;
+import com.mpp.tools.xml.Loadable;
+import com.mpp.tools.xml.Node;
+import com.mpp.tools.xml.SimpleXML;
 
 /**
  * <pre>MultipeCards is a set of 0 or more cards. They are stored in a indexed list.

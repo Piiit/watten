@@ -1,8 +1,5 @@
 package com.mpp.game;
 
-import cards.Rank;
-import cards.Suit;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -18,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.ui.CardTable;
 import com.mpp.watten.WattenGame;
+import com.mpp.watten.cards.Rank;
+import com.mpp.watten.cards.Suit;
 
 public class Card extends Image {
 

@@ -1,4 +1,4 @@
-package cards;
+package com.mpp.watten.cards;
 
 import static org.junit.Assert.*;
 

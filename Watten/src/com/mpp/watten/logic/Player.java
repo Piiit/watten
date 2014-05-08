@@ -1,10 +1,10 @@
-package logic;
+package com.mpp.watten.logic;
 
-import xml.Loadable;
-import xml.Node;
-import xml.SimpleXML;
-import cards.Card;
-import cards.MultipleCards;
+import com.mpp.tools.xml.Loadable;
+import com.mpp.tools.xml.Node;
+import com.mpp.tools.xml.SimpleXML;
+import com.mpp.watten.cards.Card;
+import com.mpp.watten.cards.MultipleCards;
 
 public class Player implements Loadable {
 

@@ -1,18 +1,19 @@
-package com.mpp.testing;
+package com.mpp.network;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import cards.MultipleCards;
-import xml.SimpleXML;
 
-public class ClientOutput extends Thread {
+import com.mpp.tools.xml.SimpleXML;
+import com.mpp.watten.cards.MultipleCards;
+
+public class ClientThread extends Thread {
 	
 	private BufferedReader input = null;
 	private Socket socket = null;
 	
-	public ClientOutput(Socket socket) {
+	public ClientThread(Socket socket) {
 		this.socket = socket;
 	}
 

@@ -1,12 +1,11 @@
 package com.mpp.game;
 
-import cards.Rank;
-import cards.Suit;
-
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.ui.PlayedCardArea;
 import com.mpp.ui.PlayerInfoTable;
+import com.mpp.watten.cards.Rank;
+import com.mpp.watten.cards.Suit;
 
 public class Player {
 

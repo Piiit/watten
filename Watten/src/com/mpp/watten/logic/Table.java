@@ -1,10 +1,10 @@
-package logic;
+package com.mpp.watten.logic;
 
-
-import xml.Loadable;
-import xml.Node;
-import xml.SimpleXML;
-import cards.Card;
+import com.mpp.tools.PlayerLocation;
+import com.mpp.tools.xml.Loadable;
+import com.mpp.tools.xml.Node;
+import com.mpp.tools.xml.SimpleXML;
+import com.mpp.watten.cards.Card;
 
 public class Table implements Loadable {
 
@@ -15,25 +15,7 @@ public class Table implements Loadable {
 	private Card cardList[] = new Card[4];
 	private int currentPlayerIndex = 0;
 
-	public enum Position {
-		NORTH(0), EAST(1), SOUTH(2), WEST(3);
-		
-		private final int index;
-
-		Position(int index) {
-			this.index = index;
-		}
-
-		public int getIndex() {
-			return index;
-		}
-		
-		public static Position get(int index) {
-			return Position.values()[index];
-		}
-	}
-	
-	public void addPlayer(Player player, Position seat) throws Exception {
+	public void addPlayer(Player player, PlayerLocation seat) throws Exception {
 		if(player == null) {
 			throw new NullPointerException("Player can not be null!");
 		}
@@ -43,10 +25,10 @@ public class Table implements Loadable {
 		
 		int freeSeat = -1;
 		for(int i = 0; i < 4; i++) {
-			if(player.equals(getPlayer(Position.get(i)))) {
+			if(player.equals(getPlayer(PlayerLocation.get(i)))) {
 				throw new Exception("Player with name " + player.getName() + " already sits at this table!");
 			}
-			if(freeSeat == -1 && isFreeSeat(Position.get(i))) {
+			if(freeSeat == -1 && isFreeSeat(PlayerLocation.get(i))) {
 				freeSeat = i;
 			}
 		}
@@ -66,7 +48,7 @@ public class Table implements Loadable {
 		addPlayer(player, null);
 	}
 	
-	public Player getPlayer(Position seat) {
+	public Player getPlayer(PlayerLocation seat) {
 		return playerList[seat.getIndex()];
 	}
 	
@@ -82,28 +64,28 @@ public class Table implements Loadable {
 		throw new Exception("Player " + playerName + " does not sit at this table!");
 	}
 	
-	public boolean isFreeSeat(Position seat) {
+	public boolean isFreeSeat(PlayerLocation seat) {
 		return (playerList[seat.getIndex()] == null);
 	}
 	
-	public boolean isFreeCardPosition(Position position) {
-		return (cardList[position.getIndex()] == null);
+	public boolean isFreeCardPlayerLocation(PlayerLocation PlayerLocation) {
+		return (cardList[PlayerLocation.getIndex()] == null);
 	}
 	
-	public Card getCard(Position position) {
-		return cardList[position.getIndex()];
+	public Card getCard(PlayerLocation PlayerLocation) {
+		return cardList[PlayerLocation.getIndex()];
 	}
 	
-	public void putCard(Card card, Position position) throws Exception {
-		if(!isFreeCardPosition(position)) {
-			throw new Exception("Card position " + position + " is not free!");
+	public void putCard(Card card, PlayerLocation PlayerLocation) throws Exception {
+		if(!isFreeCardPlayerLocation(PlayerLocation)) {
+			throw new Exception("Card PlayerLocation " + PlayerLocation + " is not free!");
 		}
 		card.faceUp();
-		cardList[position.getIndex()] = card;
+		cardList[PlayerLocation.getIndex()] = card;
 	}
 	
 	public void putCard(Card card) throws Exception {
-		putCard(card, Position.get(currentPlayerIndex));
+		putCard(card, PlayerLocation.get(currentPlayerIndex));
 	}
 	
 	public void putCardUpdatePlayer(Card card, Player player) throws Exception {
@@ -113,7 +95,7 @@ public class Table implements Loadable {
 		try {
 			int cardIndex = player.getHand().getIndex(card);
 			player.getHand().removeCard(cardIndex);
-			putCard(card, getPlayerPosition(player));
+			putCard(card, getPlayerPlayerLocation(player));
 		} catch (Exception e) {
 			throw new Exception("Player " + player.getName() + " can not put card " + card.toStringDebug() + ", because " + e.getMessage());
 		}
@@ -123,10 +105,10 @@ public class Table implements Loadable {
 		putCardUpdatePlayer(card, getCurrentPlayer());
 	}
 
-	public Position getPlayerPosition(Player player) {
+	public PlayerLocation getPlayerPlayerLocation(Player player) {
 		for(int i = 0; i < 4; i++) {
 			if(player.equals(playerList[i])) {
-				return Position.get(i);
+				return PlayerLocation.get(i);
 			}
 		}
 		return null;
@@ -137,19 +119,19 @@ public class Table implements Loadable {
 	}
 	
 	public Player getCurrentPlayer() throws Exception {
-		if(isFreeSeat(Position.get(currentPlayerIndex))) {
+		if(isFreeSeat(PlayerLocation.get(currentPlayerIndex))) {
 			throw new Exception("No player on this seat!");
 		}
 		return playerList[currentPlayerIndex];
 	}
 	
-	public void setCurrentPlayer(Position position) {
-		currentPlayerIndex = position.getIndex();
+	public void setCurrentPlayer(PlayerLocation PlayerLocation) {
+		currentPlayerIndex = PlayerLocation.getIndex();
 		System.out.println("Current player is " + playerList[currentPlayerIndex].getName());
 	}
 	
 	public Card getCurrentPlayerCard() {
-		return getCard(Position.get(currentPlayerIndex));
+		return getCard(PlayerLocation.get(currentPlayerIndex));
 	}
 	
 	public Player nextPlayer() throws Exception {
@@ -189,20 +171,20 @@ public class Table implements Loadable {
 		return count;
 	}
 	
-	private String toStringPlayer(Position position) {
-		return playerList[position.getIndex()] == null ? DESCRIPTION_EMPTY_SEAT : playerList[position.getIndex()].getName();
+	private String toStringPlayer(PlayerLocation PlayerLocation) {
+		return playerList[PlayerLocation.getIndex()] == null ? DESCRIPTION_EMPTY_SEAT : playerList[PlayerLocation.getIndex()].getName();
 	}
 	
-	private String toStringCard(Position position) {
-		return cardList[position.getIndex()] == null ? DESCRIPTION_EMPTY_CARDSLOT : cardList[position.getIndex()].toString();
+	private String toStringCard(PlayerLocation PlayerLocation) {
+		return cardList[PlayerLocation.getIndex()] == null ? DESCRIPTION_EMPTY_CARDSLOT : cardList[PlayerLocation.getIndex()].toString();
 	}
 
 	@Override
 	public String toString() {
 		String output = "";
-		output = String.format("%25s%-15s\n%25s%-15s\n", " ", toStringPlayer(Position.get(0)), " ", toStringCard(Position.get(0)));
-		output += String.format("%-15s %-15s%3s%-15s%-15s\n", toStringPlayer(Position.get(3)), toStringCard(Position.get(3)), " ", toStringCard(Position.get(1)), toStringPlayer(Position.get(1)));
-		output += String.format("%25s%-15s\n%25s%-15s\n", " ", toStringCard(Position.get(2)), " ", toStringPlayer(Position.get(2)));
+		output = String.format("%25s%-15s\n%25s%-15s\n", " ", toStringPlayer(PlayerLocation.get(0)), " ", toStringCard(PlayerLocation.get(0)));
+		output += String.format("%-15s %-15s%3s%-15s%-15s\n", toStringPlayer(PlayerLocation.get(3)), toStringCard(PlayerLocation.get(3)), " ", toStringCard(PlayerLocation.get(1)), toStringPlayer(PlayerLocation.get(1)));
+		output += String.format("%25s%-15s\n%25s%-15s\n", " ", toStringCard(PlayerLocation.get(2)), " ", toStringPlayer(PlayerLocation.get(2)));
 		return output;
 	}
 

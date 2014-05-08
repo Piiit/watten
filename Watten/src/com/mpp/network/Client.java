@@ -1,93 +1,136 @@
 package com.mpp.network;
 
-import java.io.*; 
-import java.net.*; 
-import com.mpp.tools.MessageAction;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
-public class Client implements Runnable { 
+import com.mpp.tools.xml.SimpleXML;
 
-	private Socket socket;
-	private boolean close = false;
-
-	private ObjectOutputStream dout; 
-	private ObjectInputStream din; 
-
-	public Client( String host, int port ) throws Exception { 
-
-		try {
-			socket = new Socket( host, port ); 
-
-			System.out.println( "connected to "+socket ); 
-
-			din = new ObjectInputStream( socket.getInputStream() ); 
-			dout = new ObjectOutputStream( socket.getOutputStream() ); 
-
-			new Thread( this ).start(); 
-			
-		} catch( Exception e ) { 
-			System.out.println( e );
-			throw e;
-		} 
-	} 
-
-	public void processMessage( Message message ) throws Exception { 
-		System.out.println(message);
-		
-		dout = new ObjectOutputStream( socket.getOutputStream() ); 
-		dout.writeObject(message);
-		dout.close();
+public class Client {
 	
-		if((message.getAction() == MessageAction.CHAT && message.getMessage().equals("/quit")) || message.getAction() == MessageAction.LOGOUT)
-			close = true;
-	} 
+	private static PrintWriter output = null;
+	private static BufferedReader input = null;
+	private static Socket socket = null;
+	private static final int PORT = 9999;
+	private static final String ADDRESS = "localhost";
+	
+	public static void main(String args[]) {
+		Client c = new Client();
+		c.startManualInput();
+	}
 
-	public void run() { 
-		try { 
-			din = new ObjectInputStream( socket.getInputStream() ); 
-			dout = new ObjectOutputStream( socket.getOutputStream() ); 
+	public void startManualInput() {
+		try {
+			socket = new Socket(ADDRESS, PORT);
+			try {
+				output = new PrintWriter(socket.getOutputStream(), true);
+				input = new BufferedReader(new InputStreamReader(System.in));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			
-			boolean forever = true;
-			while (forever && !socket.isClosed()) {
-				Message message = null;
-				Object object = null;
-				
-//				Thread.sleep(10000);
+			ClientThread clientOut = new ClientThread(socket);
+			clientOut.start();
+			
+			String line = "";
+			boolean done = false;
+			while(!done && !socket.isClosed()) {
 				try {
-					object = din.readObject();
-				} catch (Exception e) {
-					e.printStackTrace();
+					line = input.readLine();
+
+					String regex = "\\s";
+					String parts[] = line.split(regex);
+					
+					String cmd = parts[0].toUpperCase();
+					String gameName = "";
+
+					switch(cmd) {
+						case "Q": 
+							sendRequest("quit");
+						break;
+						case "N":
+							gameName = "";
+							if(parts.length > 1) {
+								gameName = parts[1];
+							} 
+							sendRequest("create_game", "name", gameName);
+						break;
+						case "J": 
+							gameName = "";
+							if(parts.length > 1) {
+								gameName = parts[1];
+							} 
+							sendRequest("join_game", "name", gameName);
+						break;
+						case "S":
+							sendRequest("start_game");
+						break;
+						case "H":
+							sendRequest("help");
+						break;
+						case "L":
+							sendRequest("list_games");
+						break;
+						case "C":
+							String msg = "";
+							if(parts.length > 1) {
+								for(int i = 1; i < parts.length; i++) 
+									msg += parts[i];
+							} 
+							sendRequest("chat","message",msg);
+						break;
+					}
+					
+					System.out.println("CLIENT: "+line);
+					
+				} catch (IOException e) {
+					e.getStackTrace();
 				}
-				
-				System.out.println("read: "+object);
-				
-				if(object == null) {
-					continue;
-				}
-				
-				if(object instanceof Message) {
-					message = (Message)object;
-				}
-				
-				if(message.getAction() == MessageAction.LOGIN){
-					message = new Message(MessageAction.LOGIN);
-					message.setName("patrick"+System.currentTimeMillis());
-					System.out.println("hier");
-					processMessage(message);
-				}
-				
-				if(message.getAction() == MessageAction.CHAT) {
+			}
 			
-					System.out.println(message.getMessage());
-				}
-				
-				if(close == true)
-				{
-					forever = false;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				System.out.println("Closing connection.");
+				output.close();
+				input.close();
+				if(!socket.isClosed()) {
 					socket.close();
 				}
-			} 
-		} catch(Exception e) {
-			e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		} 
 	}
-} 
+	
+	private void sendRequest(String command) {
+		output.println(SimpleXML.createTag("request", SimpleXML.createTag("command", command)));
+	}
+	
+//	private void sendRequest(String command, String message, Loadable data) {
+//		output.println(SimpleXML.createTag("request", 
+//				SimpleXML.createTag("command", command)) + 
+//				SimpleXML.createTag("message", message) +
+//				SimpleXML.createTag("data", data.serialize())
+//				);
+//	}
+	
+	private void sendRequest(String command, String ... details) {
+		String out = "";
+		int i = 0;
+		String tagName = ""; 
+		for(String s : details) {
+			if(i % 2 == 0) {
+				tagName = s;
+			} else {
+				out += SimpleXML.createTag(tagName, s);
+			}
+			i++;	
+		}
+		output.println(SimpleXML.createTag("request", SimpleXML.createTag("command", command) + out));
+	}
+
+}

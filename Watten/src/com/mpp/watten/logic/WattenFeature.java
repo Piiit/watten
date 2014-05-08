@@ -1,6 +1,6 @@
-package logic;
+package com.mpp.watten.logic;
 
-import xml.SimpleXML;
+import com.mpp.tools.xml.SimpleXML;
 
 public enum WattenFeature {
 	INIT(0), SELECT_RANK(1), SELECT_SUIT(2), 
