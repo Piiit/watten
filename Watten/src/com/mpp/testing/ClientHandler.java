@@ -69,8 +69,9 @@ public class ClientHandler extends Thread {
 		String line = "";
 		
 		player = new Player("Player" + clients.size());
-		output.println("Welcome <" + player.getName() + ">! Type H to see all commands.");
-		broadcast("<" + player.getName() + "> entered the lobby...");
+		
+		sendResponse("chat", "message", "Welcome [" + player.getName() + "]! Type H to see all commands.");
+		broadcastResponse("chat", "message", "[" + player.getName() + "] entered the lobby...");
 		
 		done = false;
 		while(!done) {
@@ -93,10 +94,18 @@ public class ClientHandler extends Thread {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		System.out.println("SERVER: Client <" + player.getName() + "> @ port " + socket.getPort() + " left the room!");
-		broadcast("<" + player.getName() + "> left the chat room...");
+		System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " left the room!");
+		broadcastResponse("chat", "message", "[" + player.getName() + "] left the chat room...");
 	}
 	
+	private void broadcastResponse(String command, String ... details) {
+		for(ClientHandler client : clients) {
+			if(client != this) {
+				client.output.println(getResponse(command, details));
+			}
+		}
+	}
+
 	private Watten getGame(Player player) {
 		for(Watten game : games) {
 			try {
@@ -139,7 +148,7 @@ public class ClientHandler extends Thread {
 		
 		switch(command) {
 			case "quit":
-				sendResponse("ACK");
+				sendResponse(command, "ACK");
 				return true;
 			case "S":
 				try {
@@ -196,7 +205,7 @@ public class ClientHandler extends Thread {
 							output.println("You joined the game " + joinedGame);
 							for(Player player : game.getTable().getPlayers()) {
 								if(player != null) {
-									broadcast("<" + player.getName() + "> joined your game!");
+									broadcastResponse("chat", "message", "[" + player.getName() + "] joined your game!");
 								}
 							}
 							break;
@@ -239,7 +248,7 @@ public class ClientHandler extends Thread {
 					i++;
 				}
 				output.println("<-YOU-> " + msg);
-				broadcast("<" + player.getName() + "> " + msg);
+				broadcastResponse("chat", "message", "[" + player.getName() + "] " + msg);
             break;
 			case "R":
 				i = 0;
@@ -255,7 +264,7 @@ public class ClientHandler extends Thread {
 				} else if (nameExists(newName)) {
 					output.println("This name exists already. Please choose another one!");
 				} else {
-					broadcast(player.getName() + " changed to " + newName);
+					broadcastResponse("chat", "message", player.getName() + " changed to " + newName);
 					output.println("Your new name is " + newName);
 					player.setName(newName);
 				}
@@ -273,12 +282,25 @@ public class ClientHandler extends Thread {
 		output.println(SimpleXML.createTag("response", SimpleXML.createTag("id", id)));
 	}
 	
-	private void sendResponse(String id, String message) {
-		output.println(SimpleXML.createTag("response", 
-				SimpleXML.createTag("id", id)) + 
-				SimpleXML.createTag("message", message)
-				);
+	private void sendResponse(String command, String ... details) {
+		output.println(getResponse(command, details));
 	}
+	
+	private String getResponse(String command, String ... details) {
+		String out = "";
+		int i = 0;
+		String tagName = ""; 
+		for(String s : details) {
+			if(i % 2 == 0) {
+				tagName = s;
+			} else {
+				out += SimpleXML.createTag(tagName, s);
+			}
+			i++;	
+		}
+		return SimpleXML.createTag("response", SimpleXML.createTag("command", command) + out);
+	}
+	
 	
 	private void sendResponse(String id, String message, Loadable data) {
 		output.println(SimpleXML.createTag("response", 
@@ -288,14 +310,6 @@ public class ClientHandler extends Thread {
 				);
 	}
 
-	private void broadcast(String text) {
-		for(ClientHandler client : clients) {
-			if(client != this) {
-				client.output.println(text);
-			}
-		}
-	}
-	
 	private void broadcastAndOutput(String text) {
 		for(ClientHandler client : clients) {
 			client.output.println(text);

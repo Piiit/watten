@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+import xml.SimpleXML;
+
 public class ClientOutput extends Thread {
 	
 	private BufferedReader input = null;
@@ -26,9 +28,23 @@ public class ClientOutput extends Thread {
 	    	while (!socket.isClosed()) {
 	    		line = input.readLine();
 	    		if(line != null) {
+	    			
 	    			System.out.println(line);
-		    		if(line.startsWith("*** Bye")) {
-		    			socket.close();
+	    			
+	    			SimpleXML xml = new SimpleXML(line);
+	    			xml.parse();
+	    			
+	    			String command = xml.root.getNode("command").getData().toLowerCase();
+	    			
+		    		switch(command) {
+		    			case "quit":
+		    				if("ACK".equalsIgnoreCase(xml.root.getNode("type").getData())) {
+		    					socket.close();
+		    				} else {
+		    					System.out.println("ERROR: " + xml.root.getNode("message").getData());
+		    				}
+		    			break;
+		    			
 		    		}
 	    		}
 	    	}

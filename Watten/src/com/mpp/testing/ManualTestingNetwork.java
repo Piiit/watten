@@ -14,7 +14,8 @@ public class ManualTestingNetwork {
 		new Thread() {
 			@Override 
 			public void run() {
-				Client.startManualInput();
+				Client c = new Client();
+				c.startManualInput();
 			}
 		}.start();
 		

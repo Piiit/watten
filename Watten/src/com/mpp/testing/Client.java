@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import xml.Loadable;
 import xml.SimpleXML;
 
 public class Client {
@@ -17,10 +18,11 @@ public class Client {
 	private static final String ADDRESS = "localhost";
 	
 	public static void main(String args[]) {
-		startManualInput();
+		Client c = new Client();
+		c.startManualInput();
 	}
 
-	public static void startManualInput() {
+	public void startManualInput() {
 		try {
 			socket = new Socket(ADDRESS, PORT);
 			try {
@@ -46,7 +48,10 @@ public class Client {
 
 					switch(cmd) {
 						case "Q": 
-							sendQuit();
+							sendRequest("quit");
+						break;
+						case "N":
+							sendRequest("create_game", "name", parts[1]);
 						break;
 						default:
 							output.println(line);
@@ -75,10 +80,32 @@ public class Client {
 			}
 		} 
 	}
-
-	private static void sendQuit() {
-		String xmlMessage = SimpleXML.createTag("request", SimpleXML.createTag("command", "quit"));
-		output.println(xmlMessage);
+	
+	private void sendRequest(String command) {
+		output.println(SimpleXML.createTag("request", SimpleXML.createTag("command", command)));
+	}
+	
+	private void sendRequest(String command, String message, Loadable data) {
+		output.println(SimpleXML.createTag("request", 
+				SimpleXML.createTag("command", command)) + 
+				SimpleXML.createTag("message", message) +
+				SimpleXML.createTag("data", data.serialize())
+				);
+	}
+	
+	private void sendRequest(String command, String ... details) {
+		String out = "";
+		int i = 0;
+		String tagName = ""; 
+		for(String s : details) {
+			if(i % 2 == 0) {
+				tagName = s;
+			} else {
+				out += SimpleXML.createTag(tagName, s);
+			}
+			i++;	
+		}
+		output.println(SimpleXML.createTag("request", SimpleXML.createTag("command", command) + out));
 	}
 
 }
