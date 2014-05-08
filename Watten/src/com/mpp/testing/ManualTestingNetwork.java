@@ -18,6 +18,6 @@ public class ManualTestingNetwork {
 				c.startManualInput();
 			}
 		}.start();
-		
+
 	}
 }

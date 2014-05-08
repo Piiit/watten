@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-
-import xml.Loadable;
 import xml.SimpleXML;
 
 public class Client {
@@ -45,21 +43,47 @@ public class Client {
 					String parts[] = line.split(regex);
 					
 					String cmd = parts[0].toUpperCase();
+					String gameName = "";
 
 					switch(cmd) {
 						case "Q": 
 							sendRequest("quit");
 						break;
 						case "N":
-							sendRequest("create_game", "name", parts[1]);
+							gameName = "";
+							if(parts.length > 1) {
+								gameName = parts[1];
+							} 
+							sendRequest("create_game", "name", gameName);
 						break;
-						default:
-							output.println(line);
+						case "J": 
+							gameName = "";
+							if(parts.length > 1) {
+								gameName = parts[1];
+							} 
+							sendRequest("join_game", "name", gameName);
+						break;
+						case "S":
+							sendRequest("start_game");
+						break;
+						case "H":
+							sendRequest("help");
+						break;
+						case "L":
+							sendRequest("list_games");
+						break;
+						case "C":
+							String msg = "";
+							if(parts.length > 1) {
+								for(int i = 1; i < parts.length; i++) 
+									msg += parts[i];
+							} 
+							sendRequest("chat","message",msg);
+						break;
 					}
 					
-					done = line.equals("/quit");
+					System.out.println("CLIENT: "+line);
 					
-					System.out.println(line);
 				} catch (IOException e) {
 					e.getStackTrace();
 				}
@@ -85,13 +109,13 @@ public class Client {
 		output.println(SimpleXML.createTag("request", SimpleXML.createTag("command", command)));
 	}
 	
-	private void sendRequest(String command, String message, Loadable data) {
-		output.println(SimpleXML.createTag("request", 
-				SimpleXML.createTag("command", command)) + 
-				SimpleXML.createTag("message", message) +
-				SimpleXML.createTag("data", data.serialize())
-				);
-	}
+//	private void sendRequest(String command, String message, Loadable data) {
+//		output.println(SimpleXML.createTag("request", 
+//				SimpleXML.createTag("command", command)) + 
+//				SimpleXML.createTag("message", message) +
+//				SimpleXML.createTag("data", data.serialize())
+//				);
+//	}
 	
 	private void sendRequest(String command, String ... details) {
 		String out = "";

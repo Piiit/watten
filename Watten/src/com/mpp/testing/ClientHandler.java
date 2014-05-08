@@ -5,15 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.Semaphore;
-
-import cards.Card;
 import xml.Loadable;
 import xml.SimpleXML;
 import logic.Player;
 import logic.Watten;
-import logic.WattenFeature;
 
 public class ClientHandler extends Thread {
 	
@@ -25,6 +24,8 @@ public class ClientHandler extends Thread {
 	private Vector<ClientHandler> clients; 	
 	
 	private Vector<Watten> games;
+	
+	private Map<String, PrintWriter> mapPlayerNameClient = new HashMap<String, PrintWriter>();
 	
 	private Watten joinedGame;
 	
@@ -121,88 +122,55 @@ public class ClientHandler extends Thread {
 		if (line == null) {
 			return false;
 		}
-		line = line.trim();
 		
-		String regex = "\\s";
-		String parts[] = line.split(regex);
-		
-		String cmd = parts[0].toUpperCase();
-		int i = 0;
 		Watten currentGame = getGame(player);
 		String gameName = currentGame == null ? "" : currentGame.getName();
-		
-		//broadcastAndOutput(WattenFeature.GAME_FINISHED.serialize());
 		
 		SimpleXML xml = new SimpleXML(line);
 		xml.parse();
 		
-		
-//		if(xml.root.getName().equals("card")) {
-//			Card c = new Card();
-//			c.load(xml.root);
-//		}
 		System.out.println("SERVER: " + line);
 		
 		String command = xml.root.getNode("command").getData().toLowerCase();
 		
-		
 		switch(command) {
 			case "quit":
-				sendResponse(command, "ACK");
+				sendResponse(command, "type", "ACK");
 				return true;
-			case "S":
-				try {
-					currentGame.start();
-					broadcastAndOutput(gameName + " started!");
-					broadcastAndOutput("Current player = " + currentGame.getTable().getCurrentPlayer());
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					output.println("Can not start game " + gameName + ": " + e1.getMessage());
-				}
-			break;
-			case "Q": 
-				output.println("*** Bye " + player.getName() + "***");
-				return true;
-			case "N":
-				i = 0;
-				gameName = "";
-				for(String part: parts) {
-					if(i > 0) {
-						gameName += part;
-					}
-					i++;
-				}
-				try {
-					for(Watten g : games) {
-						if(g.getName().equalsIgnoreCase(gameName)) {
-							output.println("You can not create the game " + gameName + ". A game with this name already exists!");
-							return false;
+			case "create_game":
+				gameName = xml.root.getNode("name").getData();
+				if(gameName == null || gameName.length() == 0) {
+					sendResponse(command, "type", "NAK", "message", "You can not create a game without a name.");
+					break;
+				} else {
+					try {
+						for(Watten g : games) {
+							if(g.getName().equalsIgnoreCase(gameName)) {
+								sendResponse(command, "type", "NAK", "message", "You can not create the game " + gameName + ". A game with this name already exists!");
+								break;
+							}
 						}
+						gamesPermit.acquire();
+						games.add(new Watten(gameName));
+						gamesPermit.release();
+						sendResponse(command, "type", "ACK", "message", "You created the game " + gameName);
+					} catch (Exception e) {
+						sendResponse(command, "type", "NAK", "message", "You can not create the game " + gameName + ": " + e.getMessage());
+						e.printStackTrace();
+						break;
 					}
-					gamesPermit.acquire();
-					games.add(new Watten(gameName));
-					gamesPermit.release();
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
-				output.println("You created the game " + gameName);
-			case "J":
-				i = 0;
-				gameName = "";
-				for(String part: parts) {
-					if(i > 0) {
-						gameName += part;
-					}
-					i++;
-				}
+			case "join_game":
+				gameName = xml.root.getNode("name").getData();
 
 				try {
 					joinedGame = null;
 					for(Watten game: games) {
 						if(game.getName().equalsIgnoreCase(gameName)) {
 							game.getTable().addPlayer(player);
+							mapPlayerNameClient.put(player.getName(), this.output);
 							joinedGame = game;
-							output.println("You joined the game " + joinedGame);
+							sendResponse(command, "type", "ACK", "message", "You joined the game " + joinedGame);
 							for(Player player : game.getTable().getPlayers()) {
 								if(player != null) {
 									broadcastResponse("chat", "message", "[" + player.getName() + "] joined your game!");
@@ -215,71 +183,87 @@ public class ClientHandler extends Thread {
 						throw new Exception("Game does not exist!");
 					}
 				} catch (Exception e) {
-					output.println("You can not join game " + gameName + ": " + e.getMessage());
+					sendResponse(command, "type", "NAK", "message", "You can not join the game '" + gameName + "': " + e.getMessage());
 					e.printStackTrace();
 				}
 			break;
-			case "L":
-				output.println("--- LIST OF GAMES --------------------");
-				i = 0;
+
+			case "start_game":
+				try {
+					currentGame.start();
+					
+					sendResponse(command, "type", "ACK");
+					for(Player player : currentGame.getTable().getPlayers()) {
+						String hand = player.getHand().serialize();
+						sendResponseTo(player.getName(), "start_round", "hand", hand, "current_player", currentGame.getTable().getCurrentPlayer().serialize());
+					}
+					
+					broadcastAndOutput("chat", "message", gameName + " started!");
+					broadcastAndOutput("chat", "message", "Current player = " + currentGame.getTable().getCurrentPlayer());
+				} catch (Exception e1) {
+					e1.printStackTrace();
+					sendResponse(command, "type", "NAK", "message", "Can not start game " + gameName + ": " + e1.getMessage());
+				}
+			break;
+			case "list_games":
+				String gameList = "";
+				int i = 0;
 				for(Watten game : games) {
 					i++;
-					output.println(i + " > " + game.getName());
+					gameList += i + " : " + game.getName();
 				}
+				sendResponse(command, "type", "ACK", "message", "--- LIST OF GAMES --------------------" + gameList);
 			break;
-			case "H":
-				output.println("--- HELP -----------------------------");
-				output.println("Q           : exit");
-				output.println("N [gameName]: create a new game");
-				output.println("J [gameName]: join a created game");
-				output.println("R [name]    : New nick name");
-				output.println("L           : list all games");
-				output.println("C [text]    : broadcasts some chat to all players");
-				output.println("S           : start the game");
-				output.println("--------------------------------------");
+			case "help":
+				sendResponse(command, "type", "ACK", "message", 
+						"--- HELP -----------------------------\n" + 
+						"Q           : exit\n" + 
+						"N [gameName]: create a new game\n" + 
+						"J [gameName]: join a created game\n" + 
+						"R [name]    : New nick name\n" + 
+						"L           : list all games\n" + 
+						"C [text]    : broadcasts some chat to all players\n" + 
+						"S           : start the game\n" + 
+						"--------------------------------------"); 
 			break;
-			case "C":
-				i = 0;
-				String msg = "";
-				for(String part: parts) {
-					if(i > 0) {
-						msg += part;
-					}
-					i++;
-				}
-				output.println("<-YOU-> " + msg);
-				broadcastResponse("chat", "message", "[" + player.getName() + "] " + msg);
+			case "chat":
+				String msg = xml.root.getNode("message").getData();
+				sendResponse(command, "type", "ACK", "message", "[-YOU-] " + msg);
+				broadcastResponse(command, "message", "[" + player.getName() + "] " + msg);
             break;
-			case "R":
-				i = 0;
-				String newName = "";
-				for(String part: parts) {
-					if(i > 0) {
-						newName += part;
-					}
-					i++;
-				}
-				if (newName.length() == 0) {
-					output.println("This name is too short!");
-				} else if (nameExists(newName)) {
-					output.println("This name exists already. Please choose another one!");
-				} else {
-					broadcastResponse("chat", "message", player.getName() + " changed to " + newName);
-					output.println("Your new name is " + newName);
-					player.setName(newName);
-				}
-				
-			break;
+//			case "R":
+//				i = 0;
+//				String newName = "";
+//				for(String part: parts) {
+//					if(i > 0) {
+//						newName += part;
+//					}
+//					i++;
+//				}
+//				if (newName.length() == 0) {
+//					output.println("This name is too short!");
+//				} else if (nameExists(newName)) {
+//					output.println("This name exists already. Please choose another one!");
+//				} else {
+//					broadcastResponse("chat", "message", player.getName() + " changed to " + newName);
+//					output.println("Your new name is " + newName);
+//					player.setName(newName);
+//				}
+//				
+//			break;
 			default:
-				output.println("Please enter a valid command. Type H to see all commands!");
+				sendResponse(command, "type", "NAK", "message", "Please enter a valid command. Type H to see all commands!");
 		}
 		
 		return false;
 	}
-	
 
-	private void sendResponse(String id) {
-		output.println(SimpleXML.createTag("response", SimpleXML.createTag("id", id)));
+	private void sendResponseTo(String playerName, String command, String ... details) {
+		mapPlayerNameClient.get(playerName).println(getResponse(command, details));
+	}
+
+	private void sendResponse(String command) {
+		output.println(getResponse(command, (String[])null));
 	}
 	
 	private void sendResponse(String command, String ... details) {
@@ -298,6 +282,7 @@ public class ClientHandler extends Thread {
 			}
 			i++;	
 		}
+		out = out.replace("\n", "\\n");
 		return SimpleXML.createTag("response", SimpleXML.createTag("command", command) + out);
 	}
 	
@@ -310,20 +295,21 @@ public class ClientHandler extends Thread {
 				);
 	}
 
-	private void broadcastAndOutput(String text) {
+	private void broadcastAndOutput(String command, String ... details) {
 		for(ClientHandler client : clients) {
-			client.output.println(text);
+			client.output.println(getResponse(command, details));
 		}
 	}
 
 	
-	private boolean nameExists(String name) {
-		for(ClientHandler client : clients) {
-			if(name.equalsIgnoreCase(client.player.getName())) {
-				return true;
-			}
-		}
-		return false;
-	}
+//	private boolean nameExists(String name) {
+//		for(ClientHandler client : clients) {
+//			if(name.equalsIgnoreCase(client.player.getName())) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+	
 
 }

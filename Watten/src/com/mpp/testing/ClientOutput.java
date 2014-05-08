@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-
+import cards.MultipleCards;
 import xml.SimpleXML;
 
 public class ClientOutput extends Thread {
@@ -29,7 +29,7 @@ public class ClientOutput extends Thread {
 	    		line = input.readLine();
 	    		if(line != null) {
 	    			
-	    			System.out.println(line);
+	    			System.out.println("OUTPUT:" + line);
 	    			
 	    			SimpleXML xml = new SimpleXML(line);
 	    			xml.parse();
@@ -41,10 +41,30 @@ public class ClientOutput extends Thread {
 		    				if("ACK".equalsIgnoreCase(xml.root.getNode("type").getData())) {
 		    					socket.close();
 		    				} else {
-		    					System.out.println("ERROR: " + xml.root.getNode("message").getData());
+		    					System.out.println("ERROR: " + unescape(xml.root.getNode("message").getData()));
 		    				}
 		    			break;
-		    			
+		    			case "create_game":
+		    			case "join_game":
+		    			case "start_game":
+		    				if("NAK".equalsIgnoreCase(xml.root.getNode("type").getData())) {
+		    					System.out.println("ERROR: " + unescape(xml.root.getNode("message").getData()));
+		    				}
+		    			break;
+		    			case "start_round":
+		    				MultipleCards hand = new MultipleCards();
+		    				hand.load(xml.root.getNode("hand"));
+		    			break;
+		    			case "help":
+		    			case "list_games":
+		    				if("ACK".equalsIgnoreCase(xml.root.getNode("type").getData()))
+		    					System.out.println(unescape(xml.root.getNode("message").getData()));
+		    			break;
+		    			case "chat":
+		    				System.out.println(unescape(xml.root.getNode("message").getData()));
+		                break;
+		                default:
+		                	System.out.println(line);
 		    		}
 	    		}
 	    	}
@@ -59,6 +79,10 @@ public class ClientOutput extends Thread {
 		}
 
 		System.out.println("Bye");
+	}
+	
+	private String unescape(String text) {
+		return text.replace("\\n", "\n");
 	}
 	
 }
