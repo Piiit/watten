@@ -9,6 +9,7 @@ import java.util.Vector;
 import java.util.concurrent.Semaphore;
 
 import cards.Card;
+import xml.Loadable;
 import xml.SimpleXML;
 import logic.Player;
 import logic.Watten;
@@ -92,7 +93,7 @@ public class ClientHandler extends Thread {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Client <" + player.getName() + "> @ port " + socket.getPort() + " left the room!");
+		System.out.println("SERVER: Client <" + player.getName() + "> @ port " + socket.getPort() + " left the room!");
 		broadcast("<" + player.getName() + "> left the chat room...");
 	}
 	
@@ -121,16 +122,25 @@ public class ClientHandler extends Thread {
 		Watten currentGame = getGame(player);
 		String gameName = currentGame == null ? "" : currentGame.getName();
 		
-		broadcastAndOutput(WattenFeature.GAME_FINISHED.serialize());
+		//broadcastAndOutput(WattenFeature.GAME_FINISHED.serialize());
 		
-//		SimpleXML xml = new SimpleXML(line);
-//		xml.parse();
+		SimpleXML xml = new SimpleXML(line);
+		xml.parse();
+		
+		
 //		if(xml.root.getName().equals("card")) {
 //			Card c = new Card();
 //			c.load(xml.root);
 //		}
+		System.out.println("SERVER: " + line);
 		
-		switch(cmd) {
+		String command = xml.root.getNode("command").getData().toLowerCase();
+		
+		
+		switch(command) {
+			case "quit":
+				sendResponse("ACK");
+				return true;
 			case "S":
 				try {
 					currentGame.start();
@@ -258,6 +268,25 @@ public class ClientHandler extends Thread {
 		return false;
 	}
 	
+
+	private void sendResponse(String id) {
+		output.println(SimpleXML.createTag("response", SimpleXML.createTag("id", id)));
+	}
+	
+	private void sendResponse(String id, String message) {
+		output.println(SimpleXML.createTag("response", 
+				SimpleXML.createTag("id", id)) + 
+				SimpleXML.createTag("message", message)
+				);
+	}
+	
+	private void sendResponse(String id, String message, Loadable data) {
+		output.println(SimpleXML.createTag("response", 
+				SimpleXML.createTag("id", id)) + 
+				SimpleXML.createTag("message", message) +
+				SimpleXML.createTag("data", data.serialize())
+				);
+	}
 
 	private void broadcast(String text) {
 		for(ClientHandler client : clients) {

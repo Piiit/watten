@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import xml.SimpleXML;
+
 public class Client {
 	
 	private static PrintWriter output = null;
@@ -36,8 +38,23 @@ public class Client {
 			while(!done && !socket.isClosed()) {
 				try {
 					line = input.readLine();
-					output.println(line);
+
+					String regex = "\\s";
+					String parts[] = line.split(regex);
+					
+					String cmd = parts[0].toUpperCase();
+
+					switch(cmd) {
+						case "Q": 
+							sendQuit();
+						break;
+						default:
+							output.println(line);
+					}
+					
 					done = line.equals("/quit");
+					
+					System.out.println(line);
 				} catch (IOException e) {
 					e.getStackTrace();
 				}
@@ -57,6 +74,11 @@ public class Client {
 				e.printStackTrace();
 			}
 		} 
+	}
+
+	private static void sendQuit() {
+		String xmlMessage = SimpleXML.createTag("request", SimpleXML.createTag("command", "quit"));
+		output.println(xmlMessage);
 	}
 
 }
