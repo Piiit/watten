@@ -8,7 +8,7 @@ import java.net.Socket;
 
 import com.mpp.tools.xml.SimpleXML;
 
-public class Client {
+public class ClientForConsole {
 	
 	private static PrintWriter output = null;
 	private static BufferedReader input = null;
@@ -17,7 +17,7 @@ public class Client {
 	private static final String ADDRESS = "localhost";
 	
 	public static void main(String args[]) {
-		Client c = new Client();
+		ClientForConsole c = new ClientForConsole();
 		c.startManualInput();
 	}
 
@@ -35,8 +35,7 @@ public class Client {
 			clientOut.start();
 			
 			String line = "";
-			boolean done = false;
-			while(!done && !socket.isClosed()) {
+			while(!socket.isClosed()) {
 				try {
 					line = input.readLine();
 
@@ -80,6 +79,13 @@ public class Client {
 									msg += parts[i];
 							} 
 							sendRequest("chat","message",msg);
+						break;
+						case "I":
+							gameName = "";
+							if(parts.length > 1) {
+								gameName = parts[1];
+							} 
+							sendRequest("info", "name", gameName);
 						break;
 					}
 					

@@ -58,6 +58,7 @@ public class ClientThread extends Thread {
 		    			break;
 		    			case "help":
 		    			case "list_games":
+		    			case "info":
 		    				if("ACK".equalsIgnoreCase(xml.root.getNode("type").getData()))
 		    					System.out.println(unescape(xml.root.getNode("message").getData()));
 		    			break;

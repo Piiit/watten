@@ -38,9 +38,21 @@ public class ServerThread extends Thread {
 	
 	public ServerThread(Socket socket, Vector<ServerThread> clients, Vector<Watten> games, final int maxClients) {
 		this.socket = socket;
+		try {
+			clientsPermit.acquire();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		this.clients = clients;
+		clientsPermit.release();
 		this.maxClients = maxClients;
+		try {
+			gamesPermit.acquire();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		this.games = games;
+		gamesPermit.release();
 	}
 	
 	public void run() {
@@ -53,13 +65,16 @@ public class ServerThread extends Thread {
 		}
 		
 		try {
+			clientsPermit.acquire();
 			if(clients.size() == maxClients) {
 				output.println("Sorry, the server is full (max=" + maxClients + "). You can not enter now!");
+				clientsPermit.release();
 				socket.close();
 				return;
 			} 
-			clientsPermit.acquire();
 			clients.add(this);
+			player = new Player("Player" + socket.getPort());
+			mapPlayerNameClient.put(player.getName(), output);
 			clientsPermit.release();
 		} catch (InterruptedException e2) {
 			e2.printStackTrace();
@@ -69,8 +84,6 @@ public class ServerThread extends Thread {
 		
 		boolean done = false;
 		String line = "";
-		
-		player = new Player("Player" + clients.size());
 		
 		sendResponse("chat", "message", "Welcome [" + player.getName() + "]! Type H to see all commands.");
 		broadcastResponse("chat", "message", "[" + player.getName() + "] entered the lobby...");
@@ -90,6 +103,9 @@ public class ServerThread extends Thread {
 			socket.close();
 			clientsPermit.acquire();
 			clients.remove(this);
+			mapPlayerNameClient.remove(this.player.getName());
+			//TODO Reset or pause game if some client exists...
+			// getGame(player).;
 			clientsPermit.release();
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -100,14 +116,6 @@ public class ServerThread extends Thread {
 		broadcastResponse("chat", "message", "[" + player.getName() + "] left the chat room...");
 	}
 	
-	private void broadcastResponse(String command, String ... details) {
-		for(ServerThread client : clients) {
-			if(client != this) {
-				client.output.println(getResponse(command, details));
-			}
-		}
-	}
-
 	private Watten getGame(Player player) {
 		for(Watten game : games) {
 			try {
@@ -136,50 +144,52 @@ public class ServerThread extends Thread {
 		
 		switch(command) {
 			case "quit":
+				clientsPermit.acquire();
+				mapPlayerNameClient.remove(player.getName());
+				clients.removeElement(this);
+				clientsPermit.release();
 				sendResponse(command, "type", "ACK");
 				return true;
 			case "create_game":
 				gameName = xml.root.getNode("name").getData();
-				if(gameName == null || gameName.length() == 0) {
-					sendResponse(command, "type", "NAK", "message", "You can not create a game without a name.");
-					break;
-				} else {
-					try {
-						for(Watten g : games) {
-							if(g.getName().equalsIgnoreCase(gameName)) {
-								sendResponse(command, "type", "NAK", "message", "You can not create the game " + gameName + ". A game with this name already exists!");
-								break;
-							}
-						}
-						gamesPermit.acquire();
-						games.add(new Watten(gameName));
-						gamesPermit.release();
-						sendResponse(command, "type", "ACK", "message", "You created the game " + gameName);
-					} catch (Exception e) {
-						sendResponse(command, "type", "NAK", "message", "You can not create the game " + gameName + ": " + e.getMessage());
-						e.printStackTrace();
-						break;
+				try {
+					if(gameName == null || gameName.length() == 0) {
+						throw new Exception("You can not create a game without a name.");
 					}
+					for(Watten g : games) {
+						if(g.getName().equalsIgnoreCase(gameName)) {
+							throw new Exception("A game with this name already exists!");
+						}
+					}
+					gamesPermit.acquire();
+					games.add(new Watten(gameName));
+					gamesPermit.release();
+					sendResponse(command, "type", "ACK", "message", "You created the game " + gameName);
+				} catch (Exception e) {
+					sendResponse(command, "type", "NAK", "message", "You can not create the game '" + gameName + "': " + e.getMessage());
+					e.printStackTrace();
+					break;
 				}
 			case "join_game":
 				gameName = xml.root.getNode("name").getData();
 
 				try {
 					joinedGame = null;
+					gamesPermit.acquire();
 					for(Watten game: games) {
 						if(game.getName().equalsIgnoreCase(gameName)) {
-							game.getTable().addPlayer(player);
-							mapPlayerNameClient.put(player.getName(), this.output);
+							game.getTable().addPlayer(this.player);
 							joinedGame = game;
 							sendResponse(command, "type", "ACK", "message", "You joined the game " + joinedGame);
-							for(Player player : game.getTable().getPlayers()) {
-								if(player != null) {
-									broadcastResponse("chat", "message", "[" + player.getName() + "] joined your game!");
+							for(Player p : game.getTable().getPlayers()) {
+								if(p != null && this.player != p) {
+									broadcastResponse("chat", "message", "[" + p.getName() + "] joined your game!");
 								}
 							}
 							break;
 						}
 					}
+					gamesPermit.release();
 					if(joinedGame == null) {
 						throw new Exception("Game does not exist!");
 					}
@@ -225,6 +235,7 @@ public class ServerThread extends Thread {
 						"L           : list all games\n" + 
 						"C [text]    : broadcasts some chat to all players\n" + 
 						"S           : start the game\n" + 
+						"I [gameName]: Information about a game\n" +
 						"--------------------------------------"); 
 			break;
 			case "chat":
@@ -232,6 +243,19 @@ public class ServerThread extends Thread {
 				sendResponse(command, "type", "ACK", "message", "[-YOU-] " + msg);
 				broadcastResponse(command, "message", "[" + player.getName() + "] " + msg);
             break;
+			case "info":
+				boolean found = false;
+				for(Watten game : games) {
+					if(game.getName().equals(xml.root.getNode("name").getData())) {
+						sendResponse(command, "type", "ACK", "message", game.toString());
+						found = true;
+						break;
+					}
+				}
+				if(!found) {
+					sendResponse(command, "type", "NAK", "message", "Can not find the game " + gameName);
+				}
+			break;
 //			case "R":
 //				i = 0;
 //				String newName = "";
@@ -297,8 +321,14 @@ public class ServerThread extends Thread {
 	}
 
 	private void broadcastAndOutput(String command, String ... details) {
-		for(ServerThread client : clients) {
-			client.output.println(getResponse(command, details));
+		try {
+			clientsPermit.acquire();
+			for(ServerThread client : clients) {
+				client.output.println(getResponse(command, details));
+			}
+			clientsPermit.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -311,6 +341,20 @@ public class ServerThread extends Thread {
 //		}
 //		return false;
 //	}
+
+	private void broadcastResponse(String command, String ... details) {
+		try {
+			clientsPermit.acquire();
+			for(ServerThread client : clients) {
+				if(client != this) {
+					client.output.println(getResponse(command, details));
+				}
+			}
+			clientsPermit.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 	
 
 }
