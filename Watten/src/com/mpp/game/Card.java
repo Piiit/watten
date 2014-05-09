@@ -33,8 +33,7 @@ public class Card extends Image {
 	Player owningPlayer;
 	Cell parentCell;
 
-	public Card(Suit _cardSuit, Rank _cardRank, boolean facingDown,
-			Player owningPlayer) {
+	public Card(Suit _cardSuit, Rank _cardRank, boolean facingDown,	Player owningPlayer) {
 		super();
 		cardSuit = _cardSuit;
 		cardRank = _cardRank;

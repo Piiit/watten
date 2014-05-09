@@ -14,7 +14,7 @@ import com.mpp.watten.logic.Watten;
 public class ServerThread extends Thread {
 	
 	private Map<String, Watten> games = new ConcurrentHashMap<String, Watten>();
-	private Map<String, ServerThread> clients = new ConcurrentHashMap<String, ServerThread>();
+	private Map<String, PrintWriter> clients = new ConcurrentHashMap<String, PrintWriter>();
 	
 	private Socket socket;
 	private BufferedReader input = null;
@@ -22,7 +22,7 @@ public class ServerThread extends Thread {
 	
 	private final int maxClients;
 	
-	public ServerThread(Socket socket, Map<String, ServerThread> clients, Map<String, Watten> games, final int maxClients) {
+	public ServerThread(Socket socket, Map<String, PrintWriter> clients, Map<String, Watten> games, final int maxClients) {
 		this.socket = socket;
 		this.clients = clients;
 		this.maxClients = maxClients;
@@ -36,7 +36,7 @@ public class ServerThread extends Thread {
 			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			output = new PrintWriter(socket.getOutputStream(), true);
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		
 		try {
@@ -52,40 +52,39 @@ public class ServerThread extends Thread {
 				if(clients.get(player.getName()) != null) {
 					throw new Exception("Client with name " + player.getName() + " already exists!" + socket.getPort()) ;
 				}
-				clients.put(player.getName(), this);
+				clients.put(player.getName(), this.output);
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		
-		boolean done = false;
 		String line = "";
 		
 		sendResponse("chat", "message", "Welcome [" + player.getName() + "]! Type H to see all commands.");
 		broadcastResponse("chat", "message", "[" + player.getName() + "] entered the lobby...");
 		
-		done = false;
-		while(!done) {
-			try {
+		try {
+			while(!socket.isClosed()) {
 				line = input.readLine();
 				System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " send a request: " + line);
-				done = handleProtocol(line, player);
+				handleProtocol(line, player);
+			}
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+			System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " left the room!" );
+			broadcastResponse("chat", "message", "[" + player.getName() + "] left the chat room...");
+		} finally {
+			try {
+				input.close();
+				socket.close();
+				clients.remove(player.getName());
+				synchronized (player) {
+					getGame(player).leavingPlayer(player);	
+				}
 			} catch (Exception e) {
 				e.printStackTrace(System.err);
-				done = true;
 			}
-		}	
-
-		System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " left the room!" );
-		broadcastResponse("chat", "message", "[" + player.getName() + "] left the chat room...");
-
-		try {
-			socket.close();
-			clients.remove(player.getName());
-			//TODO Reset or pause game if some client exists...
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
 		}
 	}
 	
@@ -102,9 +101,9 @@ public class ServerThread extends Thread {
 		return null;
 	}
 	
-	private boolean handleProtocol(String line, Player player) throws Exception {
+	private void handleProtocol(String line, Player player) throws Exception {
 		if (line == null) {
-			return false;
+			socket.close();
 		}
 		
 		Watten currentGame = getGame(player);
@@ -119,7 +118,8 @@ public class ServerThread extends Thread {
 			case "quit":
 				clients.remove(player.getName());
 				sendResponse(command, "type", "ACK");
-				return true;
+				socket.close();
+				return;
 			case "create_game":
 				gameName = xml.root.getNode("name").getData();
 				try {
@@ -140,8 +140,11 @@ public class ServerThread extends Thread {
 				gameName = xml.root.getNode("name").getData();
 
 				try {
+					if(gameName == null) {
+						throw new Exception("Please specify a game name!");
+					}
 					if(games.get(gameName) == null) {
-						throw new Exception("Game does not exist!");
+						throw new Exception("Game '" + gameName + "' does not exist!");
 					}
 					
 					games.get(gameName).getTable().addPlayer(player);
@@ -202,8 +205,8 @@ public class ServerThread extends Thread {
 				broadcastResponse(command, "message", "[" + player.getName() + "] " + msg);
             break;
 			case "info":
-				if(games.get(xml.root.getNode("name").getData()) == null) {
-					sendResponse(command, "type", "NAK", "message", "Can not find the game " + gameName);
+				if(xml.root.getNode("name").getData() == null || games.get(xml.root.getNode("name").getData()) == null) {
+					sendResponse(command, "type", "NAK", "message", "Can not find the game '" + gameName + "'.");
 				} else {
 					sendResponse(command, "type", "ACK", "message", games.get(xml.root.getNode("name").getData()).toString());
 				}
@@ -231,13 +234,13 @@ public class ServerThread extends Thread {
 			default:
 				sendResponse(command, "type", "NAK", "message", "Please enter a valid command. Type H to see all commands!");
 		}
-		
-		return false;
 	}
 
 	private void sendResponseTo(String playerName, String command, String ... details) {
 		synchronized (clients) {
-			clients.get(playerName).sendResponse(command, details);	
+			synchronized (clients.get(playerName)) {
+				clients.get(playerName).println(getResponse(command, details));	
+			}
 		}
 	}
 
@@ -265,17 +268,22 @@ public class ServerThread extends Thread {
 	
 	private void broadcastAndOutput(String command, String ... details) {
 		synchronized (clients) {
-			for(ServerThread client : clients.values()) {
-				client.sendResponse(command, details);
+			for(PrintWriter client : clients.values()) {
+				synchronized (client) {
+					client.println(getResponse(command, details));	
+				}
 			}
 		}
 	}
 	
 	private void broadcastResponse(String command, String ... details) {
 		synchronized (clients) {
-			for(ServerThread client : clients.values()) {
-				if(client != this) {
-					client.sendResponse(command, details);
+			for(PrintWriter client : clients.values()) {
+				synchronized (client) {
+					if(client != this.output) {
+						client.println(getResponse(command, details));
+					}
+					
 				}
 			}
 		}

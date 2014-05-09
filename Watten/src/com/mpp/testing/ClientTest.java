@@ -40,14 +40,16 @@ public class ClientTest {
 				try {
 					sendRequest("create_game", "name", "Watten");
 					line = input.readLine();
-					System.out.println("CLIENTTEST:" + line);
+					System.err.println("CLIENTTEST:" + line);
 					
 					//TODO wait for ACK...
 					sendRequest("join_game", "name", "Watten");
 					line = input.readLine();
-					System.out.println("CLIENTTEST: " + line);
+					System.err.println("CLIENTTEST: " + line);
 					
-				} catch (IOException e) {
+					Thread.sleep(1000000);
+					
+				} catch (Exception e) {
 					e.printStackTrace(System.err);
 				}
 			}
@@ -69,7 +71,7 @@ public class ClientTest {
 	}
 	
 	
-	private synchronized void sendRequest(String command, String ... details) {
+	private void sendRequest(String command, String ... details) {
 		String out = "";
 		int i = 0;
 		String tagName = ""; 
@@ -81,7 +83,9 @@ public class ClientTest {
 			}
 			i++;	
 		}
-		output.println(SimpleXML.createTag("request", SimpleXML.createTag("command", command) + out));
+		synchronized (output) {
+			output.println(SimpleXML.createTag("request", SimpleXML.createTag("command", command) + out));	
+		}
 	}
 
 }

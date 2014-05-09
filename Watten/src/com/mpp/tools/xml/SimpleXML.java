@@ -180,6 +180,14 @@ public class SimpleXML {
 		return (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
 	}
 	
+	private boolean isDigit() {
+		return (c >= '0' && c <= '9');
+	}
+	
+	private boolean isXMLStartChar() {
+		return (isLetter() || c == '_' || c == ':');
+	}
+	
 	
 	/**
 	 * Find the next tagName - token... 
@@ -193,15 +201,24 @@ public class SimpleXML {
 			consume();
 			type = Token.Type.TAG_EXIT;
 		}
+		if(isXMLStartChar()) {
+			buf.append(c);
+			consume();
+		}
 		do {
 			buf.append(c);
 			consume();
-		} while( isLetter() );
+		} while(isXMLFollowupChar());
 		match('>');
 		return new Token(type, buf.toString());
 	}
 	
 	
+	private boolean isXMLFollowupChar() {
+		return (isLetter() || isDigit() || c == '_' || c == '-' || c == ':' || c == '.');
+	}
+
+
 	/**
 	 * Find the next tagData - token...
 	 * No ParseException here, because a tag data can store every kind of string.

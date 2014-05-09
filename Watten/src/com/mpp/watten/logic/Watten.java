@@ -435,5 +435,21 @@ public class Watten {
 				lastBetTeamNumber
 				);
 	}
-	
+
+	public void leavingPlayer(Player player) throws Exception {
+		getTable().removePlayer(player);
+		if(getStatus() != WattenFeature.INIT) {
+			setConstraints(WattenFeature.PAUSE);
+			statePause();
+		}
+	}
+
+	private void statePause() throws Exception {
+		throwExceptionIfNotAllowed(WattenFeature.PAUSE);
+		setStatus(WattenFeature.PAUSE);
+		setConstraints(WattenFeature.RESUME);
+		
+		//TODO implement RESUME...
+	}
+
 }

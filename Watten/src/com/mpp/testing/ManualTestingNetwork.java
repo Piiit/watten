@@ -1,6 +1,6 @@
 package com.mpp.testing;
 
-//import java.util.Random;
+import java.util.Random;
 
 public class ManualTestingNetwork {
 
@@ -23,13 +23,13 @@ public class ManualTestingNetwork {
 				}
 			}.start();
 			
-//			Random rand = new Random();
-//			try {
-//				Thread.sleep(rand.nextInt(1000));
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			Random rand = new Random();
+			try {
+				Thread.sleep(rand.nextInt(2000));
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			i++;
 		}
 

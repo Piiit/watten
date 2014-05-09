@@ -1,6 +1,7 @@
 package com.mpp.network;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
@@ -12,7 +13,7 @@ public class Server {
 	
 	private static final int MAXCLIENTS = 20;
 	private static final int PORT = 9999;
-	private static Map<String, ServerThread> clients = new ConcurrentHashMap<String, ServerThread>();
+	private static Map<String, PrintWriter> clients = new ConcurrentHashMap<String, PrintWriter>();
 	private static Map<String, Watten> games = new ConcurrentHashMap<String, Watten>();
 
 	public static void main(String args[]) {

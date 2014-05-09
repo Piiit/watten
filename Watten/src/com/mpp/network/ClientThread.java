@@ -20,8 +20,8 @@ public class ClientThread extends Thread {
 	public void run() {
 		try {
 			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
 		}
 		
 	    String line = "";
@@ -30,7 +30,7 @@ public class ClientThread extends Thread {
 	    		line = input.readLine();
 	    		if(line != null) {
 	    			
-	    			System.out.println("OUTPUT:" + line);
+	    			System.err.println("OUTPUT:" + line);
 	    			
 	    			SimpleXML xml = new SimpleXML(line);
 	    			xml.parse();
@@ -66,21 +66,23 @@ public class ClientThread extends Thread {
 		    				System.out.println(unescape(xml.root.getNode("message").getData()));
 		                break;
 		                default:
-		                	System.out.println(line);
+		                	System.err.println(line);
 		    		}
 	    		}
 	    	}
 	    } catch (Exception e) {
-	    	System.out.println("Closing client output.");
-	    	e.printStackTrace();
+	    	System.err.println("Closing client output.");
+	    	e.printStackTrace(System.err);
+	    } finally {
+			try {
+				input.close();
+				socket.close();
+			} catch (IOException e) {
+				e.printStackTrace(System.err);
+			}
 	    }
-		try {
-			input.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
-		System.out.println("Bye");
+		System.err.println("Bye");
 	}
 	
 	private String unescape(String text) {

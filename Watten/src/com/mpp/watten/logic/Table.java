@@ -204,4 +204,8 @@ public class Table implements Loadable {
 		}
 		return SimpleXML.createTag("table", SimpleXML.createTag("players", xmlPlayer));
 	}
+
+	public void removePlayer(Player player) {
+		playerList[getPlayerPlayerLocation(player).getIndex()] = null;
+	}
 }
