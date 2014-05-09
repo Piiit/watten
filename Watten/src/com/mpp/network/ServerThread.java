@@ -5,57 +5,32 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
-import java.util.concurrent.Semaphore;
-
-import com.mpp.tools.xml.Loadable;
+import java.util.concurrent.ConcurrentHashMap;
 import com.mpp.tools.xml.SimpleXML;
 import com.mpp.watten.logic.Player;
 import com.mpp.watten.logic.Watten;
 
 public class ServerThread extends Thread {
 	
-	//vector should do the job, but just to be sure, I use semaphores.
-	private Semaphore clientsPermit = new Semaphore(1); 
-	private Semaphore gamesPermit = new Semaphore(1);
-	
-	//Vector is nearly deprecated(?), but works with concurrent access
-	private Vector<ServerThread> clients; 	
-	
-	private Vector<Watten> games;
-	
-	private Map<String, PrintWriter> mapPlayerNameClient = new HashMap<String, PrintWriter>();
-	
-	private Watten joinedGame;
+	private Map<String, Watten> games = new ConcurrentHashMap<String, Watten>();
+	private Map<String, ServerThread> clients = new ConcurrentHashMap<String, ServerThread>();
 	
 	private Socket socket;
 	private BufferedReader input = null;
 	private PrintWriter output = null;
-	private Player player = null;
+	
 	private final int maxClients;
 	
-	public ServerThread(Socket socket, Vector<ServerThread> clients, Vector<Watten> games, final int maxClients) {
+	public ServerThread(Socket socket, Map<String, ServerThread> clients, Map<String, Watten> games, final int maxClients) {
 		this.socket = socket;
-		try {
-			clientsPermit.acquire();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		this.clients = clients;
-		clientsPermit.release();
 		this.maxClients = maxClients;
-		try {
-			gamesPermit.acquire();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		this.games = games;
-		gamesPermit.release();
 	}
 	
 	public void run() {
+		Player player = null;
 		System.out.println("Client @ port " + socket.getPort());
 		try {
 			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -65,20 +40,22 @@ public class ServerThread extends Thread {
 		}
 		
 		try {
-			clientsPermit.acquire();
 			if(clients.size() == maxClients) {
 				output.println("Sorry, the server is full (max=" + maxClients + "). You can not enter now!");
-				clientsPermit.release();
 				socket.close();
 				return;
 			} 
-			clients.add(this);
-			player = new Player("Player" + socket.getPort());
-			mapPlayerNameClient.put(player.getName(), output);
-			clientsPermit.release();
-		} catch (InterruptedException e2) {
-			e2.printStackTrace();
-		} catch (IOException e) {
+
+			synchronized (clients) {
+				player = new Player("Player" + clients.size());
+//				System.out.println("Player = " + player.getName());
+				if(clients.get(player.getName()) != null) {
+					throw new Exception("Client with name " + player.getName() + " already exists!" + socket.getPort()) ;
+				}
+				clients.put(player.getName(), this);
+			}
+			
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -92,42 +69,40 @@ public class ServerThread extends Thread {
 		while(!done) {
 			try {
 				line = input.readLine();
-				done = handleProtocol(line);
+				System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " send a request: " + line);
+				done = handleProtocol(line, player);
 			} catch (Exception e) {
-				e.printStackTrace();
+				e.printStackTrace(System.err);
 				done = true;
 			}
 		}	
 
+		System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " left the room!" );
+		broadcastResponse("chat", "message", "[" + player.getName() + "] left the chat room...");
+
 		try {
 			socket.close();
-			clientsPermit.acquire();
-			clients.remove(this);
-			mapPlayerNameClient.remove(this.player.getName());
+			clients.remove(player.getName());
 			//TODO Reset or pause game if some client exists...
-			// getGame(player).;
-			clientsPermit.release();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
 		}
-		System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " left the room!");
-		broadcastResponse("chat", "message", "[" + player.getName() + "] left the chat room...");
 	}
 	
 	private Watten getGame(Player player) {
-		for(Watten game : games) {
-			try {
-				game.getTable().getPlayer(player.getName());
-				return game;
-			} catch(Exception e) {
+		synchronized (games) {
+			for(Watten game : games.values()) {
+				try {
+					game.getTable().getPlayer(player.getName());
+					return game;
+				} catch(Exception e) {
+				}
 			}
 		}
 		return null;
 	}
 	
-	private boolean handleProtocol(String line) throws Exception {
+	private boolean handleProtocol(String line, Player player) throws Exception {
 		if (line == null) {
 			return false;
 		}
@@ -138,16 +113,11 @@ public class ServerThread extends Thread {
 		SimpleXML xml = new SimpleXML(line);
 		xml.parse();
 		
-		System.out.println("SERVER: " + line);
-		
 		String command = xml.root.getNode("command").getData().toLowerCase();
 		
 		switch(command) {
 			case "quit":
-				clientsPermit.acquire();
-				mapPlayerNameClient.remove(player.getName());
-				clients.removeElement(this);
-				clientsPermit.release();
+				clients.remove(player.getName());
 				sendResponse(command, "type", "ACK");
 				return true;
 			case "create_game":
@@ -156,46 +126,34 @@ public class ServerThread extends Thread {
 					if(gameName == null || gameName.length() == 0) {
 						throw new Exception("You can not create a game without a name.");
 					}
-					for(Watten g : games) {
-						if(g.getName().equalsIgnoreCase(gameName)) {
-							throw new Exception("A game with this name already exists!");
-						}
+					if(games.get(gameName) != null) {
+						throw new Exception("A game with this name already exists!");
 					}
-					gamesPermit.acquire();
-					games.add(new Watten(gameName));
-					gamesPermit.release();
+					games.put(gameName, new Watten(gameName));
 					sendResponse(command, "type", "ACK", "message", "You created the game " + gameName);
 				} catch (Exception e) {
 					sendResponse(command, "type", "NAK", "message", "You can not create the game '" + gameName + "': " + e.getMessage());
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 					break;
 				}
 			case "join_game":
 				gameName = xml.root.getNode("name").getData();
 
 				try {
-					joinedGame = null;
-					gamesPermit.acquire();
-					for(Watten game: games) {
-						if(game.getName().equalsIgnoreCase(gameName)) {
-							game.getTable().addPlayer(this.player);
-							joinedGame = game;
-							sendResponse(command, "type", "ACK", "message", "You joined the game " + joinedGame);
-							for(Player p : game.getTable().getPlayers()) {
-								if(p != null && this.player != p) {
-									broadcastResponse("chat", "message", "[" + p.getName() + "] joined your game!");
-								}
-							}
-							break;
-						}
-					}
-					gamesPermit.release();
-					if(joinedGame == null) {
+					if(games.get(gameName) == null) {
 						throw new Exception("Game does not exist!");
+					}
+					
+					games.get(gameName).getTable().addPlayer(player);
+					sendResponse(command, "type", "ACK", "message", "You joined the game " + games.get(gameName));
+					for(Player p : games.get(gameName).getTable().getPlayers()) {
+						if(p != null && player != p) {
+							broadcastResponse("chat", "message", "[" + p.getName() + "] joined your game!");
+						}
 					}
 				} catch (Exception e) {
 					sendResponse(command, "type", "NAK", "message", "You can not join the game '" + gameName + "': " + e.getMessage());
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			break;
 
@@ -204,22 +162,22 @@ public class ServerThread extends Thread {
 					currentGame.start();
 					
 					sendResponse(command, "type", "ACK");
-					for(Player player : currentGame.getTable().getPlayers()) {
-						String hand = player.getHand().serialize();
-						sendResponseTo(player.getName(), "start_round", "hand", hand, "current_player", currentGame.getTable().getCurrentPlayer().serialize());
+					for(Player p : currentGame.getTable().getPlayers()) {
+						String hand = p.getHand().serialize();
+						sendResponseTo(p.getName(), "start_round", "hand", hand, "current_player", currentGame.getTable().getCurrentPlayer().serialize());
 					}
 					
 					broadcastAndOutput("chat", "message", gameName + " started!");
 					broadcastAndOutput("chat", "message", "Current player = " + currentGame.getTable().getCurrentPlayer());
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					sendResponse(command, "type", "NAK", "message", "Can not start game " + gameName + ": " + e1.getMessage());
+				} catch (Exception e) {
+					e.printStackTrace(System.err);
+					sendResponse(command, "type", "NAK", "message", "Can not start game " + gameName + ": " + e.getMessage());
 				}
 			break;
 			case "list_games":
 				String gameList = "";
 				int i = 0;
-				for(Watten game : games) {
+				for(Watten game : games.values()) {
 					i++;
 					gameList += i + " : " + game.getName() + "\n";
 				}
@@ -244,16 +202,10 @@ public class ServerThread extends Thread {
 				broadcastResponse(command, "message", "[" + player.getName() + "] " + msg);
             break;
 			case "info":
-				boolean found = false;
-				for(Watten game : games) {
-					if(game.getName().equals(xml.root.getNode("name").getData())) {
-						sendResponse(command, "type", "ACK", "message", game.toString());
-						found = true;
-						break;
-					}
-				}
-				if(!found) {
+				if(games.get(xml.root.getNode("name").getData()) == null) {
 					sendResponse(command, "type", "NAK", "message", "Can not find the game " + gameName);
+				} else {
+					sendResponse(command, "type", "ACK", "message", games.get(xml.root.getNode("name").getData()).toString());
 				}
 			break;
 //			case "R":
@@ -284,15 +236,15 @@ public class ServerThread extends Thread {
 	}
 
 	private void sendResponseTo(String playerName, String command, String ... details) {
-		mapPlayerNameClient.get(playerName).println(getResponse(command, details));
+		synchronized (clients) {
+			clients.get(playerName).sendResponse(command, details);	
+		}
 	}
 
-	private void sendResponse(String command) {
-		output.println(getResponse(command, (String[])null));
-	}
-	
 	private void sendResponse(String command, String ... details) {
-		output.println(getResponse(command, details));
+		synchronized (output) {
+			output.println(getResponse(command, details));	
+		}
 	}
 	
 	private String getResponse(String command, String ... details) {
@@ -311,48 +263,21 @@ public class ServerThread extends Thread {
 		return SimpleXML.createTag("response", SimpleXML.createTag("command", command) + out);
 	}
 	
-	
-	private void sendResponse(String id, String message, Loadable data) {
-		output.println(SimpleXML.createTag("response", 
-				SimpleXML.createTag("id", id)) + 
-				SimpleXML.createTag("message", message) +
-				SimpleXML.createTag("data", data.serialize())
-				);
-	}
-
 	private void broadcastAndOutput(String command, String ... details) {
-		try {
-			clientsPermit.acquire();
-			for(ServerThread client : clients) {
-				client.output.println(getResponse(command, details));
+		synchronized (clients) {
+			for(ServerThread client : clients.values()) {
+				client.sendResponse(command, details);
 			}
-			clientsPermit.release();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
-
 	
-//	private boolean nameExists(String name) {
-//		for(ClientHandler client : clients) {
-//			if(name.equalsIgnoreCase(client.player.getName())) {
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-
 	private void broadcastResponse(String command, String ... details) {
-		try {
-			clientsPermit.acquire();
-			for(ServerThread client : clients) {
+		synchronized (clients) {
+			for(ServerThread client : clients.values()) {
 				if(client != this) {
-					client.output.println(getResponse(command, details));
+					client.sendResponse(command, details);
 				}
 			}
-			clientsPermit.release();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
 	

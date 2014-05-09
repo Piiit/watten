@@ -1,7 +1,6 @@
 package com.mpp.testing;
 
-import com.mpp.network.ClientForConsole;
-import com.mpp.network.Server;
+//import java.util.Random;
 
 public class ManualTestingNetwork {
 
@@ -14,27 +13,25 @@ public class ManualTestingNetwork {
 //			}
 //		}.start();
 
-		new Thread() {
-			@Override 
-			public void run() {
-				ClientTest c = new ClientTest();
-				c.startManualInput();
-			}
-		}.start();
-		new Thread() {
-			@Override 
-			public void run() {
-				ClientTest c = new ClientTest();
-				c.startManualInput();
-			}
-		}.start();
-		new Thread() {
-			@Override 
-			public void run() {
-				ClientTest c = new ClientTest();
-				c.startManualInput();
-			}
-		}.start();
+		int i = 0;
+		while(i < 2) {
+			new Thread() {
+				@Override 
+				public void run() {
+					ClientTest c = new ClientTest();
+					c.startManualInput();
+				}
+			}.start();
+			
+//			Random rand = new Random();
+//			try {
+//				Thread.sleep(rand.nextInt(1000));
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+			i++;
+		}
 
 //		new Thread() {
 //			@Override 

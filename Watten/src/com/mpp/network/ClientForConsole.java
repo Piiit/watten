@@ -124,7 +124,7 @@ public class ClientForConsole {
 //				);
 //	}
 	
-	private void sendRequest(String command, String ... details) {
+	private synchronized void sendRequest(String command, String ... details) {
 		String out = "";
 		int i = 0;
 		String tagName = ""; 

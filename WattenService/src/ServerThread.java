@@ -1,9 +1,6 @@
 import java.io.*; 
 import java.net.*; 
 
-import com.mpp.network.Message;
-import com.mpp.tools.MessageAction;
-
 
 public class ServerThread extends Thread {  
 	private Server server; 

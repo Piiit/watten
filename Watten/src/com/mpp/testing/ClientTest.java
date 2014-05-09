@@ -29,33 +29,31 @@ public class ClientTest {
 				output = new PrintWriter(socket.getOutputStream(), true);
 				input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			} catch (IOException e) {
-				e.printStackTrace();
+				e.printStackTrace(System.err);
 			}
 			
 			ClientThread clientOut = new ClientThread(socket);
 			clientOut.start();
 			
 			String line = "";
-			while(!socket.isClosed()) {
+			if(!socket.isClosed()) {
 				try {
 					sendRequest("create_game", "name", "Watten");
-					
 					line = input.readLine();
+					System.out.println("CLIENTTEST:" + line);
+					
 					//TODO wait for ACK...
 					sendRequest("join_game", "name", "Watten");
-
 					line = input.readLine();
-
-					
-					System.out.println("CLIENT: "+line);
+					System.out.println("CLIENTTEST: " + line);
 					
 				} catch (IOException e) {
-					e.getStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		} finally {
 			try {
 				System.out.println("Closing connection.");
@@ -65,13 +63,13 @@ public class ClientTest {
 					socket.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				e.printStackTrace(System.err);
 			}
 		} 
 	}
 	
 	
-	private void sendRequest(String command, String ... details) {
+	private synchronized void sendRequest(String command, String ... details) {
 		String out = "";
 		int i = 0;
 		String tagName = ""; 

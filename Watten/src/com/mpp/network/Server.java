@@ -3,7 +3,8 @@ package com.mpp.network;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Vector;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.mpp.watten.logic.Watten;
 
@@ -11,8 +12,8 @@ public class Server {
 	
 	private static final int MAXCLIENTS = 20;
 	private static final int PORT = 9999;
-	private static Vector<ServerThread> clients = new Vector<ServerThread>();
-	private static Vector<Watten> games = new Vector<Watten>();
+	private static Map<String, ServerThread> clients = new ConcurrentHashMap<String, ServerThread>();
+	private static Map<String, Watten> games = new ConcurrentHashMap<String, Watten>();
 
 	public static void main(String args[]) {
 		start();
@@ -26,10 +27,10 @@ public class Server {
 			while (true) {  
 				try {  
 					Socket clientSocket = serverSocket.accept();
-					System.out.println("Client likes to connected @ local port " + clientSocket.getLocalPort());
+//					System.out.println("Client likes to connected @ local port " + clientSocket.getLocalPort());
 					
-					ServerThread client = new ServerThread(clientSocket, clients, games, MAXCLIENTS);
-					client.start();
+					ServerThread clientHandler = new ServerThread(clientSocket, clients, games, MAXCLIENTS);
+					clientHandler.start();
 					
 	            } catch(IOException e) {  
 	            	e.getStackTrace();
