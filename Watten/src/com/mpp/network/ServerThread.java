@@ -58,7 +58,7 @@ public class ServerThread extends Thread {
 		String line = "";
 		
 		sendResponse("chat", "message", "Welcome [" + player.getName() + "]! Type H to see all commands.");
-		broadcastResponse("chat", "message", "[" + player.getName() + "] entered the lobby...");
+		sendResponseToOthers("chat", "message", "[" + player.getName() + "] entered the lobby...");
 		
 		try {
 			while(!socket.isClosed()) {
@@ -69,7 +69,7 @@ public class ServerThread extends Thread {
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 			System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " left the room!" );
-			broadcastResponse("chat", "message", "[" + player.getName() + "] left the chat room...");
+			sendResponseToOthers("chat", "message", "[" + player.getName() + "] left the lobby...");
 		} finally {
 			try {
 				input.close();
@@ -114,6 +114,7 @@ public class ServerThread extends Thread {
 			case "quit":
 				clients.remove(player.getName());
 				sendResponse(command, "type", "ACK");
+				sendResponseToAll("chat", "message", "Player '" + player.getName() + "' left the game!");
 				socket.close();
 				return;
 			case "create_game":
@@ -145,11 +146,7 @@ public class ServerThread extends Thread {
 					
 					games.get(gameName).addPlayer(player);
 					sendResponse(command, "type", "ACK", "message", "You joined the game " + games.get(gameName));
-					for(Player p : games.get(gameName).getTable().getPlayers()) {
-						if(p != null && player != p) {
-							broadcastResponse("chat", "message", "[" + p.getName() + "] joined your game!");
-						}
-					}
+					sendResponseToGameOthers(gameName, "chat", "message", "[" + player.getName() + "] joined your game!");
 				} catch (Exception e) {
 					sendResponse(command, "type", "NAK", "message", "You can not join the game '" + gameName + "': " + e.getMessage());
 					e.printStackTrace(System.err);
@@ -157,7 +154,16 @@ public class ServerThread extends Thread {
 			break;
 
 			case "start_game":
+				gameName = currentGame.getName();
+
 				try {
+					if(gameName == null) {
+						throw new Exception("Please specify a game name!");
+					}
+					if(games.get(gameName) == null) {
+						throw new Exception("Game '" + gameName + "' does not exist!");
+					}
+					
 					currentGame.start();
 					
 					sendResponse(command, "type", "ACK");
@@ -166,11 +172,11 @@ public class ServerThread extends Thread {
 						sendResponseTo(p.getName(), "start_round", "hand", hand, "current_player", currentGame.getTable().getCurrentPlayer().serialize());
 					}
 					
-					broadcastAndOutput("chat", "message", gameName + " started!");
-					broadcastAndOutput("chat", "message", "Current player = " + currentGame.getTable().getCurrentPlayer());
+					sendResponseToGameAll(gameName, "chat", "message", "Game with name '" + gameName + "' started!");
+					sendResponseToGameAll(gameName, "chat", "message", "Current player = " + currentGame.getTable().getCurrentPlayer());
 				} catch (Exception e) {
 					e.printStackTrace(System.err);
-					sendResponse(command, "type", "NAK", "message", "Can not start game " + gameName + ": " + e.getMessage());
+					sendResponse(command, "type", "NAK", "message", "Can not start game '" + gameName + "', because '" + e.getMessage() + "'.");
 				}
 			break;
 			case "list_games":
@@ -198,7 +204,7 @@ public class ServerThread extends Thread {
 			case "chat":
 				String msg = xml.root.getNode("message").getData();
 				sendResponse(command, "type", "ACK", "message", "[-YOU-] " + msg);
-				broadcastResponse(command, "message", "[" + player.getName() + "] " + msg);
+				sendResponseToOthers(command, "message", "[" + player.getName() + "] " + msg);
             break;
 			case "info":
 				if(xml.root.getNode("name").getData() == null || games.get(xml.root.getNode("name").getData()) == null) {
@@ -262,7 +268,7 @@ public class ServerThread extends Thread {
 		return SimpleXML.createTag("response", SimpleXML.createTag("command", command) + out);
 	}
 	
-	private void broadcastAndOutput(String command, String ... details) {
+	private void sendResponseToAll(String command, String ... details) {
 		synchronized (clients) {
 			for(PrintWriter client : clients.values()) {
 				synchronized (client) {
@@ -272,7 +278,7 @@ public class ServerThread extends Thread {
 		}
 	}
 	
-	private void broadcastResponse(String command, String ... details) {
+	private void sendResponseToOthers(String command, String ... details) {
 		synchronized (clients) {
 			for(PrintWriter client : clients.values()) {
 				synchronized (client) {
@@ -285,5 +291,34 @@ public class ServerThread extends Thread {
 		}
 	}
 	
+	private void sendResponseToGameOthers(String gameName, String command, String ... details) throws Exception {
+		synchronized (games) {
+			Watten game = games.get(gameName);
+			if(game == null) {
+				throw new Exception("Game with name '" + gameName + "' does not exist!");
+			}
+			for(Player p : game.getTable().getPlayers()) {
+				synchronized (clients) {
+					if(p != null && clients.get(p.getName()) != this.output) {
+						sendResponseTo(p.getName(), command, details);
+					}
+				}
+			}
+		}
+	}
+	
+	private void sendResponseToGameAll(String gameName, String command, String ... details) throws Exception {
+		synchronized (games) {
+			Watten game = games.get(gameName);
+			if(game == null) {
+				throw new Exception("Game with name '" + gameName + "' does not exist!");
+			}
+			for(Player p : game.getTable().getPlayers()) {
+				if(p != null) {
+					sendResponseTo(p.getName(), command, details);
+				}
+			}
+		}
+	}
 
 }

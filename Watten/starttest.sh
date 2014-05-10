@@ -5,7 +5,7 @@ CLIENT2=com/mpp/network/ClientForConsole
 SERVER=com/mpp/network/Server
 
 SERVERCMD="echo SERVER; cd $BINDIR; java.exe $SERVER; read -p 'Done. Press any key to close...' -n1 -s"
-CLIENTCMD="echo CLIENT; cd $BINDIR; java.exe $CLIENT 2>/dev/null; read -p 'Done. Press any key to close...' -n1 -s"
+CLIENTCMD="echo CLIENT; cd $BINDIR; java.exe $CLIENT; read -p 'Done. Press any key to close...' -n1 -s"
 CLIENT2CMD="echo CLIENT2; cd $BINDIR; java.exe $CLIENT2 2>/dev/null; /bin/bash"
 
 tmux kill-session -t watten-test-session
