@@ -146,7 +146,7 @@ public class ServerThread extends Thread {
 					
 					games.get(gameName).addPlayer(player);
 					sendResponse(command, "type", "ACK", "message", "You joined the game " + games.get(gameName));
-					sendResponseToGameOthers(gameName, "chat", "message", "[" + player.getName() + "] joined your game!");
+					sendResponseToOthersInGame(gameName, "chat", "message", "[" + player.getName() + "] joined your game!");
 				} catch (Exception e) {
 					sendResponse(command, "type", "NAK", "message", "You can not join the game '" + gameName + "': " + e.getMessage());
 					e.printStackTrace(System.err);
@@ -172,8 +172,8 @@ public class ServerThread extends Thread {
 						sendResponseTo(p.getName(), "start_round", "hand", hand, "current_player", currentGame.getTable().getCurrentPlayer().serialize());
 					}
 					
-					sendResponseToGameAll(gameName, "chat", "message", "Game with name '" + gameName + "' started!");
-					sendResponseToGameAll(gameName, "chat", "message", "Current player = " + currentGame.getTable().getCurrentPlayer());
+					sendResponseToAllInGame(gameName, "chat", "message", "Game with name '" + gameName + "' started!");
+					sendResponseToAllInGame(gameName, "chat", "message", "Current player = " + currentGame.getTable().getCurrentPlayer());
 				} catch (Exception e) {
 					e.printStackTrace(System.err);
 					sendResponse(command, "type", "NAK", "message", "Can not start game '" + gameName + "', because '" + e.getMessage() + "'.");
@@ -291,7 +291,7 @@ public class ServerThread extends Thread {
 		}
 	}
 	
-	private void sendResponseToGameOthers(String gameName, String command, String ... details) throws Exception {
+	private void sendResponseToOthersInGame(String gameName, String command, String ... details) throws Exception {
 		synchronized (games) {
 			Watten game = games.get(gameName);
 			if(game == null) {
@@ -307,7 +307,7 @@ public class ServerThread extends Thread {
 		}
 	}
 	
-	private void sendResponseToGameAll(String gameName, String command, String ... details) throws Exception {
+	private void sendResponseToAllInGame(String gameName, String command, String ... details) throws Exception {
 		synchronized (games) {
 			Watten game = games.get(gameName);
 			if(game == null) {
