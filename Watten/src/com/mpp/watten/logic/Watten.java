@@ -78,7 +78,7 @@ public class Watten {
 	}
 	
 	public int getTeam(Player player) {
-		return getTeam(table.getPlayerPlayerLocation(player));
+		return getTeam(table.getPlayerLocation(player));
 	}
 	
 	public int getTeam(PlayerLocation playerLocation) {
@@ -89,7 +89,7 @@ public class Watten {
 	}
 	
 	public int getTeam() throws Exception {
-		return getTeam(table.getPlayerPlayerLocation(table.getCurrentPlayer()));
+		return getTeam(table.getPlayerLocation(table.getCurrentPlayer()));
 	}
 	
 	public void start() throws Exception {
@@ -436,11 +436,20 @@ public class Watten {
 				);
 	}
 
-	public void leavingPlayer(Player player) throws Exception {
+	public void kickPlayer(Player player) throws Exception {
 		getTable().removePlayer(player);
-		if(getStatus() != WattenFeature.INIT) {
+		System.out.println("A player left the table: " + player.getName());
+		if(getStatus() != WattenFeature.INIT && getStatus() != WattenFeature.PAUSE) {
 			setConstraints(WattenFeature.PAUSE);
 			statePause();
+		}
+	}
+	
+	public void addPlayer(Player player) throws Exception {
+		getTable().addPlayer(player);
+		System.out.println("New player joined the table: " + player.getName());
+		if(getStatus() == WattenFeature.PAUSE && getTable().getPlayerCount() == 4) {
+			stateResume();
 		}
 	}
 
@@ -448,8 +457,15 @@ public class Watten {
 		throwExceptionIfNotAllowed(WattenFeature.PAUSE);
 		setStatus(WattenFeature.PAUSE);
 		setConstraints(WattenFeature.RESUME);
-		
-		//TODO implement RESUME...
 	}
-
+	
+	private void stateResume() throws Exception {
+		throwExceptionIfNotAllowed(WattenFeature.RESUME);
+		if(getTable().getPlayerCount() != 4) {
+			throw new Exception("Can not resume this game. We need 4 players to continue...");
+		}
+		setStatus(WattenFeature.RESUME);
+		setConstraints(WattenFeature.ROUND_START);
+		stateRoundEntry();
+	}
 }

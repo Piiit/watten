@@ -26,7 +26,7 @@ public class Table implements Loadable {
 		int freeSeat = -1;
 		for(int i = 0; i < 4; i++) {
 			if(player.equals(getPlayer(PlayerLocation.get(i)))) {
-				throw new Exception("Player with name " + player.getName() + " already sits at this table!");
+				throw new Exception("Player with name '" + player.getName() + "' already sits at this table!");
 			}
 			if(freeSeat == -1 && isFreeSeat(PlayerLocation.get(i))) {
 				freeSeat = i;
@@ -61,7 +61,7 @@ public class Table implements Loadable {
 				return playerList[i];
 			}
 		}
-		throw new Exception("Player " + playerName + " does not sit at this table!");
+		throw new Exception("Player '" + playerName + "' does not sit at this table!");
 	}
 	
 	public boolean isFreeSeat(PlayerLocation seat) {
@@ -78,7 +78,7 @@ public class Table implements Loadable {
 	
 	public void putCard(Card card, PlayerLocation PlayerLocation) throws Exception {
 		if(!isFreeCardPlayerLocation(PlayerLocation)) {
-			throw new Exception("Card PlayerLocation " + PlayerLocation + " is not free!");
+			throw new Exception("Card PlayerLocation '" + PlayerLocation + "' is not free!");
 		}
 		card.faceUp();
 		cardList[PlayerLocation.getIndex()] = card;
@@ -95,9 +95,9 @@ public class Table implements Loadable {
 		try {
 			int cardIndex = player.getHand().getIndex(card);
 			player.getHand().removeCard(cardIndex);
-			putCard(card, getPlayerPlayerLocation(player));
+			putCard(card, getPlayerLocation(player));
 		} catch (Exception e) {
-			throw new Exception("Player " + player.getName() + " can not put card " + card.toStringDebug() + ", because " + e.getMessage());
+			throw new Exception("Player '" + player.getName() + "' can not put card '" + card.toStringDebug() + "', because '" + e.getMessage() + "'.");
 		}
 	}
 
@@ -105,7 +105,7 @@ public class Table implements Loadable {
 		putCardUpdatePlayer(card, getCurrentPlayer());
 	}
 
-	public PlayerLocation getPlayerPlayerLocation(Player player) {
+	public PlayerLocation getPlayerLocation(Player player) {
 		for(int i = 0; i < 4; i++) {
 			if(player.equals(playerList[i])) {
 				return PlayerLocation.get(i);
@@ -127,7 +127,7 @@ public class Table implements Loadable {
 	
 	public void setCurrentPlayer(PlayerLocation PlayerLocation) {
 		currentPlayerIndex = PlayerLocation.getIndex();
-		System.out.println("Current player is " + playerList[currentPlayerIndex].getName());
+		System.out.println("Current player is '" + playerList[currentPlayerIndex].getName() + "'.");
 	}
 	
 	public Card getCurrentPlayerCard() {
@@ -206,6 +206,8 @@ public class Table implements Loadable {
 	}
 
 	public void removePlayer(Player player) {
-		playerList[getPlayerPlayerLocation(player).getIndex()] = null;
+		playerList[getPlayerLocation(player).getIndex()] = null;
+		resetCardList();
 	}
+
 }

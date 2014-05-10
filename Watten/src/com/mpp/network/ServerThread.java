@@ -47,11 +47,7 @@ public class ServerThread extends Thread {
 			} 
 
 			synchronized (clients) {
-				player = new Player("Player" + clients.size());
-//				System.out.println("Player = " + player.getName());
-				if(clients.get(player.getName()) != null) {
-					throw new Exception("Client with name " + player.getName() + " already exists!" + socket.getPort()) ;
-				}
+				player = new Player("Player" + (clients.size() + 1));
 				clients.put(player.getName(), this.output);
 			}
 			
@@ -80,7 +76,7 @@ public class ServerThread extends Thread {
 				socket.close();
 				clients.remove(player.getName());
 				synchronized (player) {
-					getGame(player).leavingPlayer(player);	
+					getGame(player).kickPlayer(player);	
 				}
 			} catch (Exception e) {
 				e.printStackTrace(System.err);
@@ -147,7 +143,7 @@ public class ServerThread extends Thread {
 						throw new Exception("Game '" + gameName + "' does not exist!");
 					}
 					
-					games.get(gameName).getTable().addPlayer(player);
+					games.get(gameName).addPlayer(player);
 					sendResponse(command, "type", "ACK", "message", "You joined the game " + games.get(gameName));
 					for(Player p : games.get(gameName).getTable().getPlayers()) {
 						if(p != null && player != p) {

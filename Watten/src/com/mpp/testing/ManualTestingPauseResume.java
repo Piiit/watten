@@ -23,6 +23,8 @@ public class ManualTestingPauseResume {
 			
 			watten.start();
 			
+			int kick = 0;
+			
 			//Play a whole game...
 			while(watten.getStatus() != WattenFeature.GAME_FINISHED) {
 
@@ -57,9 +59,12 @@ public class ManualTestingPauseResume {
 					case SURRENDER_OR_HOLD:
 						watten.stateTurnSurrenderOrHold(Watten.SURRENDER);
 					break;
+					case RESUME:
+						watten.addPlayer(new Player("My name is nobody"));
+					break;
 					
 					default:
-						throw new Exception("Feature without action! " + watten.getConstraints().get(selected));
+						throw new Exception("Feature without action: " + watten.getConstraints().get(selected));
 				}
 				if(watten.getStatus() == WattenFeature.PLAY_CARD) {
 					System.out.println(watten.toString());
@@ -69,7 +74,12 @@ public class ManualTestingPauseResume {
 				
 				SimpleXML xml = new SimpleXML(watten.getTable().serialize());
 				xml.parse();
-				System.out.println(xml.toStringIntented());
+//				System.out.println(xml.toStringIntented());
+				
+				kick++;
+				if(kick == 3) {
+					watten.kickPlayer(watten.getTable().getCurrentPlayer());
+				}
 				
 			};
 			

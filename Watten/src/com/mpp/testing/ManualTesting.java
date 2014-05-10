@@ -16,10 +16,10 @@ public class ManualTesting {
 			Watten watten = new Watten("test");
 			watten.setMaxPoints(18);
 
-			watten.getTable().addPlayer(new Player("Matthäus"));
-			watten.getTable().addPlayer(new Player("Patrick"));
-			watten.getTable().addPlayer(new Player("Peter"));
-			watten.getTable().addPlayer(new Player("Seppl"));
+			watten.addPlayer(new Player("Matthäus"));
+			watten.addPlayer(new Player("Patrick"));
+			watten.addPlayer(new Player("Peter"));
+			watten.addPlayer(new Player("Seppl"));
 			
 			watten.start();
 			
