@@ -48,6 +48,8 @@ public class ClientThread extends Thread {
 		    			case "create_game":
 		    			case "join_game":
 		    			case "start_game":
+		    			case "select_rank":
+		    			case "select_suit":
 		    				if("NAK".equalsIgnoreCase(xml.root.getNode("type").getData())) {
 		    					System.out.println("ERROR: " + unescape(xml.root.getNode("message").getData()));
 		    				}

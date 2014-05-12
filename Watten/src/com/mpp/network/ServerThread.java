@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import com.mpp.tools.xml.SimpleXML;
 import com.mpp.watten.logic.Player;
 import com.mpp.watten.logic.Watten;
@@ -103,12 +104,16 @@ public class ServerThread extends Thread {
 		}
 		
 		Watten currentGame = getGame(player);
+
+		Player currentPlayer = currentGame == null ? null : currentGame.getTable().getCurrentPlayer();
 		String gameName = currentGame == null ? "" : currentGame.getName();
 		
 		SimpleXML xml = new SimpleXML(line);
 		xml.parse();
 		
 		String command = xml.root.getNode("command").getData().toLowerCase();
+		
+		boolean isCurrentPlayer = (currentPlayer != null && player.getName().equals(currentPlayer.getName())) ? false : true;
 		
 		switch(command) {
 			case "quit":
@@ -169,14 +174,28 @@ public class ServerThread extends Thread {
 					sendResponse(command, "type", "ACK");
 					for(Player p : currentGame.getTable().getPlayers()) {
 						String hand = p.getHand().serialize();
-						sendResponseTo(p.getName(), "start_round", "hand", hand, "current_player", currentGame.getTable().getCurrentPlayer().serialize());
+						sendResponseTo(p.getName(), "start_round", "hand", hand, "current_player", currentPlayer.serialize());
 					}
 					
 					sendResponseToAllInGame(gameName, "chat", "message", "Game with name '" + gameName + "' started!");
-					sendResponseToAllInGame(gameName, "chat", "message", "Current player = " + currentGame.getTable().getCurrentPlayer());
+					sendResponseToAllInGame(gameName, "chat", "message", "Current player = " + currentPlayer.getName());
 				} catch (Exception e) {
 					e.printStackTrace(System.err);
 					sendResponse(command, "type", "NAK", "message", "Can not start game '" + gameName + "', because '" + e.getMessage() + "'.");
+				}
+			break;
+			case "select_rank":
+				if(isCurrentPlayer) {
+					currentGame.stateSelectBestCardRank(currentPlayer.getHand().getCard(Integer.parseInt(xml.root.getNode("card_index").getData())).getRank());
+				}else {
+					sendResponse(command, "type", "NAK", "message", "You are not allows to select the rank ! It's "+currentPlayer.getName() +" turn !");
+				}
+			break;
+			case "select_suit":
+				if(isCurrentPlayer) {
+					currentGame.stateSelectBestCardSuit(currentPlayer.getHand().getCard(Integer.parseInt(xml.root.getNode("card_index").getData())).getSuit());
+				}else {
+					sendResponse(command, "type", "NAK", "message", "You are not allows to select the suit ! It's "+currentPlayer.getName() +" turn !");
 				}
 			break;
 			case "list_games":

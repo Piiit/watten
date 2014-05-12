@@ -47,7 +47,7 @@ public class ClientTest {
 					line = input.readLine();
 					System.err.println("CLIENTTEST: " + line);
 					
-					Thread.sleep(1000000);
+//					Thread.sleep(1000000);
 					
 				} catch (Exception e) {
 					e.printStackTrace(System.err);
