@@ -87,12 +87,16 @@ public class ClientForConsole {
 							} 
 							sendRequest("info", "name", gameName);
 						break;
-						case "SR":
-							sendRequest("select_rank","card_index",parts[1]);
-						break;
-						case "SS":
-							sendRequest("select_suit","card_index",parts[1]);
-						break;
+                        case "SR":
+                                sendRequest("select_rank","card_index",parts[1]);
+                        break;
+                        case "SS":
+                                sendRequest("select_suit","card_index",parts[1]);
+                        break;
+                        case "P":
+                        		sendRequest("play_card","card_index",parts[1]);
+                        break;
+
 					}
 					
 					System.out.println("CLIENT: "+line);

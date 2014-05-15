@@ -188,14 +188,21 @@ public class ServerThread extends Thread {
 				if(isCurrentPlayer) {
 					currentGame.stateSelectBestCardRank(currentPlayer.getHand().getCard(Integer.parseInt(xml.root.getNode("card_index").getData())).getRank());
 				}else {
-					sendResponse(command, "type", "NAK", "message", "You are not allows to select the rank ! It's "+currentPlayer.getName() +" turn !");
+					sendResponse(command, "type", "NAK", "message", "You are not allowed to select the rank ! It's "+currentPlayer.getName() +" turn !");
 				}
 			break;
 			case "select_suit":
 				if(isCurrentPlayer) {
 					currentGame.stateSelectBestCardSuit(currentPlayer.getHand().getCard(Integer.parseInt(xml.root.getNode("card_index").getData())).getSuit());
 				}else {
-					sendResponse(command, "type", "NAK", "message", "You are not allows to select the suit ! It's "+currentPlayer.getName() +" turn !");
+					sendResponse(command, "type", "NAK", "message", "You are not allowed to select the suit ! It's "+currentPlayer.getName() +" turn !");
+				}
+			break;
+			case "play_card":
+				if(isCurrentPlayer) {
+					currentGame.stateTurnPlayCard(currentPlayer.getHand().getCard(Integer.parseInt(xml.root.getNode("card_index").getData())));
+				}else {
+					sendResponse(command, "type", "NAK", "message", "You are not allowed to play this card ! It's "+currentPlayer.getName() +" turn !");
 				}
 			break;
 			case "list_games":
