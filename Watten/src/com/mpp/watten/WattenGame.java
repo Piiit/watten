@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.mpp.ui.screens.EnterNameScreen;
 import com.mpp.ui.screens.MainMenuScreen;
 
 public class WattenGame extends Game {
@@ -14,21 +15,30 @@ public class WattenGame extends Game {
 	private SpriteBatch batch;
 	private Stage stage;
 	private static Skin skin;
-	MainMenuScreen mainMenu;
+	private String localPlayerName = "";
+	EnterNameScreen firstScreen; // Splashscreen later
+	MainMenuScreen mainMenuScreen;
 
 	@Override
 	public void create() {
+		// Visual Setup
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
 
 		camera = new OrthographicCamera(w, h);
 		batch = new SpriteBatch();
+
+		// Loading Skin for all visual items
 		TextureAtlas atlas = new TextureAtlas(
 				Gdx.files.internal("skins/uiskin.atlas"));
 		skin = new Skin(Gdx.files.internal("skins/uiskin.json"), atlas);
-		mainMenu = new MainMenuScreen(this);
-		this.setScreen(mainMenu);
-	
+
+		// Loading of Screens
+		firstScreen = new EnterNameScreen(this);
+		mainMenuScreen = new MainMenuScreen(this);
+
+		// Starts the game displaying the first screen
+		this.setScreen(firstScreen);
 
 	}
 
@@ -65,4 +75,15 @@ public class WattenGame extends Game {
 		return batch;
 	}
 
+	public void toMainMenu() {
+		this.setScreen(mainMenuScreen);
+	}
+
+	public void setLocalName(String name) {
+		localPlayerName = name;
+	}
+
+	public String getLocalPlayerName() {
+		return localPlayerName;
+	}
 }
