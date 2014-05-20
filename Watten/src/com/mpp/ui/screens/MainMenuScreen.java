@@ -7,8 +7,13 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.mpp.tools.WTools;
+import com.mpp.ui.ErrorDialog;
 import com.mpp.watten.WattenGame;
 
 public class MainMenuScreen implements Screen {
@@ -18,18 +23,25 @@ public class MainMenuScreen implements Screen {
 	Button createGameButton;
 	Skin skin;
 	Stage stage;
-
+	Label welcomeLabel;
+	Dialog dg;
+	
 	public MainMenuScreen(WattenGame _game) {
 
 		this.game = _game;
 		skin = WattenGame.getSkin();
+		stage = new Stage();
+
 		layoutTable = new Table(skin);
 		layoutTable.setPosition(0, 0);
 		layoutTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		layoutTable.setBackground(WTools.getTableImage().getDrawable());
 
+		welcomeLabel = new Label("", skin);
+		welcomeLabel.setAlignment(Align.center);
+		
 		joinGameButton = new Button(skin);
 		joinGameButton.add("Join Game");
-
 		joinGameButton.addListener(new InputListener() {
 			public boolean touchDown(InputEvent event, float x, float y,
 					int pointer, int button) {
@@ -47,10 +59,29 @@ public class MainMenuScreen implements Screen {
 
 		createGameButton = new Button(skin);
 		createGameButton.add("Create Game");
+		createGameButton.addListener(new InputListener() {
+			public boolean touchDown(InputEvent event, float x, float y,
+					int pointer, int button) {
+
+				return true;
+			}
+
+			public void touchUp(InputEvent event, float x, float y,
+
+			int pointer, int button) {
+				
+				
+				new ErrorDialog("Errors", "Lots of errors!!!!!", stage);
+				
+			}
+		});
+		
+		
+		layoutTable.add(welcomeLabel).width(300f).height(50f).center();
+		layoutTable.row();
 		layoutTable.add(joinGameButton).width(300f).height(50f);
 		layoutTable.row();
-		layoutTable.add(createGameButton);
-		stage = new Stage();
+		layoutTable.add(createGameButton).width(300f).height(50f);
 		
 	}
 
@@ -73,6 +104,7 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void show() {
+		welcomeLabel.setText("Welcome " + game.getLocalPlayerName() );
 		stage.addActor(layoutTable);
 		Gdx.input.setInputProcessor(stage);
 	}

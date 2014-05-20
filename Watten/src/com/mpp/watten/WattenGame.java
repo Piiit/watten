@@ -7,7 +7,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.mpp.ui.screens.EnterNameScreen;
+import com.mpp.tools.WTools;
+import com.mpp.ui.screens.InputPlayerNameScreen;
 import com.mpp.ui.screens.MainMenuScreen;
 
 public class WattenGame extends Game {
@@ -16,11 +17,13 @@ public class WattenGame extends Game {
 	private Stage stage;
 	private static Skin skin;
 	private String localPlayerName = "";
-	EnterNameScreen firstScreen; // Splashscreen later
+	InputPlayerNameScreen firstScreen; // Splashscreen later
 	MainMenuScreen mainMenuScreen;
 
 	@Override
 	public void create() {
+		
+		WTools.initiate();
 		// Visual Setup
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
@@ -34,7 +37,7 @@ public class WattenGame extends Game {
 		skin = new Skin(Gdx.files.internal("skins/uiskin.json"), atlas);
 
 		// Loading of Screens
-		firstScreen = new EnterNameScreen(this);
+		firstScreen = new InputPlayerNameScreen(this);
 		mainMenuScreen = new MainMenuScreen(this);
 
 		// Starts the game displaying the first screen

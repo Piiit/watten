@@ -7,7 +7,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -16,7 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mpp.tools.WTools;
 import com.mpp.watten.WattenGame;
 
-public class CreateGameScreen implements Screen {
+public class JoinGameScreen implements Screen {
 	WattenGame game;
 	Table layoutTable;
 	Button confirmNameButton;
@@ -25,7 +24,7 @@ public class CreateGameScreen implements Screen {
 	Skin skin;
 	Stage stage;
 
-	public CreateGameScreen(WattenGame _game) {
+	public JoinGameScreen(WattenGame _game) {
 
 		this.game = _game;
 		skin = WattenGame.getSkin();
@@ -37,7 +36,7 @@ public class CreateGameScreen implements Screen {
 		layoutTable.setBackground(WTools.getTableImage().getDrawable());
 
 		
-		nameLabel = new Label("Enter games name to create:", skin);
+		nameLabel = new Label("Enter games name to join:", skin);
 		nameLabel.setAlignment(Align.center);
 
 		nameField = new TextField("", skin);
