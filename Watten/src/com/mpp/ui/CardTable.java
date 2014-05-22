@@ -3,9 +3,8 @@ package com.mpp.ui;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.esotericsoftware.tablelayout.Cell;
-import com.mpp.game.Card;
-import com.mpp.game.Player;
 import com.mpp.tools.PlayerLocation;
+import com.mpp.tools.WTools;
 import com.mpp.watten.WattenGame;
 import com.mpp.watten.cards.Suit;
 
@@ -26,7 +25,8 @@ public class CardTable extends Table {
 	Cell[][] cardTableCells;
 	Cell[][] playerCells;
 	Cell[] localPlayerHand;
-	Player[] players = new Player[4];
+	int positionCorrection;
+	boolean seatTaken[] = { false, false, false, false };
 
 	/*
 	 * A class that might get a UI component(stage?), which is the highest
@@ -38,6 +38,8 @@ public class CardTable extends Table {
 		super(WattenGame.getSkin());
 		float maxCardWidth = _tableWidth / 6.5f;
 		float maxCardHeight = _tableHeight / 4.15f;
+
+		positionCorrection = 0;
 
 		if (maxCardWidth / 0.556f <= maxCardHeight) {
 			columnWidth = maxCardWidth;
@@ -56,6 +58,7 @@ public class CardTable extends Table {
 		float horizontalFiller = (_tableHeight - columnHeight * 4.15f) / 4f;
 		sideColumnsWidth = (_tableWidth - columnWidth * 5) / 2;
 		Table table = new Table(WattenGame.getSkin());
+		table.setBackground(WTools.getTableImage().getDrawable());
 		table.debug();
 		table.setSize(_tableWidth, _tableHeight);
 		for (int row = 0; row < ROWS; row++) {
@@ -68,11 +71,11 @@ public class CardTable extends Table {
 						cardTableCells[row][column] = table.add("")
 								.width(columnWidth)
 								.height(columnHeight * 0.15f).center();
-						
+
 					} else {
 						cardTableCells[row][column] = table.add("")
 								.width(columnWidth).height(columnHeight);
-						
+
 					}
 					if (column != 5)
 						table.add("").width(verticalFiller);
@@ -89,42 +92,53 @@ public class CardTable extends Table {
 		divideCardTable();
 
 		// TESTING
-		addPlayer(new Player("me"), PlayerLocation.South); 
-		addPlayer(new Player("West"), PlayerLocation.West); 
-		addPlayer(new Player("North"), PlayerLocation.North); 
-		addPlayer(new Player("East"), PlayerLocation.East); 
+		// addPlayer(new PlayerUI("me"), PlayerLocation.South);
+		// addPlayer(new PlayerUI("West"), PlayerLocation.West);
+		// addPlayer(new PlayerUI("North"), PlayerLocation.North);
+		// addPlayer(new PlayerUI("East"), PlayerLocation.East);
 		// TESTING
 
 		System.out.println("cardWidth: " + cardWidth + " cardHeight: "
 				+ cardHeight + " side columns: " + sideColumnsWidth);
-		
+
 	}
 
-	//Add player to table
-	public void addPlayer(Player player, PlayerLocation location) {
-		switch (location) {
+	// Add player to local table
+	public synchronized void addPlayer(PlayerUI player) {
+
+		// Local player is always south, so other players positions have to be
+		// rotated for local table
+		int tempPosition = player.getPlayerLocation().ordinal();
+		if (player.isLocalPlayer())
+			positionCorrection = 4 - tempPosition;
+
+		tempPosition = (positionCorrection + tempPosition) % 4;
+
+		PlayerLocation localTableLocation = PlayerLocation.get(tempPosition);
+		
+		System.out.println("player: " +player.getPlayerName()+" "+localTableLocation);
+
+		switch (localTableLocation) {
 
 		case South:
-			player.setLocalPlayer(true);
 
-			player.addToTable(playerCells[location.ordinal()][0],
-					playerCells[location.ordinal()][1], localPlayerHand);
+			player.addToTable(playerCells[localTableLocation.ordinal()][0],
+					playerCells[localTableLocation.ordinal()][1], localPlayerHand);
 			break;
 		case West:
-			player.addToTable(playerCells[location.ordinal()][0],
-					playerCells[location.ordinal()][1], null);
+			player.addToTable(playerCells[localTableLocation.ordinal()][0],
+					playerCells[localTableLocation.ordinal()][1], null);
 			break;
 		case North:
-			player.addToTable(playerCells[location.ordinal()][0],
-					playerCells[location.ordinal()][1], null);
+			player.addToTable(playerCells[localTableLocation.ordinal()][0],
+					playerCells[localTableLocation.ordinal()][1], null);
 			break;
 		case East:
-			player.addToTable(playerCells[location.ordinal()][0],
-					playerCells[location.ordinal()][1], null);
+			player.addToTable(playerCells[localTableLocation.ordinal()][0],
+					playerCells[localTableLocation.ordinal()][1], null);
 			break;
 
 		}
-		players[location.ordinal()] = player;
 	}
 
 	public float getTableWidth() {
@@ -147,7 +161,6 @@ public class CardTable extends Table {
 		return CELL_TO_CARD_FACTOR;
 	}
 
-
 	public float getColumnWidth() {
 		return columnWidth;
 	}
@@ -160,6 +173,7 @@ public class CardTable extends Table {
 
 		// South Player (local player)
 		for (int i = 0; i < 5; i++)
+
 			localPlayerHand[i] = cardTableCells[4][i + 1];
 
 		playerCells[PlayerLocation.South.ordinal()][0] = cardTableCells[2][3];

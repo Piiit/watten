@@ -43,7 +43,7 @@ public class CreateGameScreen implements Screen {
 		nameField = new TextField("", skin);
 
 		confirmNameButton = new Button(skin);
-		confirmNameButton.add("Join Game");
+		confirmNameButton.add("Create Game");
 
 		confirmNameButton.addListener(new InputListener() {
 			public boolean touchDown(InputEvent event, float x, float y,
@@ -55,8 +55,7 @@ public class CreateGameScreen implements Screen {
 			public void touchUp(InputEvent event, float x, float y,
 
 			int pointer, int button) {
-				game.setLocalName(nameField.getText());
-				game.toMainMenu();
+				game.sendRequest("create_game " + nameField.getText());
 			}
 		});
 		// Adds elements to layoutTable and the table to the stage

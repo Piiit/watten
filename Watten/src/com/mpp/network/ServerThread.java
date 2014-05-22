@@ -21,6 +21,7 @@ public class ServerThread extends Thread {
 	private BufferedReader input = null;
 	private PrintWriter output = null;
 	
+	
 	private final int maxClients;
 	
 	public ServerThread(Socket socket, Map<String, PrintWriter> clients, Map<String, Watten> games, final int maxClients) {
@@ -48,7 +49,9 @@ public class ServerThread extends Thread {
 			} 
 
 			synchronized (clients) {
-				player = new Player("Player" + (clients.size() + 1));
+//				player = new Player("Player" + (clients.size() + 1));
+				player = new Player(input.readLine());
+
 				clients.put(player.getName(), this.output);
 			}
 			

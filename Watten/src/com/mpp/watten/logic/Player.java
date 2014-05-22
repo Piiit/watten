@@ -1,5 +1,6 @@
 package com.mpp.watten.logic;
 
+import com.mpp.tools.PlayerLocation;
 import com.mpp.tools.xml.Loadable;
 import com.mpp.tools.xml.Node;
 import com.mpp.tools.xml.SimpleXML;
@@ -10,6 +11,7 @@ public class Player implements Loadable {
 
 	private String playerName;
 	private MultipleCards hand = new MultipleCards();
+	private PlayerLocation playerLocation;
 	
 	public Player(String name) {
 		playerName = name;
@@ -23,11 +25,34 @@ public class Player implements Loadable {
 		this.playerName = playerName;
 	}
 	
-	public void addCard(Card card) throws Exception {
+	public void setPlayerLocation(PlayerLocation location){
+		this.playerLocation = location;
+	}
+	public PlayerLocation getPlayerLocation(){
+		return this.playerLocation;
+	}
+	
+	public boolean addCard(Card card) {
 		if(hand.getCount() >= 5) {
-			throw new Exception("Max. 5 cards per hand!");
+//			throw new Exception("Max. 5 cards per hand!");
+			return false;
 		}
 		hand.addCard(card);
+		return true;
+	}
+	
+	public boolean removeCard(Card card){
+		if(hand.getCount()<= 0){
+//			throw new Exception("No cards to remove!");
+			return false;
+		}
+		try {
+			hand.removeCard(hand.getIndex(card));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
 	}
 	
 	public MultipleCards getHand() {

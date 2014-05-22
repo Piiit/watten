@@ -2,27 +2,36 @@ package com.mpp.watten;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Net.Protocol;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.net.Socket;
+import com.badlogic.gdx.net.SocketHints;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.mpp.tools.WTools;
+import com.mpp.ui.CardTable;
+import com.mpp.ui.ClientReceiver;
+import com.mpp.ui.ClientSender;
+import com.mpp.ui.PlayerUI;
 import com.mpp.ui.screens.InputPlayerNameScreen;
 import com.mpp.ui.screens.MainMenuScreen;
+import com.mpp.watten.logic.Player;
 
 public class WattenGame extends Game {
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
-	private Stage stage;
 	private static Skin skin;
-	private String localPlayerName = "";
+	private PlayerUI players[] = new PlayerUI[4];
 	InputPlayerNameScreen firstScreen; // Splashscreen later
 	MainMenuScreen mainMenuScreen;
+	ClientSender clientOut;
+	CardTable currentGame = null;
 
 	@Override
 	public void create() {
-		
+
 		WTools.initiate();
 		// Visual Setup
 		float w = Gdx.graphics.getWidth();
@@ -82,11 +91,45 @@ public class WattenGame extends Game {
 		this.setScreen(mainMenuScreen);
 	}
 
-	public void setLocalName(String name) {
-		localPlayerName = name;
+	public void createLocalPlayer(String name) {
+		players[0] = new PlayerUI(new Player(name));
+		players[0].setLocalPlayer(true);
 	}
 
 	public String getLocalPlayerName() {
-		return localPlayerName;
+		return players[0].getPlayerName();
+	}
+	
+	public PlayerUI getPlayer(int id){
+		return players[id];
+	}
+
+	public  void sendRequest(String requestLine) {
+		clientOut.prepareRequest(requestLine);
+				
+	}
+	
+	public void setCurrentGame(CardTable currentGame){
+		this.currentGame = currentGame;
+	}
+	
+	public void addPlayerCurrentGame(PlayerUI player){
+		if(currentGame != null){
+			currentGame.addPlayer(player);
+		}
+	}
+
+	private WattenGame returnThisGame() {
+		return this;
+	}
+
+	public void startClientNetworkingThread() {
+		new Thread() {
+			public void run() {
+				clientOut = new ClientSender();
+				clientOut.startClientSenderThread(returnThisGame());
+			}
+
+		}.start();
 	}
 }

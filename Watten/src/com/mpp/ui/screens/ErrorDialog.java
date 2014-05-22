@@ -1,5 +1,6 @@
-package com.mpp.ui;
+package com.mpp.ui.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -36,7 +37,8 @@ public class ErrorDialog extends Dialog {
 			}
 		});
 
-		this.show(stage);
+		this.show((Stage)Gdx.input.getInputProcessor()); //Bad solution!!!
+		
 	}
 
 }

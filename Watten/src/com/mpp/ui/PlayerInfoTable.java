@@ -2,16 +2,15 @@ package com.mpp.ui;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.mpp.game.Player;
 import com.mpp.watten.WattenGame;
 
 public class PlayerInfoTable extends Table {
-	Player player;
+	PlayerUI player;
 	String team;
 	String name;
 	String roundWins;
 
-	public PlayerInfoTable(Player player) {
+	public PlayerInfoTable(PlayerUI player) {
 		super(WattenGame.getSkin());
 		this.player = player;
 		team = "Team " + this.player.getTeamNumber();

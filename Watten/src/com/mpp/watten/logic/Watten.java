@@ -103,7 +103,7 @@ public class Watten {
 		}
 		team1Points = 0;
 		team2Points = 0;
-		turnWinnerPlayerLocation = PlayerLocation.North;
+		turnWinnerPlayerLocation = PlayerLocation.South;
 		
 		setStatus(WattenFeature.GAME_START);
 		setConstraints(WattenFeature.ROUND_START);
@@ -141,7 +141,7 @@ public class Watten {
 		lastBet = 2;
 		lastBetTeamNumber = NOTEAM;
 		if(cardDealerPlayerLocation == null || cardDealerPlayerLocation.getIndex() + 1 > 3) {
-			cardDealerPlayerLocation = PlayerLocation.North;
+			cardDealerPlayerLocation = PlayerLocation.South;
 		} else {
 			cardDealerPlayerLocation = PlayerLocation.get(cardDealerPlayerLocation.getIndex() + 1);
 		}

@@ -1,5 +1,6 @@
 package com.mpp.ui.screens;
 
+import com.mpp.tools.PlayerLocation;
 import com.mpp.ui.CardTable;
 import com.mpp.watten.WattenGame;
 import com.badlogic.gdx.Gdx;
@@ -15,7 +16,7 @@ public class GameScreen implements Screen {
 	CardTable table;
 	Stage stage;
 
-	public GameScreen(WattenGame game) {
+	public GameScreen(WattenGame game, String gameName) {
 		this.game = game;
 		wrapperTable = new Table(WattenGame.getSkin());
 		table = new CardTable(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -25,6 +26,10 @@ public class GameScreen implements Screen {
 				Gdx.graphics.getHeight() / 2);
 		stage = new Stage();
 		stage.addActor(wrapperTable);
+
+		// Add local player to table
+//		game.getPlayer(0).setPlayerLocation(PlayerLocation.South);
+		game.setCurrentGame(table);
 	}
 
 	@Override

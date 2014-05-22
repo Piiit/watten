@@ -1,7 +1,7 @@
 package com.mpp.tools;
 
 public enum PlayerLocation {
-	North(0), East(1), South(2), West(3);
+	South(0), West(1), North(2), East(3);
 	
 	private final int index;
 

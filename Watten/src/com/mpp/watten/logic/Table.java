@@ -34,10 +34,12 @@ public class Table implements Loadable {
 		}
 		if(seat != null) {
 			playerList[seat.getIndex()] = player;
+			player.setPlayerLocation(seat);
 			return;
 		} else {
 			if(freeSeat != -1) {
 				playerList[freeSeat] = player;
+				player.setPlayerLocation(PlayerLocation.get(freeSeat));
 				return;
 			}
 		}

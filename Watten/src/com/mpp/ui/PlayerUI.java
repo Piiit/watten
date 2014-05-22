@@ -1,16 +1,15 @@
-package com.mpp.game;
+package com.mpp.ui;
 
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.tablelayout.Cell;
-import com.mpp.ui.PlayedCardArea;
-import com.mpp.ui.PlayerInfoTable;
+import com.mpp.tools.PlayerLocation;
+import com.mpp.watten.cards.Card;
 import com.mpp.watten.cards.Rank;
 import com.mpp.watten.cards.Suit;
+import com.mpp.watten.logic.Player;
 
-public class Player {
+public class PlayerUI {
 
-	String playerName;
-	String playerID;
 	int teamNumber;
 	int roundWins; // Stich
 	boolean local = false;
@@ -20,10 +19,11 @@ public class Player {
 	int cellCounter;
 	PlayedCardArea playedCardArea;
 	PlayerInfoTable playerInfoTable;
+	Player player;
 
-	public Player(String name) {
+	public PlayerUI(Player player) {
 		// TODO Auto-generated constructor stub
-		playerName = name;
+		this.player = player;
 		roundWins = 0;
 		cellCounter = 0;
 		hand = new Cell[5];
@@ -44,9 +44,15 @@ public class Player {
 			this.hand = hand;
 
 			// TESTING
-			addCard(new Card(Suit.ACORNS, Rank.ACE, false, this));
-			addCard(new Card(Suit.ACORNS, Rank.ACE, false, this));
-			addCard(new Card(Suit.ACORNS, Rank.ACE, false, this));
+			try {
+				addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true), this));
+				addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true), this));
+				addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true), this));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			System.out.println("cards added");
 			// TESTING
 		}
@@ -71,7 +77,7 @@ public class Player {
 	}
 
 	public String getPlayerName() {
-		return playerName;
+		return player.getName();
 	}
 
 	public int getRoundWins() {
@@ -87,8 +93,11 @@ public class Player {
 		this.teamNumber = teamNumber;
 	}
 
-	public void setPlayerID(String _playerID) {
-		playerID = _playerID;
+	public void resetHand() {
+		cellCounter = 0;
+		for (int i = 0; i < hand.length; i++) {
+			hand[i].setWidget(null);
+		}
 	}
 
 	public void resetForRound() {
@@ -96,9 +105,18 @@ public class Player {
 
 	}
 
+	public PlayerLocation getPlayerLocation() {
+		return player.getPlayerLocation();
+	}
+
+	public void setPlayerLocation(PlayerLocation location) {
+		player.setPlayerLocation(location);
+	}
+
 	// Adds card to players hand
-	public void addCard(Card card) {
-		if (local) {
+	public void addCard(Card2D card) {
+		System.out.println("Cell counter");
+		if (local && cellCounter <5) {
 			card.setParentCell(hand[cellCounter]);
 			hand[cellCounter].setWidget(card);
 			cellCounter++;
@@ -110,10 +128,11 @@ public class Player {
 	 * Adds card to playedcardarea, if local removes from hand, checks if card
 	 * playable goes here
 	 */
-	public void playCard(Card card) {
+	public void playCard(Card2D card) {
 		if (local) {
 			card.removeFromParent();
 		}
+		player.removeCard(card.getCard());
 		// Add card to playedcard area
 		playedCardArea.addCard(card);
 	}

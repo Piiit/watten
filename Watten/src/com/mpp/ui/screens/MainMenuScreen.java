@@ -13,7 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mpp.tools.WTools;
-import com.mpp.ui.ErrorDialog;
 import com.mpp.watten.WattenGame;
 
 public class MainMenuScreen implements Screen {
@@ -45,15 +44,14 @@ public class MainMenuScreen implements Screen {
 		joinGameButton.addListener(new InputListener() {
 			public boolean touchDown(InputEvent event, float x, float y,
 					int pointer, int button) {
-
 				return true;
 			}
 
 			public void touchUp(InputEvent event, float x, float y,
 
 			int pointer, int button) {
-				game.setScreen(new GameScreen(game)); // For testing, replace by
-														// selectgamescreen
+									game.setScreen(new JoinGameScreen(game));
+
 			}
 		});
 
@@ -71,7 +69,7 @@ public class MainMenuScreen implements Screen {
 			int pointer, int button) {
 				
 				
-				new ErrorDialog("Errors", "Lots of errors!!!!!", stage);
+				game.setScreen(new CreateGameScreen(game));
 				
 			}
 		});

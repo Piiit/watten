@@ -1,4 +1,4 @@
-package com.mpp.game;
+package com.mpp.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,12 +13,12 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.esotericsoftware.tablelayout.Cell;
-import com.mpp.ui.CardTable;
 import com.mpp.watten.WattenGame;
+import com.mpp.watten.cards.Card;
 import com.mpp.watten.cards.Rank;
 import com.mpp.watten.cards.Suit;
 
-public class Card extends Image {
+public class Card2D extends Image {
 
 	Texture frontTexture; // Later get as parameter directly from helper class
 							// creating image, reduce load
@@ -30,14 +30,16 @@ public class Card extends Image {
 	Rank cardRank;
 	boolean facingDown;
 	boolean played;
-	Player owningPlayer;
+	PlayerUI owningPlayer;
+	Card card;
 	Cell parentCell;
 
-	public Card(Suit _cardSuit, Rank _cardRank, boolean facingDown,	Player owningPlayer) {
+	public Card2D(Card card, PlayerUI owningPlayer) {
 		super();
-		cardSuit = _cardSuit;
-		cardRank = _cardRank;
-		this.facingDown = facingDown;
+		this.card = card;
+		cardSuit = card.getSuit();
+		cardRank = card.getRank();
+		this.facingDown = card.isFaceDown();
 		this.owningPlayer = owningPlayer;
 		played = false;
 
@@ -76,6 +78,10 @@ public class Card extends Image {
 	// So players which are not selecting can't see their cards
 	public void flipCard() {
 		facingDown = !facingDown;
+		if (facingDown)
+			card.faceUp();
+		else
+			card.faceDown();
 		evaluateCardFacing();
 
 	}
@@ -108,7 +114,7 @@ public class Card extends Image {
 		parentCell = cell;
 	}
 
-	//Remove it from parent cell
+	// Remove it from parent cell
 	public void removeFromParent() {
 		parentCell.setWidget(null);
 		parentCell = null;
@@ -128,7 +134,7 @@ public class Card extends Image {
 			public void touchUp(InputEvent event, float x, float y,
 
 			int pointer, int button) {
-				
+
 				if (!played) {
 					playCard();
 					played = true;
@@ -136,5 +142,8 @@ public class Card extends Image {
 
 			}
 		});
+	}
+	public Card getCard(){
+		return card;
 	}
 }
