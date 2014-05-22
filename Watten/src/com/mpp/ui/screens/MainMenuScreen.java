@@ -13,7 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mpp.tools.WTools;
-import com.mpp.ui.ErrorDialog;
 import com.mpp.watten.WattenGame;
 
 public class MainMenuScreen implements Screen {
@@ -71,7 +70,7 @@ public class MainMenuScreen implements Screen {
 			int pointer, int button) {
 				
 				
-				new ErrorDialog("Errors", "Lots of errors!!!!!", stage);
+				game.setScreen(new CreateGameScreen(game));
 				
 			}
 		});

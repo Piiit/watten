@@ -3,9 +3,8 @@ package com.mpp.ui;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.esotericsoftware.tablelayout.Cell;
-import com.mpp.game.Card;
-import com.mpp.game.Player;
 import com.mpp.tools.PlayerLocation;
+import com.mpp.tools.WTools;
 import com.mpp.watten.WattenGame;
 import com.mpp.watten.cards.Suit;
 
@@ -26,7 +25,7 @@ public class CardTable extends Table {
 	Cell[][] cardTableCells;
 	Cell[][] playerCells;
 	Cell[] localPlayerHand;
-	Player[] players = new Player[4];
+	PlayerUI[] players = new PlayerUI[4];
 
 	/*
 	 * A class that might get a UI component(stage?), which is the highest
@@ -56,6 +55,7 @@ public class CardTable extends Table {
 		float horizontalFiller = (_tableHeight - columnHeight * 4.15f) / 4f;
 		sideColumnsWidth = (_tableWidth - columnWidth * 5) / 2;
 		Table table = new Table(WattenGame.getSkin());
+		table.setBackground(WTools.getTableImage().getDrawable());
 		table.debug();
 		table.setSize(_tableWidth, _tableHeight);
 		for (int row = 0; row < ROWS; row++) {
@@ -89,10 +89,10 @@ public class CardTable extends Table {
 		divideCardTable();
 
 		// TESTING
-		addPlayer(new Player("me"), PlayerLocation.South); 
-		addPlayer(new Player("West"), PlayerLocation.West); 
-		addPlayer(new Player("North"), PlayerLocation.North); 
-		addPlayer(new Player("East"), PlayerLocation.East); 
+		addPlayer(new PlayerUI("me"), PlayerLocation.South); 
+		addPlayer(new PlayerUI("West"), PlayerLocation.West); 
+		addPlayer(new PlayerUI("North"), PlayerLocation.North); 
+		addPlayer(new PlayerUI("East"), PlayerLocation.East); 
 		// TESTING
 
 		System.out.println("cardWidth: " + cardWidth + " cardHeight: "
@@ -101,7 +101,7 @@ public class CardTable extends Table {
 	}
 
 	//Add player to table
-	public void addPlayer(Player player, PlayerLocation location) {
+	public void addPlayer(PlayerUI player, PlayerLocation location) {
 		switch (location) {
 
 		case South:

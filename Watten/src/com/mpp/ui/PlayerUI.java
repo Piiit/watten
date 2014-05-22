@@ -1,13 +1,11 @@
-package com.mpp.game;
+package com.mpp.ui;
 
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.tablelayout.Cell;
-import com.mpp.ui.PlayedCardArea;
-import com.mpp.ui.PlayerInfoTable;
 import com.mpp.watten.cards.Rank;
 import com.mpp.watten.cards.Suit;
 
-public class Player {
+public class PlayerUI {
 
 	String playerName;
 	String playerID;
@@ -21,7 +19,7 @@ public class Player {
 	PlayedCardArea playedCardArea;
 	PlayerInfoTable playerInfoTable;
 
-	public Player(String name) {
+	public PlayerUI(String name) {
 		// TODO Auto-generated constructor stub
 		playerName = name;
 		roundWins = 0;
@@ -44,9 +42,9 @@ public class Player {
 			this.hand = hand;
 
 			// TESTING
-			addCard(new Card(Suit.ACORNS, Rank.ACE, false, this));
-			addCard(new Card(Suit.ACORNS, Rank.ACE, false, this));
-			addCard(new Card(Suit.ACORNS, Rank.ACE, false, this));
+			addCard(new Card2D(Suit.ACORNS, Rank.ACE, false, this));
+			addCard(new Card2D(Suit.ACORNS, Rank.ACE, false, this));
+			addCard(new Card2D(Suit.ACORNS, Rank.ACE, false, this));
 			System.out.println("cards added");
 			// TESTING
 		}
@@ -97,7 +95,7 @@ public class Player {
 	}
 
 	// Adds card to players hand
-	public void addCard(Card card) {
+	public void addCard(Card2D card) {
 		if (local) {
 			card.setParentCell(hand[cellCounter]);
 			hand[cellCounter].setWidget(card);
@@ -110,7 +108,7 @@ public class Player {
 	 * Adds card to playedcardarea, if local removes from hand, checks if card
 	 * playable goes here
 	 */
-	public void playCard(Card card) {
+	public void playCard(Card2D card) {
 		if (local) {
 			card.removeFromParent();
 		}

@@ -1,4 +1,4 @@
-package com.mpp.game;
+package com.mpp.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,12 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.esotericsoftware.tablelayout.Cell;
-import com.mpp.ui.CardTable;
 import com.mpp.watten.WattenGame;
 import com.mpp.watten.cards.Rank;
 import com.mpp.watten.cards.Suit;
 
-public class Card extends Image {
+public class Card2D extends Image {
 
 	Texture frontTexture; // Later get as parameter directly from helper class
 							// creating image, reduce load
@@ -30,10 +29,10 @@ public class Card extends Image {
 	Rank cardRank;
 	boolean facingDown;
 	boolean played;
-	Player owningPlayer;
+	PlayerUI owningPlayer;
 	Cell parentCell;
 
-	public Card(Suit _cardSuit, Rank _cardRank, boolean facingDown,	Player owningPlayer) {
+	public Card2D(Suit _cardSuit, Rank _cardRank, boolean facingDown,	PlayerUI owningPlayer) {
 		super();
 		cardSuit = _cardSuit;
 		cardRank = _cardRank;

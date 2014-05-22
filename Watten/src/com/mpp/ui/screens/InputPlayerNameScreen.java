@@ -54,6 +54,7 @@ public class InputPlayerNameScreen implements Screen {
 
 			int pointer, int button) {
 				game.setLocalName(nameField.getText());
+				game.startClientNetworkingThread();
 				game.toMainMenu();
 			}
 		});

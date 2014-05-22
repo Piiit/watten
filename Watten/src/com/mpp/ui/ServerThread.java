@@ -64,7 +64,7 @@ public class ServerThread extends Thread {
 		try {
 			while(!socket.isClosed()) {
 				line = input.readLine();
-				System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " send a request: " + line);
+				System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " sent a request: " + line);
 				handleProtocol(line, player);
 			}
 		} catch (Exception e) {

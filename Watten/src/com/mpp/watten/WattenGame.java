@@ -2,12 +2,17 @@ package com.mpp.watten;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Net.Protocol;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.net.Socket;
+import com.badlogic.gdx.net.SocketHints;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.mpp.tools.WTools;
+import com.mpp.ui.ClientReceiver;
+import com.mpp.ui.ClientSender;
 import com.mpp.ui.screens.InputPlayerNameScreen;
 import com.mpp.ui.screens.MainMenuScreen;
 
@@ -19,10 +24,11 @@ public class WattenGame extends Game {
 	private String localPlayerName = "";
 	InputPlayerNameScreen firstScreen; // Splashscreen later
 	MainMenuScreen mainMenuScreen;
+	ClientSender clientOut;
 
 	@Override
 	public void create() {
-		
+
 		WTools.initiate();
 		// Visual Setup
 		float w = Gdx.graphics.getWidth();
@@ -88,5 +94,24 @@ public class WattenGame extends Game {
 
 	public String getLocalPlayerName() {
 		return localPlayerName;
+	}
+
+	public  void sendRequest(String requestLine) {
+		clientOut.prepareRequest(requestLine);
+				
+	}
+
+	private WattenGame returnThisGame() {
+		return this;
+	}
+
+	public void startClientNetworkingThread() {
+		new Thread() {
+			public void run() {
+				clientOut = new ClientSender();
+				clientOut.startClientSenderThread(returnThisGame());
+			}
+
+		}.start();
 	}
 }
