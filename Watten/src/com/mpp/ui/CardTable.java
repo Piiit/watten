@@ -25,12 +25,9 @@ public class CardTable extends Table {
 	Cell[][] cardTableCells;
 	Cell[][] playerCells;
 	Cell[] localPlayerHand;
-<<<<<<< HEAD
 	int positionCorrection;
 	boolean seatTaken[] = { false, false, false, false };
-=======
 	PlayerUI[] players = new PlayerUI[4];
->>>>>>> refs/remotes/origin/master
 
 	/*
 	 * A class that might get a UI component(stage?), which is the highest
@@ -96,17 +93,11 @@ public class CardTable extends Table {
 		divideCardTable();
 
 		// TESTING
-<<<<<<< HEAD
 		// addPlayer(new PlayerUI("me"), PlayerLocation.South);
 		// addPlayer(new PlayerUI("West"), PlayerLocation.West);
 		// addPlayer(new PlayerUI("North"), PlayerLocation.North);
 		// addPlayer(new PlayerUI("East"), PlayerLocation.East);
-=======
-		addPlayer(new PlayerUI("me"), PlayerLocation.South); 
-		addPlayer(new PlayerUI("West"), PlayerLocation.West); 
-		addPlayer(new PlayerUI("North"), PlayerLocation.North); 
-		addPlayer(new PlayerUI("East"), PlayerLocation.East); 
->>>>>>> refs/remotes/origin/master
+		
 		// TESTING
 
 		System.out.println("cardWidth: " + cardWidth + " cardHeight: "
@@ -114,7 +105,6 @@ public class CardTable extends Table {
 
 	}
 
-<<<<<<< HEAD
 	// Add player to local table
 	public synchronized void addPlayer(PlayerUI player) {
 
@@ -131,11 +121,7 @@ public class CardTable extends Table {
 		System.out.println("player: " +player.getPlayerName()+" "+localTableLocation);
 
 		switch (localTableLocation) {
-=======
-	//Add player to table
-	public void addPlayer(PlayerUI player, PlayerLocation location) {
-		switch (location) {
->>>>>>> refs/remotes/origin/master
+
 
 		case South:
 

@@ -53,12 +53,9 @@ public class JoinGameScreen implements Screen {
 
 			public void touchUp(InputEvent event, float x, float y,
 			int pointer, int button) {
-<<<<<<< HEAD
 				game.sendRequest("join_game " + nameField.getText());
 
-=======
-				
->>>>>>> refs/remotes/origin/master
+
 			}
 		});
 		// Adds elements to layoutTable and the table to the stage

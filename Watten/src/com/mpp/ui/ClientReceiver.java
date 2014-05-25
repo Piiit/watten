@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 import com.badlogic.gdx.Gdx;
-<<<<<<< HEAD
 import com.mpp.tools.PlayerLocation;
 import com.mpp.tools.xml.SimpleXML;
 import com.mpp.ui.screens.ErrorDialog;
@@ -155,71 +154,7 @@ public class ClientReceiver extends Thread {
 
 						break;
 
-=======
-import com.mpp.tools.xml.SimpleXML;
-import com.mpp.ui.screens.ErrorDialog;
-import com.mpp.ui.screens.GameScreen;
-import com.mpp.watten.WattenGame;
-import com.mpp.watten.cards.MultipleCards;
 
-public class ClientReceiver extends Thread {
-
-	private BufferedReader input = null;
-	private Socket socket = null;
-	private WattenGame game;
-
-	public ClientReceiver(Socket socket, WattenGame game) {
-		this.socket = socket;
-		this.game = game;
-	}
-
-	public void run() {
-		try {
-			input = new BufferedReader(new InputStreamReader(
-					socket.getInputStream()));
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
-		}
-
-		String line = "";
-		try {
-			while (!socket.isClosed()) {
-				line = input.readLine();
-				if (line != null) {
-
-					System.err.println("OUTPUT:" + line);
-
-					SimpleXML xml = new SimpleXML(line);
-					xml.parse();
-
-					String command = xml.root.getNode("command").getData()
-							.toLowerCase();
-
-					switch (command) {
-					case "quit":
-						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
-								.getData())) {
-							socket.close();
-						} else {
-							error(xml);
-						}
-						break;
-					case "create_game":
-						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
-								.getData())) {
-							Gdx.app.postRunnable(new Runnable() {
-
-								@Override
-								public void run() {
-									game.setScreen(new GameScreen(game));
-								}
-							});
-
-						} else {
-							error(xml);
-						}
-					case "join_game":
->>>>>>> refs/remotes/origin/master
 					case "start_game":
 					case "select_rank":
 					case "select_suit":
