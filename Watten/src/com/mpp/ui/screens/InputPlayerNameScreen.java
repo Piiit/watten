@@ -53,7 +53,11 @@ public class InputPlayerNameScreen implements Screen {
 			public void touchUp(InputEvent event, float x, float y,
 
 			int pointer, int button) {
+<<<<<<< HEAD
 				game.createLocalPlayer(nameField.getText());
+=======
+				game.setLocalName(nameField.getText());
+>>>>>>> refs/remotes/origin/master
 				game.startClientNetworkingThread();
 				game.toMainMenu();
 			}

@@ -19,6 +19,7 @@ public class ClientSender {
 	String userRequest;
 	WattenGame game;
 
+<<<<<<< HEAD
 	public void startClientSenderThread(WattenGame game) {
 		this.game = game;
 		try {
@@ -78,6 +79,64 @@ public class ClientSender {
 
 					case "other_players":
 						sendRequest("other_players", "name", gameName);
+=======
+	
+	public void startClientSenderThread(WattenGame game) {
+		this.game = game;
+		try {
+			socket = new Socket(ADDRESS, PORT);
+			try {
+				output = new PrintWriter(socket.getOutputStream(), true);
+				input = new BufferedReader(new InputStreamReader(System.in));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			// Some error-handling needed
+			output.println(game.getLocalPlayerName());
+
+			ClientReceiver clientOut = new ClientReceiver(socket, game);
+			clientOut.start();
+
+			userRequest = "";
+			while (!socket.isClosed()) {
+
+				if (userRequest != "") {
+					System.out.println("userRequest changed");
+					String regex = "\\s";
+					String parts[] = userRequest.split(regex);
+
+					String cmd = parts[0];
+					String gameName = "";
+
+					switch (cmd) {
+					case "quit":
+						sendRequest("quit");
+						break;
+					case "create_game":
+						gameName = "";
+						if (parts.length > 1) {
+							gameName = parts[1];
+						}
+						System.out.println("CR request created, sending...");
+						sendRequest("create_game", "name", gameName);
+						break;
+					case "join_game":
+						gameName = "";
+						if (parts.length > 1) {
+							gameName = parts[1];
+						}
+						sendRequest("join_game", "name", gameName);
+						break;
+					case "start_game":
+						sendRequest("start_game");
+						break;
+					case "help":
+						sendRequest("help");
+						break;
+					case "list_games":
+						sendRequest("list_games");
+>>>>>>> refs/remotes/origin/master
 						break;
 					case "chat":
 						String msg = "";

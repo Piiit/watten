@@ -71,9 +71,13 @@ public class ServerThread extends Thread {
 		try {
 			while (!socket.isClosed()) {
 				line = input.readLine();
+<<<<<<< HEAD
 				System.out.println("SERVER: Client [" + player.getName()
 						+ "] @ port " + socket.getPort() + " sent a request: "
 						+ line);
+=======
+				System.out.println("SERVER: Client [" + player.getName() + "] @ port " + socket.getPort() + " sent a request: " + line);
+>>>>>>> refs/remotes/origin/master
 				handleProtocol(line, player);
 			}
 		} catch (Exception e) {
