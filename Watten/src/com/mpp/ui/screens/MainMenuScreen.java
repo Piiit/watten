@@ -15,16 +15,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mpp.tools.WTools;
 import com.mpp.watten.WattenGame;
 
-public class MainMenuScreen implements Screen {
-	WattenGame game;
-	Table layoutTable;
+public class MainMenuScreen extends WattenScreen {
+	
 	Button joinGameButton;
 	Button createGameButton;
-	Skin skin;
-	Stage stage;
+
 	Label welcomeLabel;
 	Dialog dg;
-	
+
 	public MainMenuScreen(WattenGame _game) {
 
 		this.game = _game;
@@ -38,7 +36,7 @@ public class MainMenuScreen implements Screen {
 
 		welcomeLabel = new Label("", skin);
 		welcomeLabel.setAlignment(Align.center);
-		
+
 		joinGameButton = new Button(skin);
 		joinGameButton.add("Join Game");
 		joinGameButton.addListener(new InputListener() {
@@ -50,7 +48,7 @@ public class MainMenuScreen implements Screen {
 			public void touchUp(InputEvent event, float x, float y,
 
 			int pointer, int button) {
-									game.setScreen(new JoinGameScreen(game));
+				game.setScreen(new JoinGameScreen(game));
 
 			}
 		});
@@ -67,20 +65,18 @@ public class MainMenuScreen implements Screen {
 			public void touchUp(InputEvent event, float x, float y,
 
 			int pointer, int button) {
-				
-				
+
 				game.setScreen(new CreateGameScreen(game));
-				
+
 			}
 		});
-		
-		
+
 		layoutTable.add(welcomeLabel).width(300f).height(50f).center();
 		layoutTable.row();
 		layoutTable.add(joinGameButton).width(300f).height(50f);
 		layoutTable.row();
 		layoutTable.add(createGameButton).width(300f).height(50f);
-		
+
 	}
 
 	@Override
@@ -90,7 +86,6 @@ public class MainMenuScreen implements Screen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act(delta);
 		stage.draw();
-		
 
 	}
 
@@ -102,7 +97,8 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void show() {
-		welcomeLabel.setText("Welcome " + game.getLocalPlayerName() );
+		super.show();
+		welcomeLabel.setText("Welcome " + game.getLocalPlayerName());
 		stage.addActor(layoutTable);
 		Gdx.input.setInputProcessor(stage);
 	}

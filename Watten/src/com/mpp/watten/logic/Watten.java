@@ -468,4 +468,8 @@ public class Watten {
 		setConstraints(WattenFeature.ROUND_START);
 		stateRoundEntry();
 	}
+	
+	public int getPlayerCount(){
+		return table.getPlayerCount();
+	}
 }

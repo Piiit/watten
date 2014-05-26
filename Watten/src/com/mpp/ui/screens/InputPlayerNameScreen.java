@@ -15,14 +15,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mpp.tools.WTools;
 import com.mpp.watten.WattenGame;
 
-public class InputPlayerNameScreen implements Screen {
-	WattenGame game;
-	Table layoutTable;
+public class InputPlayerNameScreen extends WattenScreen {
+
 	Button confirmNameButton;
 	TextField nameField;
 	Label nameLabel;
-	Skin skin;
-	Stage stage;
+
 
 	public InputPlayerNameScreen(WattenGame _game) {
 
@@ -54,9 +52,8 @@ public class InputPlayerNameScreen implements Screen {
 
 			int pointer, int button) {
 				game.createLocalPlayer(nameField.getText());
-
 				game.startClientNetworkingThread();
-				game.toMainMenu();
+				
 			}
 		});
 		// Adds elements to layoutTable and the table to the stage
@@ -87,6 +84,7 @@ public class InputPlayerNameScreen implements Screen {
 
 	@Override
 	public void show() {
+		super.show();
 		stage.addActor(layoutTable);
 		Gdx.input.setInputProcessor(stage);
 	}

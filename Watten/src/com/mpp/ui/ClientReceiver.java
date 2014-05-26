@@ -64,11 +64,12 @@ public class ClientReceiver extends Thread {
 
 								@Override
 								public void run() {
-									game.getPlayer(0).setPlayerLocation(
+									game.getLocalPlayer().setPlayerLocation(
 											PlayerLocation.get(0));
 									game.setScreen(new GameScreen(game,
 											xml.root.getNode("name").getData()));
-									game.addPlayerCurrentGame(game.getPlayer(0));
+									game.addPlayerCurrentGame(game
+											.getLocalPlayer());
 									System.out.println("Runnable");
 
 								}
@@ -86,14 +87,15 @@ public class ClientReceiver extends Thread {
 
 								@Override
 								public void run() {
-									game.getPlayer(0).setPlayerLocation(
+									game.getLocalPlayer().setPlayerLocation(
 											PlayerLocation.get(Integer
 													.parseInt(xml.root.getNode(
 															"position")
 															.getData())));
 									game.setScreen(new GameScreen(game,
 											xml.root.getNode("name").getData()));
-									game.addPlayerCurrentGame(game.getPlayer(0));
+									game.addPlayerCurrentGame(game
+											.getLocalPlayer());
 
 									game.sendRequest("other_players "
 											+ xml.root.getNode("name")
@@ -154,8 +156,25 @@ public class ClientReceiver extends Thread {
 
 						break;
 
-
 					case "start_game":
+						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
+								.getData())) {
+
+							// No idea what to put here
+
+						} else if ("NAK".equalsIgnoreCase(xml.root.getNode(
+								"type").getData())) {
+
+							error(xml);
+
+						}
+					case "game_ready":
+						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
+								.getData())) {
+							game.sendRequest("start_game");
+
+						}
+
 					case "select_rank":
 					case "select_suit":
 						if ("NAK".equalsIgnoreCase(xml.root.getNode("type")
@@ -166,8 +185,20 @@ public class ClientReceiver extends Thread {
 						}
 						break;
 					case "start_round":
-						MultipleCards hand = new MultipleCards();
-						hand.load(xml.root.getNode("hand"));
+						System.out.println("start_round received");
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+
+								MultipleCards hand = new MultipleCards();
+								hand.load(xml.root.getNode("hand"));
+								System.out.println(xml.root.getNode("hand"));
+								game.getLocalPlayer().addHand(hand);
+								
+							}
+						});
+
 						break;
 					case "help":
 					case "list_games":
@@ -207,7 +238,7 @@ public class ClientReceiver extends Thread {
 
 	public void error(SimpleXML xml) {
 		new ErrorDialog("ERROR: "
-				+ unescape(xml.root.getNode("message").getData()), null);
+				+ unescape(xml.root.getNode("message").getData()));
 
 	}
 

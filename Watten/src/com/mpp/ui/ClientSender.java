@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import com.mpp.tools.xml.SimpleXML;
+import com.mpp.ui.screens.ErrorDialog;
 import com.mpp.watten.WattenGame;
 
 public class ClientSender {
@@ -19,14 +20,14 @@ public class ClientSender {
 	String userRequest;
 	WattenGame game;
 
-
 	public void startClientSenderThread(WattenGame game) {
 		this.game = game;
 		try {
 			socket = new Socket(ADDRESS, PORT);
 			try {
 				output = new PrintWriter(socket.getOutputStream(), true);
-				input = new BufferedReader(new InputStreamReader(System.in));
+				input = new BufferedReader(new InputStreamReader(
+						socket.getInputStream()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -34,8 +35,20 @@ public class ClientSender {
 			// Some error-handling needed
 			output.println(game.getLocalPlayerName());
 
-			ClientReceiver clientOut = new ClientReceiver(socket, game);
-			clientOut.start();
+			// Needed so that player-names are unique
+			boolean playerAccepted = false;
+			while (!playerAccepted && !socket.isClosed()) {
+				String answer = input.readLine();
+				if (answer.equals("NACK")) {
+					new ErrorDialog(input.readLine());
+					socket.close();
+				} else if (answer.equals("ACK")) {
+					game.toMainMenu();
+					ClientReceiver clientOut = new ClientReceiver(socket, game);
+					clientOut.start();
+					playerAccepted = true;
+				}
+			}
 
 			userRequest = "";
 			while (!socket.isClosed()) {
@@ -131,8 +144,11 @@ public class ClientSender {
 	}
 
 	private void sendRequest(String command) {
-		output.println(SimpleXML.createTag("request",
-				SimpleXML.createTag("command", command)));
+		if (socket == null || !socket.isConnected())
+			new ErrorDialog("Not connected to server!");
+		else
+			output.println(SimpleXML.createTag("request",
+					SimpleXML.createTag("command", command)));
 	}
 
 	// private void sendRequest(String command, String message, Loadable data) {

@@ -1,15 +1,16 @@
 package com.mpp.ui.screens;
 
-import com.mpp.watten.WattenGame;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.mpp.watten.WattenGame;
 
-public class SelectGameScreen  extends WattenScreen {
-
-
-
-	public SelectGameScreen(WattenGame game) {
-		this.game = game;
-	}
+public class WattenScreen implements Screen {
+	Skin skin;
+	Stage stage;
+	WattenGame game;
+	Table layoutTable;
 
 	@Override
 	public void render(float delta) {
@@ -25,8 +26,8 @@ public class SelectGameScreen  extends WattenScreen {
 
 	@Override
 	public void show() {
-		super.show();
 		// TODO Auto-generated method stub
+		game.setCurrentScreen(this);
 
 	}
 
@@ -52,6 +53,10 @@ public class SelectGameScreen  extends WattenScreen {
 	public void dispose() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public Stage getStage() {
+		return stage;
 	}
 
 }

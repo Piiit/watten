@@ -9,12 +9,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
-public class GameScreen implements Screen {
+public class GameScreen  extends WattenScreen  {
 
-	WattenGame game;
 	Table wrapperTable;
 	CardTable table;
-	Stage stage;
 
 	public GameScreen(WattenGame game, String gameName) {
 		this.game = game;
@@ -50,6 +48,7 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void show() {
+		super.show();
 		// TODO Auto-generated method stub
 		Gdx.input.setInputProcessor(stage);
 	}

@@ -9,19 +9,19 @@ import com.mpp.watten.WattenGame;
 
 public class ErrorDialog extends Dialog {
 
-	public ErrorDialog(String message, Stage stage) {
+	public ErrorDialog(String message) {
 		super("Error!", WattenGame.getSkin());
-		createErrorDialog(message, stage);
+		createErrorDialog(message);
 
 	}
 
-	public ErrorDialog(String title, String message, Stage stage) {
+	public ErrorDialog(String title, String message) {
 
 		super(title, WattenGame.getSkin());
-		createErrorDialog(message, stage);
+		createErrorDialog(message);
 	}
 
-	public void createErrorDialog(String message, Stage stage) {
+	public void createErrorDialog(String message) {
 		this.text(message);
 		this.button("Ok").addListener(new InputListener() {
 			public boolean touchDown(InputEvent event, float x, float y,
@@ -37,8 +37,8 @@ public class ErrorDialog extends Dialog {
 			}
 		});
 
-		this.show((Stage)Gdx.input.getInputProcessor()); //Bad solution!!!
-		
+		// this.show((Stage)Gdx.input.getInputProcessor()); //Bad solution!!!
+		this.show(WattenGame.getCurrentScreen().getStage());
 	}
 
 }

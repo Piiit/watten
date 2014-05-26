@@ -101,9 +101,6 @@ public class Card2D extends Image {
 		return cardRank;
 	}
 
-	public void moveCardTo(float xOffset, float yOffset) {
-		this.addAction(Actions.moveTo(xOffset, yOffset, 2));
-	}
 
 	@Override
 	public void draw(Batch batch, float alpha) {

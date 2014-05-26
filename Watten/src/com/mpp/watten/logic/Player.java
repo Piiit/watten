@@ -55,6 +55,10 @@ public class Player implements Loadable {
 		return true;
 	}
 	
+	public void setHand(MultipleCards hand)
+	{
+		this.hand = hand;
+	}
 	public MultipleCards getHand() {
 		return hand;
 	}

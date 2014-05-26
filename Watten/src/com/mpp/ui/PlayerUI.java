@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.tools.PlayerLocation;
 import com.mpp.watten.cards.Card;
+import com.mpp.watten.cards.MultipleCards;
 import com.mpp.watten.cards.Rank;
 import com.mpp.watten.cards.Suit;
 import com.mpp.watten.logic.Player;
@@ -13,27 +14,27 @@ public class PlayerUI {
 	int teamNumber;
 	int roundWins; // Stich
 	boolean local = false;
-	Cell[] hand;
+	Cell[] handCells;
 	Cell playedCardCell;
 	Cell playerInfoCell;
-	int cellCounter;
 	PlayedCardArea playedCardArea;
 	PlayerInfoTable playerInfoTable;
 	Player player;
+	Card2D[] handUI = new Card2D[5];
 
 	public PlayerUI(Player player) {
 		// TODO Auto-generated constructor stub
 		this.player = player;
 		roundWins = 0;
-		cellCounter = 0;
-		hand = new Cell[5];
+		handCells = new Cell[5];
 		playedCardArea = new PlayedCardArea(0, 0);
 		playerInfoTable = new PlayerInfoTable(this);
 
 	}
 
 	// Adds player to table
-	public void addToTable(Cell playedCardCell, Cell playerInfoCell, Cell[] hand) {
+	public void addToTable(Cell playedCardCell, Cell playerInfoCell,
+			Cell[] handCells) {
 		this.playedCardCell = playedCardCell;
 		this.playedCardCell.setWidget(playedCardArea);
 
@@ -41,13 +42,15 @@ public class PlayerUI {
 		this.playerInfoCell.setWidget(playerInfoTable);
 
 		if (local) {
-			this.hand = hand;
+			this.handCells = handCells;
 
 			// TESTING
 			try {
-				addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true), this));
-				addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true), this));
-				addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true), this));
+				
+				// addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true),
+				// this));
+				// addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true),
+				// this));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -69,7 +72,7 @@ public class PlayerUI {
 
 	// If player local, sets cells where hand is
 	public void setHandCells(Cell[] hand) {
-		this.hand = hand;
+		this.handCells = hand;
 	}
 
 	public int getTeamNumber() {
@@ -94,15 +97,17 @@ public class PlayerUI {
 	}
 
 	public void resetHand() {
-		cellCounter = 0;
-		for (int i = 0; i < hand.length; i++) {
-			hand[i].setWidget(null);
+
+		for (int i = 0; i < handCells.length; i++) {
+			handCells[i].setWidget(null);
 		}
+		handUI = new Card2D[5];
+		player.setHand(null);
 	}
 
 	public void resetForRound() {
 		roundWins = 0;
-
+		resetHand();
 	}
 
 	public PlayerLocation getPlayerLocation() {
@@ -114,14 +119,24 @@ public class PlayerUI {
 	}
 
 	// Adds card to players hand
-	public void addCard(Card2D card) {
+	public void addCard(Card2D card, int handIndex) {
 		System.out.println("Cell counter");
-		if (local && cellCounter <5) {
-			card.setParentCell(hand[cellCounter]);
-			hand[cellCounter].setWidget(card);
-			cellCounter++;
+		if (local) {
+			card.setParentCell(handCells[handIndex]);
+			handCells[handIndex].setWidget(card);
+			System.out.println("Adding card to table");
 		}
 
+	}
+
+	public void addHand(MultipleCards hand) {
+		player.setHand(hand);
+
+		for (int i = 0; i < hand.getAllCards().size(); i++)
+			addCard(new Card2D(hand.getCard(i), this), i);
+
+		System.out.println(hand.toString());
+		System.out.println("Hand added");
 	}
 
 	/*

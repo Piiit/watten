@@ -16,14 +16,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mpp.tools.WTools;
 import com.mpp.watten.WattenGame;
 
-public class CreateGameScreen implements Screen {
-	WattenGame game;
-	Table layoutTable;
+public class CreateGameScreen  extends WattenScreen {
+
 	Button confirmNameButton;
 	TextField nameField;
 	Label nameLabel;
-	Skin skin;
-	Stage stage;
+
 
 	public CreateGameScreen(WattenGame _game) {
 
@@ -86,6 +84,7 @@ public class CreateGameScreen implements Screen {
 
 	@Override
 	public void show() {
+		super.show();
 		stage.addActor(layoutTable);
 		Gdx.input.setInputProcessor(stage);
 	}

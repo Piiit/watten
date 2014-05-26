@@ -43,17 +43,28 @@ public class ServerThread extends Thread {
 		}
 
 		try {
+			String playerName = input.readLine();
+			player = new Player(playerName);
 			if (clients.size() == maxClients) {
+				output.println("NACK");
 				output.println("Sorry, the server is full (max=" + maxClients
 						+ "). You can not enter now!");
 				socket.close();
 				return;
 			}
+			
+			//If a player with the same name is already on the server, the request is rejected
+			if(clients.containsKey(playerName)){
+				output.println("NACK");
+				output.println("Sorry, a player with this name is already playing!");
+				socket.close();
+				return;
+			}
+			
+			output.println("ACK");
 
 			synchronized (clients) {
-				// player = new Player("Player" + (clients.size() + 1));
-				player = new Player(input.readLine());
-
+				
 				clients.put(player.getName(), this.output);
 			}
 
@@ -186,6 +197,11 @@ public class ServerThread extends Thread {
 								+ player.getPlayerLocation().getIndex());
 				sendResponseToOthersInGame(gameName, "chat", "message", "["
 						+ player.getName() + "] joined your game!");
+				
+				//Tells current player that game can be started
+				if(games.get(gameName).getPlayerCount() ==4){
+					sendResponseTo(player.getName(), "game_ready", "type","ACK");
+				}
 			} catch (Exception e) {
 				sendResponse(
 						command,
@@ -217,7 +233,9 @@ public class ServerThread extends Thread {
 					String hand = p.getHand().serialize();
 					sendResponseTo(p.getName(), "start_round", "hand", hand,
 							"current_player", currentPlayer.serialize());
+					System.out.println("start_round sent");
 				}
+			
 
 				sendResponseToAllInGame(gameName, "chat", "message",
 						"Game with name '" + gameName + "' started!");
