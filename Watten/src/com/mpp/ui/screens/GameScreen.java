@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
-public class GameScreen  extends WattenScreen  {
+public class GameScreen extends WattenScreen {
 
 	Table wrapperTable;
 	CardTable table;
@@ -25,8 +25,6 @@ public class GameScreen  extends WattenScreen  {
 		stage = new Stage();
 		stage.addActor(wrapperTable);
 
-		// Add local player to table
-//		game.getPlayer(0).setPlayerLocation(PlayerLocation.South);
 		game.setCurrentGame(table);
 	}
 

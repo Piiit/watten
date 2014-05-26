@@ -21,7 +21,6 @@ public class InputPlayerNameScreen extends WattenScreen {
 	TextField nameField;
 	Label nameLabel;
 
-
 	public InputPlayerNameScreen(WattenGame _game) {
 
 		this.game = _game;
@@ -51,9 +50,12 @@ public class InputPlayerNameScreen extends WattenScreen {
 			public void touchUp(InputEvent event, float x, float y,
 
 			int pointer, int button) {
-				game.createLocalPlayer(nameField.getText());
-				game.startClientNetworkingThread();
-				
+				if (nameField.getText().equals(""))
+					new ErrorDialog("No name entered!");
+				else {
+					game.createLocalPlayer(nameField.getText());
+					game.startClientNetworkingThread();
+				}
 			}
 		});
 		// Adds elements to layoutTable and the table to the stage

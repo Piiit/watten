@@ -52,19 +52,20 @@ public class ServerThread extends Thread {
 				socket.close();
 				return;
 			}
-			
-			//If a player with the same name is already on the server, the request is rejected
-			if(clients.containsKey(playerName)){
+
+			// If a player with the same name is already on the server, the
+			// request is rejected
+			if (clients.containsKey(playerName)) {
 				output.println("NACK");
 				output.println("Sorry, a player with this name is already playing!");
 				socket.close();
 				return;
 			}
-			
+
 			output.println("ACK");
 
 			synchronized (clients) {
-				
+
 				clients.put(player.getName(), this.output);
 			}
 
@@ -138,7 +139,7 @@ public class ServerThread extends Thread {
 		String command = xml.root.getNode("command").getData().toLowerCase();
 
 		boolean isCurrentPlayer = (currentPlayer != null && player.getName()
-				.equals(currentPlayer.getName())) ? false : true;
+				.equals(currentPlayer.getName())) ? true : false;
 
 		switch (command) {
 		case "quit":
@@ -190,17 +191,20 @@ public class ServerThread extends Thread {
 
 				sendResponse(command, "type", "ACK", "message",
 						"You joined the game " + games.get(gameName), "name",
-						gameName,"position", ""
+						gameName, "position", ""
 								+ player.getPlayerLocation().getIndex());
+
 				sendResponseToOthersInGame(gameName, "player_joined", "name",
 						player.getName(), "position", ""
 								+ player.getPlayerLocation().getIndex());
+
 				sendResponseToOthersInGame(gameName, "chat", "message", "["
 						+ player.getName() + "] joined your game!");
-				
-				//Tells current player that game can be started
-				if(games.get(gameName).getPlayerCount() ==4){
-					sendResponseTo(player.getName(), "game_ready", "type","ACK");
+
+				// Tells current player that game can be started
+				if (games.get(gameName).getPlayerCount() == 4) {
+					sendResponseTo(player.getName(), "game_ready", "type",
+							"ACK");
 				}
 			} catch (Exception e) {
 				sendResponse(
@@ -231,16 +235,19 @@ public class ServerThread extends Thread {
 				sendResponse(command, "type", "ACK");
 				for (Player p : currentGame.getTable().getPlayers()) {
 					String hand = p.getHand().serialize();
-					sendResponseTo(p.getName(), "start_round", "hand", hand,
-							"current_player", currentPlayer.serialize());
-					System.out.println("start_round sent");
+					// sendResponseTo(p.getName(), "start_round", "hand", hand,
+					// "current_player", currentPlayer.serialize());
+					sendResponseTo(p.getName(), "start_round", "hand", hand);
 				}
-			
 
 				sendResponseToAllInGame(gameName, "chat", "message",
 						"Game with name '" + gameName + "' started!");
 				sendResponseToAllInGame(gameName, "chat", "message",
 						"Current player = " + currentPlayer.getName());
+
+				sendResponseTo(currentGame.getTable().getCurrentPlayer()
+						.getName(), "select_rank");
+
 			} catch (Exception e) {
 				e.printStackTrace(System.err);
 				sendResponse(
@@ -252,37 +259,53 @@ public class ServerThread extends Thread {
 								+ e.getMessage() + "'.");
 			}
 			break;
-		case "select_rank":
+		case "rank_selected":
 			if (isCurrentPlayer) {
 				currentGame.stateSelectBestCardRank(currentPlayer
 						.getHand()
 						.getCard(
 								Integer.parseInt(xml.root.getNode("card_index")
 										.getData())).getRank());
+				sendResponse(command, "type", "ACK");
+
+				sendResponseTo(currentGame.getTable().getCurrentPlayer()
+						.getName(), "select_suit");
+
 			} else {
 				sendResponse(command, "type", "NAK", "message",
 						"You are not allowed to select the rank ! It's "
 								+ currentPlayer.getName() + " turn !");
 			}
 			break;
-		case "select_suit":
+		case "suit_selected":
 			if (isCurrentPlayer) {
 				currentGame.stateSelectBestCardSuit(currentPlayer
 						.getHand()
 						.getCard(
 								Integer.parseInt(xml.root.getNode("card_index")
 										.getData())).getSuit());
+				
+				sendResponse(command, "type", "ACK");
+				sendResponseToOthersInGame(gameName, "reveal_hand", "");
+				sendResponseTo(currentGame.getTable().getCurrentPlayer()
+						.getName(), "play_card");
+
 			} else {
 				sendResponse(command, "type", "NAK", "message",
 						"You are not allowed to select the suit ! It's "
 								+ currentPlayer.getName() + " turn !");
 			}
 			break;
-		case "play_card":
+		case "card_played":
 			if (isCurrentPlayer) {
 				currentGame.stateTurnPlayCard(currentPlayer.getHand().getCard(
 						Integer.parseInt(xml.root.getNode("card_index")
 								.getData())));
+				sendResponse(command, "type", "ACK");
+				// Add if's or switch to check game status, then depending on
+				// status send command
+				sendResponseTo(currentGame.getTable().getCurrentPlayer()
+						.getName(), "play_card");
 			} else {
 				sendResponse(command, "type", "NAK", "message",
 						"You are not allowed to play this card ! It's "
@@ -302,7 +325,7 @@ public class ServerThread extends Thread {
 			int playerCounter = 0;
 			String[] playerInfo = new String[18];
 			for (Player p : currentGame.getTable().getPlayers()) {
-				if (p != null && p != player  ) {
+				if (p != null && p != player) {
 					playerInfo[arrayCounter] = "player" + playerCounter;
 					arrayCounter++;
 

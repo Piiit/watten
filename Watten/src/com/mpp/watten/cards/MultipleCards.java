@@ -7,6 +7,7 @@ import java.util.List;
 import com.mpp.tools.xml.Loadable;
 import com.mpp.tools.xml.Node;
 import com.mpp.tools.xml.SimpleXML;
+import com.mpp.ui.screens.ErrorDialog;
 
 /**
  * <pre>
@@ -243,21 +244,28 @@ public class MultipleCards implements Loadable {
 		Node nIndex = nCards.getNode("index");
 		clear();
 		index = Integer.parseInt(nIndex.getData());
-		if (nCards.getData() != null) {
-			System.out.println("ncards data not null: " + nCards.getData());
-			String arr[] = nCards.getData().split(",");
-			for (String c : arr) {
-				System.out.println("loading hand: "+c);
-				addCard(new Card(c));
-			}
+		for (Node node : nCards.getChildren()) {
+			if (!node.equals(nIndex))
+
+				try {
+					addCard(new Card(Suit.valueOf(node.getNode("suit")
+							.getData()), Rank.valueOf(node.getNode("rank")
+							.getData()), Boolean.parseBoolean(node.getNode(
+							"facedown").getData())));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 		}
+
 	}
 
 	@Override
 	public String toString() {
 		String output = "";
 		for (Card c : cards) {
-			output += c.getRank();
+			output += c;
 		}
 		return output;
 	}

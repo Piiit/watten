@@ -78,11 +78,11 @@ public class Card2D extends Image {
 
 	// So players which are not selecting can't see their cards
 	public void flipCard() {
-		facingDown = !facingDown;
-		if (facingDown)
-			card.faceUp();
-		else
-			card.faceDown();
+		facingDown = card.isFaceDown();
+		// if (facingDown)
+		// card.faceUp();
+		// else
+		// card.faceDown();
 		evaluateCardFacing();
 
 	}
@@ -90,7 +90,15 @@ public class Card2D extends Image {
 	// When card clicked
 	public void playCard() {
 		// Add card to playing field
-		owningPlayer.playCard(this);
+		owningPlayer.requestCardPlay(this);
+	}
+
+	private void selectAsSuit() {
+		owningPlayer.selectSuit(this);
+	}
+
+	private void selectAsRank() {
+		owningPlayer.selectRank(this);
 	}
 
 	public Suit getCardsSuit() {
@@ -100,7 +108,6 @@ public class Card2D extends Image {
 	public Rank getCardRank() {
 		return cardRank;
 	}
-
 
 	@Override
 	public void draw(Batch batch, float alpha) {
@@ -116,6 +123,7 @@ public class Card2D extends Image {
 	public void removeFromParent() {
 		parentCell.setWidget(null);
 		parentCell = null;
+		owningPlayer = null;
 	}
 
 	private void addActionListener() {
@@ -132,10 +140,21 @@ public class Card2D extends Image {
 			public void touchUp(InputEvent event, float x, float y,
 
 			int pointer, int button) {
+				if (owningPlayer != null) {
+					if (owningPlayer.isPlaying()) {
+						playCard();
+					}
+					if (owningPlayer.isSelect_rank()) {
+						selectAsRank();
+					}
+					if (owningPlayer.isSelect_suit()) {
+						selectAsSuit();
+					}
 
-				if (!played) {
-					playCard();
-					played = true;
+//					if (!played) {
+//						playCard();
+//						played = true;
+//					}
 				}
 
 			}

@@ -29,7 +29,7 @@ public class ClientSender {
 				input = new BufferedReader(new InputStreamReader(
 						socket.getInputStream()));
 			} catch (IOException e) {
-				e.printStackTrace();
+				new ErrorDialog(e.getMessage());
 			}
 
 			// Some error-handling needed
@@ -54,7 +54,7 @@ public class ClientSender {
 			while (!socket.isClosed()) {
 
 				if (userRequest != "") {
-					System.out.println("userRequest changed");
+
 					String regex = "\\s";
 					String parts[] = userRequest.split(regex);
 
@@ -70,7 +70,6 @@ public class ClientSender {
 						if (parts.length > 1) {
 							gameName = parts[1];
 						}
-						System.out.println("CR request created, sending...");
 						sendRequest("create_game", "name", gameName);
 						break;
 					case "join_game":
@@ -109,14 +108,14 @@ public class ClientSender {
 						}
 						sendRequest("info", "name", gameName);
 						break;
-					case "select_rank":
-						sendRequest("select_rank", "card_index", parts[1]);
+					case "rank_selected":
+						sendRequest("rank_selected", "card_index", parts[1]);
 						break;
-					case "select_suit":
-						sendRequest("select_suit", "card_index", parts[1]);
+					case "suit_selected":
+						sendRequest("suit_selected", "card_index", parts[1]);
 						break;
-					case "play_card":
-						sendRequest("play_card", "card_index", parts[1]);
+					case "card_played":
+						sendRequest("card_played", "card_index", parts[1]);
 						break;
 
 					}
@@ -128,7 +127,7 @@ public class ClientSender {
 			}
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			new ErrorDialog(e.getMessage());
 		} finally {
 			try {
 				System.out.println("Closing connection.");
@@ -138,7 +137,7 @@ public class ClientSender {
 					socket.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				new ErrorDialog(e.getMessage());
 			}
 		}
 	}

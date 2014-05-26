@@ -19,6 +19,7 @@ import com.mpp.watten.WattenGame;
 public class CreateGameScreen  extends WattenScreen {
 
 	Button confirmNameButton;
+	Button menuButton;
 	TextField nameField;
 	Label nameLabel;
 
@@ -56,12 +57,31 @@ public class CreateGameScreen  extends WattenScreen {
 				game.sendRequest("create_game " + nameField.getText());
 			}
 		});
+		
+		menuButton = new Button(skin);
+		menuButton.add("Menu");
+
+		menuButton.addListener(new InputListener() {
+			public boolean touchDown(InputEvent event, float x, float y,
+					int pointer, int button) {
+
+				return true;
+			}
+
+			public void touchUp(InputEvent event, float x, float y,
+
+			int pointer, int button) {
+				game.toMainMenu();
+			}
+		});
 		// Adds elements to layoutTable and the table to the stage
 		layoutTable.add(nameLabel).width(300f).height(50f);
 		layoutTable.row();
 		layoutTable.add(nameField).width(300f).height(50f);
 		layoutTable.row();
 		layoutTable.add(confirmNameButton).width(300f).height(50f);
+		layoutTable.row();
+		layoutTable.add(menuButton).width(300f).height(50f);
 		stage = new Stage();
 
 	}

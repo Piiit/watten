@@ -1,11 +1,10 @@
 package com.mpp.ui;
 
-import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.tools.PlayerLocation;
-import com.mpp.watten.cards.Card;
+import com.mpp.ui.screens.ErrorDialog;
+import com.mpp.watten.WattenGame;
 import com.mpp.watten.cards.MultipleCards;
-import com.mpp.watten.cards.Rank;
 import com.mpp.watten.cards.Suit;
 import com.mpp.watten.logic.Player;
 
@@ -13,14 +12,21 @@ public class PlayerUI {
 
 	int teamNumber;
 	int roundWins; // Stich
+
 	boolean local = false;
+	boolean select_rank = false;
+	boolean select_suit = false;
+	boolean playing = false;
+
 	Cell[] handCells;
 	Cell playedCardCell;
 	Cell playerInfoCell;
+
 	PlayedCardArea playedCardArea;
 	PlayerInfoTable playerInfoTable;
 	Player player;
 	Card2D[] handUI = new Card2D[5];
+	WattenGame game;
 
 	public PlayerUI(Player player) {
 		// TODO Auto-generated constructor stub
@@ -46,7 +52,7 @@ public class PlayerUI {
 
 			// TESTING
 			try {
-				
+
 				// addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true),
 				// this));
 				// addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true),
@@ -121,7 +127,9 @@ public class PlayerUI {
 	// Adds card to players hand
 	public void addCard(Card2D card, int handIndex) {
 		System.out.println("Cell counter");
+		handUI[handIndex] = card;
 		if (local) {
+
 			card.setParentCell(handCells[handIndex]);
 			handCells[handIndex].setWidget(card);
 			System.out.println("Adding card to table");
@@ -160,4 +168,81 @@ public class PlayerUI {
 		local = isLocal;
 	}
 
+	public void handReveal() {
+		player.getHand().revealAllCards();
+		checkCardFacing();
+	}
+
+	public void handHide() {
+		player.getHand().hideAllCards();
+		checkCardFacing();
+	}
+
+	public void checkCardFacing() {
+		for (int i = 0; i < handUI.length; i++) {
+			if (handUI[i] != null)
+				handUI[i].flipCard();
+
+		}
+	}
+
+	public boolean isSelect_rank() {
+		return select_rank;
+	}
+
+	public void setSelect_rank(boolean select_rank) {
+		this.select_rank = select_rank;
+	}
+
+	public boolean isSelect_suit() {
+		return select_suit;
+	}
+
+	public void setSelect_suit(boolean select_suit) {
+		this.select_suit = select_suit;
+	}
+
+	public boolean isPlaying() {
+		return playing;
+	}
+
+	public void setPlaying(boolean playing) {
+		this.playing = playing;
+	}
+
+	public int getCardIndex(Card2D card) throws Exception {
+		return player.getHand().getIndex(card.getCard());
+
+	}
+
+	public void selectSuit(Card2D card) {
+		try {
+			game.sendRequest("suit_selected " + getCardIndex(card));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			new ErrorDialog("Suit select error: " + e.getMessage());
+		}
+	}
+
+	public void selectRank(Card2D card) {
+		try {
+			game.sendRequest("rank_selected " + getCardIndex(card));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			new ErrorDialog("Rank select error: " + e.getMessage());
+		}
+	}
+
+	public void requestCardPlay(Card2D card) {
+		try {
+			game.sendRequest("card_played " + getCardIndex(card));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			new ErrorDialog("Card play select error: " + e.getMessage());
+		}
+	}
+
+	public void setWattenGame(WattenGame game) {
+		this.game = game;
+	}
 }

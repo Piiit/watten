@@ -59,7 +59,6 @@ public class ClientReceiver extends Thread {
 					case "create_game":
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
-							System.out.println("Gamescreen ACK");
 							Gdx.app.postRunnable(new Runnable() {
 
 								@Override
@@ -70,8 +69,6 @@ public class ClientReceiver extends Thread {
 											xml.root.getNode("name").getData()));
 									game.addPlayerCurrentGame(game
 											.getLocalPlayer());
-									System.out.println("Runnable");
-
 								}
 							});
 
@@ -82,7 +79,6 @@ public class ClientReceiver extends Thread {
 					case "join_game":
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
-							System.out.println("Gamescreen ACK");
 							Gdx.app.postRunnable(new Runnable() {
 
 								@Override
@@ -100,7 +96,6 @@ public class ClientReceiver extends Thread {
 									game.sendRequest("other_players "
 											+ xml.root.getNode("name")
 													.getData());
-									System.out.println("Runnable");
 
 								}
 							});
@@ -130,6 +125,7 @@ public class ClientReceiver extends Thread {
 						break;
 
 					case "other_players":
+
 						Gdx.app.postRunnable(new Runnable() {
 
 							@Override
@@ -149,7 +145,6 @@ public class ClientReceiver extends Thread {
 											player));
 
 								}
-								System.out.println("Runnable");
 
 							}
 						});
@@ -168,15 +163,61 @@ public class ClientReceiver extends Thread {
 							error(xml);
 
 						}
+						break;
 					case "game_ready":
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
 							game.sendRequest("start_game");
 
 						}
+						break;
 
 					case "select_rank":
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+
+								game.getLocalPlayer().handReveal();
+								game.getLocalPlayer().setSelect_rank(true);
+							}
+						});
+						break;
+						
+					case "rank_selected"	:
+						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
+								.getData())) {
+							game.getLocalPlayer().setSelect_rank(false);
+							
+
+						}else
+						if ("NAK".equalsIgnoreCase(xml.root.getNode("type")
+								.getData())) {
+
+							error(xml);
+
+						}
+						break;
+
 					case "select_suit":
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+
+								game.getLocalPlayer().handReveal();
+								game.getLocalPlayer().setSelect_suit(true);
+							}
+						});
+						break;
+						
+					case "suit_selected"	:
+						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
+								.getData())) {
+							game.getLocalPlayer().setSelect_suit(false);
+							
+
+						}else
 						if ("NAK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
 
@@ -185,7 +226,7 @@ public class ClientReceiver extends Thread {
 						}
 						break;
 					case "start_round":
-						System.out.println("start_round received");
+
 						Gdx.app.postRunnable(new Runnable() {
 
 							@Override
@@ -193,13 +234,24 @@ public class ClientReceiver extends Thread {
 
 								MultipleCards hand = new MultipleCards();
 								hand.load(xml.root.getNode("hand"));
-								System.out.println(xml.root.getNode("hand"));
 								game.getLocalPlayer().addHand(hand);
-								
+
 							}
 						});
 
 						break;
+					
+					case "reveal_hand":
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+
+								game.getLocalPlayer().handReveal();
+							}
+						});
+						break;
+					
 					case "help":
 					case "list_games":
 					case "info":
