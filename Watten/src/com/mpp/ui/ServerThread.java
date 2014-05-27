@@ -300,8 +300,13 @@ public class ServerThread extends Thread {
 			if (isCurrentPlayer) {
 				int cardIndex = Integer.parseInt(xml.root.getNode("card_index")
 						.getData());
+				try{
 				currentGame.stateTurnPlayCard(currentPlayer.getHand().getCard(
 						cardIndex));
+				}catch(Exception e){
+					sendResponse(command, "type", "NAK", "message", e.getMessage());
+					break;
+				}
 				// sendResponse(command, "type", "ACK");
 				// Add if's or switch to check game status, then depending on
 				// status send command

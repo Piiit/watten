@@ -271,6 +271,9 @@ public class ClientReceiver extends Thread {
 									game.getLocalPlayer().setPlaying(false);
 								}
 							});
+						}else if ("NAK".equalsIgnoreCase(xml.root.getNode("type")
+								.getData())) {
+							error(xml);
 						}
 						break;
 
