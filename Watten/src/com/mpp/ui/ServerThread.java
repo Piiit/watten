@@ -245,7 +245,7 @@ public class ServerThread extends Thread {
 				sendResponseToAllInGame(gameName, "chat", "message",
 						"Current player = " + currentPlayer.getName());
 
-				sendResponseTo(currentGame.getTable().getCurrentPlayer()
+				sendResponseTo(currentGame.getSelectRankPlayer()
 						.getName(), "select_rank");
 
 			} catch (Exception e) {
@@ -268,7 +268,7 @@ public class ServerThread extends Thread {
 										.getData())).getRank());
 				sendResponse(command, "type", "ACK");
 
-				sendResponseTo(currentGame.getTable().getCurrentPlayer()
+				sendResponseTo(currentGame.getSelectSuitPlayer()
 						.getName(), "select_suit");
 
 			} else {

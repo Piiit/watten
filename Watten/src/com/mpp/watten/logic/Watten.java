@@ -45,6 +45,7 @@ public class Watten {
 	private Suit firstCardsSuit = null;
 	private int lastBet;
 	
+
 	public Watten(String name) throws Exception {
 		this.name = name;
 		deck = new Deck();
@@ -103,7 +104,6 @@ public class Watten {
 		}
 		team1Points = 0;
 		team2Points = 0;
-		turnWinnerPlayerLocation = PlayerLocation.South;
 		
 		setStatus(WattenFeature.GAME_START);
 		setConstraints(WattenFeature.ROUND_START);
@@ -145,6 +145,7 @@ public class Watten {
 		} else {
 			cardDealerPlayerLocation = PlayerLocation.get(cardDealerPlayerLocation.getIndex() + 1);
 		}
+		turnWinnerPlayerLocation = getSelectRankPlayer().getPlayerLocation();
 
 		//Deal cards...
 		for(Player p : table.getPlayers()) {
@@ -334,6 +335,8 @@ public class Watten {
 		bestCard.setSuit(suit);
 		setStatus(WattenFeature.SELECT_SUIT);
 		setConstraints(WattenFeature.PLAY_CARD, WattenFeature.BET);
+		table.setCurrentPlayer(getSelectRankPlayer().getPlayerLocation());
+		
 	}
 	
 	public void stateSelectBestCardRank(Rank rank) throws Exception {
@@ -341,6 +344,9 @@ public class Watten {
 		bestCard.setRank(rank);
 		setStatus(WattenFeature.SELECT_RANK);
 		setConstraints(WattenFeature.SELECT_SUIT);
+		table.setCurrentPlayer(getSelectSuitPlayer().getPlayerLocation());
+
+
 	}
 	
 	private void stateTurnExit() throws Exception {
@@ -471,5 +477,11 @@ public class Watten {
 	
 	public int getPlayerCount(){
 		return table.getPlayerCount();
+	}
+	public Player getSelectRankPlayer(){
+		return table.getPlayer(PlayerLocation.get(cardDealerPlayerLocation.getIndex()+1));
+	}
+	public Player getSelectSuitPlayer(){
+		return table.getPlayer(PlayerLocation.get(cardDealerPlayerLocation.getIndex()));
 	}
 }
