@@ -11,7 +11,10 @@ import com.mpp.tools.xml.SimpleXML;
 import com.mpp.ui.screens.ErrorDialog;
 import com.mpp.ui.screens.GameScreen;
 import com.mpp.watten.WattenGame;
+import com.mpp.watten.cards.Card;
 import com.mpp.watten.cards.MultipleCards;
+import com.mpp.watten.cards.Rank;
+import com.mpp.watten.cards.Suit;
 import com.mpp.watten.logic.Player;
 
 public class ClientReceiver extends Thread {
@@ -183,16 +186,14 @@ public class ClientReceiver extends Thread {
 							}
 						});
 						break;
-						
-					case "rank_selected"	:
+
+					case "rank_selected":
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
 							game.getLocalPlayer().setSelect_rank(false);
-							
 
-						}else
-						if ("NAK".equalsIgnoreCase(xml.root.getNode("type")
-								.getData())) {
+						} else if ("NAK".equalsIgnoreCase(xml.root.getNode(
+								"type").getData())) {
 
 							error(xml);
 
@@ -210,16 +211,14 @@ public class ClientReceiver extends Thread {
 							}
 						});
 						break;
-						
-					case "suit_selected"	:
+
+					case "suit_selected":
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
 							game.getLocalPlayer().setSelect_suit(false);
-							
 
-						}else
-						if ("NAK".equalsIgnoreCase(xml.root.getNode("type")
-								.getData())) {
+						} else if ("NAK".equalsIgnoreCase(xml.root.getNode(
+								"type").getData())) {
 
 							error(xml);
 
@@ -240,7 +239,7 @@ public class ClientReceiver extends Thread {
 						});
 
 						break;
-					
+
 					case "reveal_hand":
 						Gdx.app.postRunnable(new Runnable() {
 
@@ -251,7 +250,60 @@ public class ClientReceiver extends Thread {
 							}
 						});
 						break;
-					
+					case "your_turn":
+						game.getLocalPlayer().setPlaying(true);
+						break;
+					case "play_card":
+						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
+								.getData())) {
+							
+							Gdx.app.postRunnable(new Runnable() {
+
+								@Override
+								public void run() {
+
+									int cardIndex = Integer.parseInt(xml.root
+											.getNode("card_index").getData());
+
+									game.getLocalPlayer().playCard(
+											game.getLocalPlayer().getCard2D(
+													cardIndex));
+									game.getLocalPlayer().setPlaying(false);
+								}
+							});
+						}
+						break;
+
+					case "card_played":
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									game.getPlayer(
+											xml.root.getNode("name").getData())
+											.playCard(
+													new Card2D(
+															new Card(
+																	Suit.valueOf(xml.root
+																			.getNode(
+																					"suit")
+																			.getData()),
+																	Rank.valueOf(xml.root
+																			.getNode(
+																					"rank")
+																			.getData()),false ),
+															game.getPlayer(xml.root
+																	.getNode(
+																			"name")
+																	.getData())));
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									new ErrorDialog(e.getMessage());
+								}
+							}
+						});
+						break;
 					case "help":
 					case "list_games":
 					case "info":

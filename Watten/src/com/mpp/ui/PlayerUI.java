@@ -214,6 +214,10 @@ public class PlayerUI {
 		return player.getHand().getIndex(card.getCard());
 
 	}
+	
+	public Card2D getCard2D(int index){
+		return handUI[index];
+	}
 
 	public void selectSuit(Card2D card) {
 		try {

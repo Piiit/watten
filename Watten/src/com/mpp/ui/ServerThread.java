@@ -202,6 +202,7 @@ public class ServerThread extends Thread {
 						+ player.getName() + "] joined your game!");
 
 				// Tells current player that game can be started
+				System.out.println("Current playerCount: "+games.get(gameName).getPlayerCount() );
 				if (games.get(gameName).getPlayerCount() == 4) {
 					sendResponseTo(player.getName(), "game_ready", "type",
 							"ACK");
@@ -235,8 +236,7 @@ public class ServerThread extends Thread {
 				sendResponse(command, "type", "ACK");
 				for (Player p : currentGame.getTable().getPlayers()) {
 					String hand = p.getHand().serialize();
-					// sendResponseTo(p.getName(), "start_round", "hand", hand,
-					// "current_player", currentPlayer.serialize());
+				
 					sendResponseTo(p.getName(), "start_round", "hand", hand);
 				}
 
@@ -245,8 +245,8 @@ public class ServerThread extends Thread {
 				sendResponseToAllInGame(gameName, "chat", "message",
 						"Current player = " + currentPlayer.getName());
 
-				sendResponseTo(currentGame.getSelectRankPlayer()
-						.getName(), "select_rank");
+				sendResponseTo(currentGame.getSelectRankPlayer().getName(),
+						"select_rank");
 
 			} catch (Exception e) {
 				e.printStackTrace(System.err);
@@ -268,8 +268,8 @@ public class ServerThread extends Thread {
 										.getData())).getRank());
 				sendResponse(command, "type", "ACK");
 
-				sendResponseTo(currentGame.getSelectSuitPlayer()
-						.getName(), "select_suit");
+				sendResponseTo(currentGame.getSelectSuitPlayer().getName(),
+						"select_suit");
 
 			} else {
 				sendResponse(command, "type", "NAK", "message",
@@ -284,11 +284,11 @@ public class ServerThread extends Thread {
 						.getCard(
 								Integer.parseInt(xml.root.getNode("card_index")
 										.getData())).getSuit());
-				
+
 				sendResponse(command, "type", "ACK");
 				sendResponseToOthersInGame(gameName, "reveal_hand", "");
 				sendResponseTo(currentGame.getTable().getCurrentPlayer()
-						.getName(), "play_card");
+						.getName(), "your_turn");
 
 			} else {
 				sendResponse(command, "type", "NAK", "message",
@@ -298,14 +298,22 @@ public class ServerThread extends Thread {
 			break;
 		case "card_played":
 			if (isCurrentPlayer) {
+				int cardIndex = Integer.parseInt(xml.root.getNode("card_index")
+						.getData());
 				currentGame.stateTurnPlayCard(currentPlayer.getHand().getCard(
-						Integer.parseInt(xml.root.getNode("card_index")
-								.getData())));
-				sendResponse(command, "type", "ACK");
+						cardIndex));
+				// sendResponse(command, "type", "ACK");
 				// Add if's or switch to check game status, then depending on
 				// status send command
+				sendResponseTo(player.getName(), "play_card", "type", "ACK","card_index", ""
+						+ cardIndex);
+				sendResponseToOthers("card_played", "name", player.getName(),
+						"rank", player.getHand().getCard(cardIndex).getRank()
+								.toString(), "suit",
+						player.getHand().getCard(cardIndex).getSuit()
+								.toString());
 				sendResponseTo(currentGame.getTable().getCurrentPlayer()
-						.getName(), "play_card");
+						.getName(), "your_turn");
 			} else {
 				sendResponse(command, "type", "NAK", "message",
 						"You are not allowed to play this card ! It's "
