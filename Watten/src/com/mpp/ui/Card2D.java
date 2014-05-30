@@ -1,6 +1,7 @@
 package com.mpp.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -12,14 +13,16 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.esotericsoftware.tablelayout.Cell;
+import com.mpp.tools.WTools;
 import com.mpp.watten.WattenGame;
 
 import com.mpp.watten.cards.Card;
 import com.mpp.watten.cards.Rank;
 import com.mpp.watten.cards.Suit;
 
-public class Card2D extends Image {
+public class Card2D extends Table {
 
 	Texture frontTexture; // Later get as parameter directly from helper class
 							// creating image, reduce load
@@ -38,6 +41,7 @@ public class Card2D extends Image {
 	public Card2D(Card card, PlayerUI owningPlayer) {
 		super();
 		this.card = card;
+		this.setSkin(WattenGame.getSkin());
 		cardSuit = card.getSuit();
 		cardRank = card.getRank();
 		this.facingDown = card.isFaceDown();
@@ -52,10 +56,11 @@ public class Card2D extends Image {
 		backTexture = new Texture(Gdx.files.internal("data/cardback.png"));
 		backTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		backImage = new Image(backTexture);
-
 		this.setBounds(0, 0, getWidth(), getHeight());
 		this.setTouchable(Touchable.enabled);
-
+this.add(card.getSuit().toString());
+this.row();
+this.add(card.getRank().toString());
 		evaluateCardFacing();
 
 		addActionListener();
@@ -69,9 +74,9 @@ public class Card2D extends Image {
 
 	private void evaluateCardFacing() {
 		if (facingDown)
-			this.setDrawable(backImage.getDrawable());
+			this.background(backImage.getDrawable());
 		else
-			this.setDrawable(frontImage.getDrawable());
+			this.background(frontImage.getDrawable());
 
 		this.setSize(CardTable.getCardWidth(), CardTable.getCardHeight());
 	}
@@ -112,7 +117,7 @@ public class Card2D extends Image {
 	@Override
 	public void draw(Batch batch, float alpha) {
 		super.draw(batch, alpha);
-
+		
 	}
 
 	public void setParentCell(Cell cell) {
@@ -151,10 +156,10 @@ public class Card2D extends Image {
 						selectAsSuit();
 					}
 
-//					if (!played) {
-//						playCard();
-//						played = true;
-//					}
+					// if (!played) {
+					// playCard();
+					// played = true;
+					// }
 				}
 
 			}

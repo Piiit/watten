@@ -7,7 +7,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import com.mpp.tools.xml.SimpleXML;
-import com.mpp.ui.screens.ErrorDialog;
+import com.mpp.ui.message.MessageDialog;
+import com.mpp.ui.message.MessageType;
 import com.mpp.watten.WattenGame;
 
 public class ClientSender {
@@ -16,7 +17,7 @@ public class ClientSender {
 	private static BufferedReader input = null;
 	private static Socket socket = null;
 	private static final int PORT = 9999;
-	private static final String ADDRESS = "localhost";
+	private static final String ADDRESS = "192.168.178.22";
 	String userRequest;
 	WattenGame game;
 
@@ -29,7 +30,7 @@ public class ClientSender {
 				input = new BufferedReader(new InputStreamReader(
 						socket.getInputStream()));
 			} catch (IOException e) {
-				new ErrorDialog(e.getMessage());
+				MessageDialog.createErrorDialog(e.getMessage());
 			}
 
 			// Some error-handling needed
@@ -40,7 +41,7 @@ public class ClientSender {
 			while (!playerAccepted && !socket.isClosed()) {
 				String answer = input.readLine();
 				if (answer.equals("NACK")) {
-					new ErrorDialog(input.readLine());
+					MessageDialog.createErrorDialog(input.readLine());
 					socket.close();
 				} else if (answer.equals("ACK")) {
 					game.toMainMenu();
@@ -127,7 +128,7 @@ public class ClientSender {
 			}
 
 		} catch (IOException e) {
-			new ErrorDialog(e.getMessage());
+			MessageDialog.createErrorDialog(e.getMessage());
 		} finally {
 			try {
 				System.out.println("Closing connection.");
@@ -137,14 +138,14 @@ public class ClientSender {
 					socket.close();
 				}
 			} catch (IOException e) {
-				new ErrorDialog(e.getMessage());
+				MessageDialog.createErrorDialog(e.getMessage());
 			}
 		}
 	}
 
 	private void sendRequest(String command) {
 		if (socket == null || !socket.isConnected())
-			new ErrorDialog("Not connected to server!");
+			MessageDialog.createErrorDialog("Not connected to server!");
 		else
 			output.println(SimpleXML.createTag("request",
 					SimpleXML.createTag("command", command)));

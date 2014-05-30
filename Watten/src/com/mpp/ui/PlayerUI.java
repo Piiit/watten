@@ -2,7 +2,8 @@ package com.mpp.ui;
 
 import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.tools.PlayerLocation;
-import com.mpp.ui.screens.ErrorDialog;
+import com.mpp.ui.message.MessageDialog;
+import com.mpp.ui.message.MessageType;
 import com.mpp.watten.WattenGame;
 import com.mpp.watten.cards.MultipleCards;
 import com.mpp.watten.cards.Suit;
@@ -224,7 +225,7 @@ public class PlayerUI {
 			game.sendRequest("suit_selected " + getCardIndex(card));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			new ErrorDialog("Suit select error: " + e.getMessage());
+			MessageDialog.createErrorDialog("Suit select error: " + e.getMessage());
 		}
 	}
 
@@ -233,7 +234,7 @@ public class PlayerUI {
 			game.sendRequest("rank_selected " + getCardIndex(card));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			new ErrorDialog("Rank select error: " + e.getMessage());
+			MessageDialog.createErrorDialog("Rank select error: " + e.getMessage());
 		}
 	}
 
@@ -242,7 +243,7 @@ public class PlayerUI {
 			game.sendRequest("card_played " + getCardIndex(card));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			new ErrorDialog("Card play select error: " + e.getMessage());
+			MessageDialog.createErrorDialog("Card play select error: " + e.getMessage());
 		}
 	}
 

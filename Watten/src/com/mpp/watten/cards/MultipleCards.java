@@ -7,7 +7,7 @@ import java.util.List;
 import com.mpp.tools.xml.Loadable;
 import com.mpp.tools.xml.Node;
 import com.mpp.tools.xml.SimpleXML;
-import com.mpp.ui.screens.ErrorDialog;
+import com.mpp.ui.message.MessageDialog;
 
 /**
  * <pre>

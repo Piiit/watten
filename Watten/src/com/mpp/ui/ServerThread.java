@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.mpp.tools.xml.SimpleXML;
 import com.mpp.watten.logic.Player;
 import com.mpp.watten.logic.Watten;
+import com.mpp.watten.logic.WattenFeature;
 
 public class ServerThread extends Thread {
 
@@ -310,6 +311,10 @@ public class ServerThread extends Thread {
 				// sendResponse(command, "type", "ACK");
 				// Add if's or switch to check game status, then depending on
 				// status send command
+				// if(currentGame.getStatus() ==WattenFeature.ROUND_FINISHED){
+				// sendResponseToAll("round_finished", "winner",
+				// currentGame.getTurnWinner().getName());
+				// }
 				sendResponseTo(player.getName(), "play_card", "type", "ACK","card_index", ""
 						+ cardIndex);
 				sendResponseToOthers("card_played", "name", player.getName(),
@@ -317,6 +322,8 @@ public class ServerThread extends Thread {
 								.toString(), "suit",
 						player.getHand().getCard(cardIndex).getSuit()
 								.toString());
+				
+				System.err.println("Current status: "+currentGame.getStatus());
 				sendResponseTo(currentGame.getTable().getCurrentPlayer()
 						.getName(), "your_turn");
 			} else {

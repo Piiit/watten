@@ -8,7 +8,8 @@ import java.net.Socket;
 import com.badlogic.gdx.Gdx;
 import com.mpp.tools.PlayerLocation;
 import com.mpp.tools.xml.SimpleXML;
-import com.mpp.ui.screens.ErrorDialog;
+import com.mpp.ui.message.MessageDialog;
+import com.mpp.ui.message.MessageType;
 import com.mpp.ui.screens.GameScreen;
 import com.mpp.watten.WattenGame;
 import com.mpp.watten.cards.Card;
@@ -302,7 +303,7 @@ public class ClientReceiver extends Thread {
 																	.getData())));
 								} catch (Exception e) {
 									// TODO Auto-generated catch block
-									new ErrorDialog(e.getMessage());
+									MessageDialog.createErrorDialog(e.getMessage());
 								}
 							}
 						});
@@ -344,7 +345,7 @@ public class ClientReceiver extends Thread {
 	}
 
 	public void error(SimpleXML xml) {
-		new ErrorDialog("ERROR: "
+		 MessageDialog.createErrorDialog("ERROR: "
 				+ unescape(xml.root.getNode("message").getData()));
 
 	}

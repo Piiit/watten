@@ -13,7 +13,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mpp.tools.WTools;
+import com.mpp.ui.Card2D;
+import com.mpp.ui.PlayerUI;
+import com.mpp.ui.message.MessageDialog;
+import com.mpp.ui.message.MessageType;
 import com.mpp.watten.WattenGame;
+import com.mpp.watten.cards.Card;
+import com.mpp.watten.cards.Rank;
+import com.mpp.watten.cards.Suit;
+import com.mpp.watten.logic.Player;
 
 public class InputPlayerNameScreen extends WattenScreen {
 
@@ -51,7 +59,7 @@ public class InputPlayerNameScreen extends WattenScreen {
 
 			int pointer, int button) {
 				if (nameField.getText().equals(""))
-					new ErrorDialog("No name entered!");
+					MessageDialog.createErrorDialog("No name entered!");
 				else {
 					game.createLocalPlayer(nameField.getText());
 					game.startClientNetworkingThread();
@@ -64,6 +72,12 @@ public class InputPlayerNameScreen extends WattenScreen {
 		layoutTable.add(nameField).width(300f).height(50f);
 		layoutTable.row();
 		layoutTable.add(confirmNameButton).width(300f).height(50f);
+//		try {
+//			layoutTable.add(new Card2D(new Card(Suit.ACORNS, Rank.ACE),new PlayerUI(new Player("me"))));
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		stage = new Stage();
 
 	}
