@@ -96,15 +96,15 @@ public class ClientReceiver extends Thread {
 											xml.root.getNode("name").getData()));
 									game.addPlayerCurrentGame(game
 											.getLocalPlayer());
+									game.sendRequest("other_players "
+											+ xml.root.getNode("name")
+													.getData());
 									int team1points = Integer.parseInt(xml.root
 											.getNode("team1points").getData());
 									int team2points = Integer.parseInt(xml.root
 											.getNode("team2points").getData());
 									game.getCurrentGame().refreshPoints(
 											team1points, team2points);
-									game.sendRequest("other_players "
-											+ xml.root.getNode("name")
-													.getData());
 
 								}
 							});
@@ -183,9 +183,15 @@ public class ClientReceiver extends Thread {
 						}
 						break;
 					case "game_ready":
+						System.out.println("game ready switch");
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
 							game.sendRequest("start_game");
+							System.out.println("game_ready ACK");
+						} else {
+							game.sendRequest("start_game");
+							System.out
+									.println("game_ready NACK but still started");
 
 						}
 						break;
@@ -266,6 +272,8 @@ public class ClientReceiver extends Thread {
 						});
 						break;
 					case "your_turn":
+						System.out.println("my turn");
+
 						game.getLocalPlayer().setPlaying(true);
 						break;
 					case "play_card":
@@ -283,7 +291,6 @@ public class ClientReceiver extends Thread {
 									game.getLocalPlayer().playCard(
 											game.getLocalPlayer().getCard2D(
 													cardIndex));
-									game.getLocalPlayer().setPlaying(false);
 								}
 							});
 						} else if ("NAK".equalsIgnoreCase(xml.root.getNode(
@@ -338,7 +345,6 @@ public class ClientReceiver extends Thread {
 											player.winsTurn();
 										player.resetForTurn();
 
-										
 									}
 									if (game.getLocalPlayerName().equals(
 											xml.root.getNode("winner")

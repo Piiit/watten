@@ -26,7 +26,7 @@ public class Watten {
 	public final static boolean HOLD = true;
 
 	private String name;
-	private int maxPoints = 2;
+	private int maxPoints = 18;
 	private Deck deck;
 	private Table table;
 	private PlayerLocation cardDealerPlayerLocation = null;
@@ -51,7 +51,7 @@ public class Watten {
 		team1Points = 0;
 		team2Points = 0;
 		status = WattenFeature.INIT;
-		setConstraints(WattenFeature.GAME_START);
+		setConstraints(WattenFeature.GAME_READY);
 	}
 
 	public Player getTurnWinner() {
@@ -159,6 +159,10 @@ public class Watten {
 
 		setStatus(WattenFeature.ROUND_START);
 		setConstraints(WattenFeature.TURN_START);
+		// stateTurnEntry();
+	}
+
+	public void startTurn() throws Exception {
 		stateTurnEntry();
 	}
 
@@ -169,16 +173,20 @@ public class Watten {
 	 */
 	private void stateTurnEntry() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.TURN_START);
-	
+
 		firstCardsSuit = null;
 		table.setCurrentPlayer(turnWinnerPlayerLocation);
 		table.resetCardList();
 
 		setStatus(WattenFeature.TURN_START);
+
+	}
+
+	public boolean evaluateRoundFirstTurnStart() throws Exception {
 		if (getTurnTricksTeam1() > 0 || getTurnTricksTeam2() > 0) {
 
 			setConstraints(WattenFeature.PLAY_CARD, WattenFeature.BET);
-
+			return false;
 		} else {
 			if (bestCard == null) {
 				bestCard = new Card();
@@ -188,9 +196,8 @@ public class Watten {
 			}
 
 			setConstraints(WattenFeature.SELECT_RANK);
-
+			return true;
 		}
-		
 	}
 
 	public int getMaxPoints() {
@@ -490,6 +497,9 @@ public class Watten {
 		if (getStatus() == WattenFeature.PAUSE
 				&& getTable().getPlayerCount() == 4) {
 			stateResume();
+		} else if (getTable().getPlayerCount() == 4) {
+			setStatus(WattenFeature.GAME_READY);
+			setConstraints(WattenFeature.GAME_START);
 		}
 	}
 

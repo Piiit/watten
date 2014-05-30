@@ -194,7 +194,11 @@ public class ServerThread extends Thread {
 				sendResponse(command, "type", "ACK", "message",
 						"You joined the game " + games.get(gameName), "name",
 						gameName, "position", ""
-								+ player.getPlayerLocation().getIndex(),"team1points", ""+games.get(gameName).getPointsTeam1(), "team2points", ""+games.get(gameName).getPointsTeam2());
+								+ player.getPlayerLocation().getIndex(),
+						"team1points", ""
+								+ games.get(gameName).getPointsTeam1(),
+						"team2points", ""
+								+ games.get(gameName).getPointsTeam2());
 
 				sendResponseToOthersInGame(gameName, "player_joined", "name",
 						player.getName(), "position", ""
@@ -206,10 +210,7 @@ public class ServerThread extends Thread {
 				// Tells current player that game can be started
 				System.out.println("Current playerCount: "
 						+ games.get(gameName).getPlayerCount());
-				if (games.get(gameName).getPlayerCount() == 4) {
-					sendResponseTo(player.getName(), "game_ready", "type",
-							"ACK");
-				}
+				evaluateGameStatus(games.get(gameName), player);
 			} catch (Exception e) {
 				sendResponse(
 						command,
@@ -237,19 +238,10 @@ public class ServerThread extends Thread {
 				currentGame.start();
 
 				sendResponse(command, "type", "ACK");
-				for (Player p : currentGame.getTable().getPlayers()) {
-					String hand = p.getHand().serialize();
-
-					sendResponseTo(p.getName(), "start_round", "hand", hand);
-				}
-
-				sendResponseToAllInGame(gameName, "chat", "message",
-						"Game with name '" + gameName + "' started!");
-				sendResponseToAllInGame(gameName, "chat", "message",
+				evaluateGameStatus(currentGame, player);
+				sendResponseToAllInGame(currentGame.getName(), "chat",
+						"message",
 						"Current player = " + currentPlayer.getName());
-
-				sendResponseTo(currentGame.getSelectRankPlayer().getName(),
-						"select_rank");
 
 			} catch (Exception e) {
 				e.printStackTrace(System.err);
@@ -312,20 +304,17 @@ public class ServerThread extends Thread {
 					break;
 				}
 
-				sendResponseTo(player.getName(), "play_card", "type", "ACK",
-						"card_index", "" + cardIndex);
+				sendResponse("play_card", "type", "ACK", "card_index", ""
+						+ cardIndex);
 				sendResponseToOthers("card_played", "name", player.getName(),
-						"rank", playedCard.getRank()
-								.toString(), "suit",
-								playedCard.getSuit()
-								.toString());
+						"rank", playedCard.getRank().toString(), "suit",
+						playedCard.getSuit().toString());
 
 				evaluateGameStatus(currentGame, player);
-				
 
 				System.err
 						.println("Current status: " + currentGame.getStatus());
-				
+
 			} else {
 				sendResponse(command, "type", "NAK", "message",
 						"You are not allowed to play this card ! It's "
@@ -533,43 +522,69 @@ public class ServerThread extends Thread {
 			throws Exception {
 		if (currentGame != null)
 			System.out.println(currentGame.getStatus());
-			switch (currentGame.getStatus()) {
-			case GAME_START:
-				
-				break;
-			case PLAY_CARD:
-				sendResponseTo(currentGame.getTable().getCurrentPlayer()
-						.getName(), "your_turn");
-				break;
-			case TURN_START:
-				sendResponseTo(currentGame.getTable().getCurrentPlayer()
-						.getName(), "your_turn");
-				break;
-			case TURN_FINISHED:
-				sendResponseToAll("turn_finished", "winner", currentGame
-						.getTurnWinner().getName());
-				currentGame.evaluateTricks();
-				evaluateGameStatus(currentGame, player);
-				break;
-			case ROUND_START:
+		switch (currentGame.getStatus()) {
+		case GAME_READY:
+			sendResponseTo(player.getName(), "game_ready", "type", "ACK");
+			break;
+		case GAME_START:
+			// Nothing
+
+			break;
+		case PLAY_CARD:
+			sendResponseTo(currentGame.getTable().getCurrentPlayer().getName(),
+					"your_turn");
+			break;
+		case TURN_START:
+			if (currentGame.evaluateRoundFirstTurnStart()) {
 				sendResponseTo(currentGame.getSelectRankPlayer().getName(),
 						"select_rank");
-				break;
-			case ROUND_FINISHED:
-				sendResponseToAll("round_finished", "winners", ""+currentGame
-						.getRoundWinningTeam(),"team1points", ""+currentGame.getPointsTeam1(), "team2points", ""+currentGame.getPointsTeam2());
-				currentGame.evaluatePoints();
-				evaluateGameStatus(currentGame, player);
-				break;
-			case GAME_FINISHED:
-				sendResponseToAll("game_finished", "winner1", currentGame
-						.getWinners()[0].getName(),"winner2", currentGame
-						.getWinners()[1].getName());
-				evaluateGameStatus(currentGame, player);
-				break;
-				
+			} else {
+				sendResponseTo(currentGame.getTable().getCurrentPlayer()
+						.getName(), "your_turn");
 			}
-		
+			break;
+		case TURN_FINISHED:
+			sendResponseToAll("turn_finished", "winner", currentGame
+					.getTurnWinner().getName());
+			currentGame.evaluateTricks();
+			evaluateGameStatus(currentGame, player);
+			break;
+		case ROUND_START:
+			System.out.println("Switch roundstart");
+			System.out.println("players: "
+					+ currentGame.getTable().getPlayers().length);
+			for (Player p : currentGame.getTable().getPlayers()) {
+				String hand = p.getHand().serialize();
+
+				sendResponseTo(p.getName(), "start_round", "hand", hand);
+				System.out.println(p.getName() + " start_round");
+			}
+
+			sendResponseToAllInGame(currentGame.getName(), "chat", "message",
+					"Game with name '" + currentGame.getName() + "' started!");
+
+			currentGame.startTurn();
+
+			evaluateGameStatus(currentGame, player);
+			break;
+		case ROUND_FINISHED:
+			sendResponseToAll("round_finished", "winners",
+					"" + currentGame.getRoundWinningTeam(), "team1points", ""
+							+ currentGame.getPointsTeam1(), "team2points", ""
+							+ currentGame.getPointsTeam2());
+			currentGame.evaluatePoints();
+			evaluateGameStatus(currentGame, player);
+			break;
+		case GAME_FINISHED:
+			sendResponseToAll("game_finished", "winner1",
+					currentGame.getWinners()[0].getName(), "winner2",
+					currentGame.getWinners()[1].getName());
+
+			break;
+		default:
+			break;
+
+		}
 
 	}
 

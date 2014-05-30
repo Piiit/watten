@@ -32,7 +32,7 @@ public class CreateGameScreen  extends WattenScreen {
 		//Sets up the layoutTable and all the UI elements it will contain
 		layoutTable = new Table(skin);
 		layoutTable.setPosition(0, 0);
-		layoutTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		layoutTable.setSize(game.getScreenWidth(), game.getScreenHeight());
 		layoutTable.setBackground(WTools.getTableImage().getDrawable());
 
 		

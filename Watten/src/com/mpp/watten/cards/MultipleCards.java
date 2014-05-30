@@ -215,6 +215,7 @@ public class MultipleCards implements Loadable {
 	 */
 	public void reset() {
 		index = 0;
+		hideAllCards();
 	}
 
 	/**

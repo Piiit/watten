@@ -171,12 +171,14 @@ public class PlayerUI {
 	 * playable goes here
 	 */
 	public void playCard(Card2D card) {
+		setPlaying(false);
 		if (local) {
 			card.removeFromParent();
 		}
 		player.removeCard(card.getCard());
 		// Add card to playedcard area
 		playedCardArea.addCard(card);
+		handUI.remove(card);
 	}
 
 	public boolean isLocalPlayer() {
@@ -227,6 +229,7 @@ public class PlayerUI {
 
 	public void setPlaying(boolean playing) {
 		this.playing = playing;
+		System.out.println("playing: "+this.playing);
 	}
 
 	public int getCardIndex(Card2D card) throws Exception {

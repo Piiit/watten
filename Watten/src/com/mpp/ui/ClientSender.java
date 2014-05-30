@@ -81,6 +81,7 @@ public class ClientSender {
 						sendRequest("join_game", "name", gameName);
 						break;
 					case "start_game":
+						System.out.println("start game request");
 						sendRequest("start_game");
 						break;
 					case "help":

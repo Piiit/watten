@@ -1,6 +1,7 @@
 package com.mpp.ui;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.mpp.watten.WattenGame;
 
@@ -9,6 +10,8 @@ public class PlayerInfoTable extends Table {
 	String team;
 	String name;
 	String roundWins;
+	Label teamLabel ;
+	Label turnWinsLabel;
 
 	public PlayerInfoTable(PlayerUI player) {
 		super(WattenGame.getSkin());
@@ -16,20 +19,21 @@ public class PlayerInfoTable extends Table {
 		team = "Team " + this.player.getTeamNumber();
 		name = player.getPlayerName();
 		roundWins = "Stich: " + player.getRoundWins();
-		
+		 teamLabel = new Label("Team " + this.player.getTeamNumber(), WattenGame.getSkin());
+		 turnWinsLabel = new Label("Stich: " + player.getRoundWins(), WattenGame.getSkin());
 		this.add(name);
 		this.row();
-		this.add(team);
+		this.add(teamLabel);
 		this.row();
-		this.add(roundWins);
+		this.add(turnWinsLabel);
 		
 	}
 	
 	@Override
 	public void draw(Batch batch, float parentAlpha){
 		super.draw(batch, parentAlpha);
-		roundWins = "Stich: " + player.getRoundWins();
-		team = "Team " + this.player.getTeamNumber();
+		turnWinsLabel.setText("Stich: " + player.getRoundWins());
+		teamLabel.setText("Team " + this.player.getTeamNumber());
 		
 	}
 

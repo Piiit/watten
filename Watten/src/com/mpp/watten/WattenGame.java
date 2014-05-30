@@ -33,6 +33,8 @@ public class WattenGame extends Game {
 	private static Skin skin;
 	private String localPlayerName;
 	private Map<String, PlayerUI> currentPlayers = new ConcurrentHashMap<String, PlayerUI>();
+	private float screenWidth;
+	private float screenHeight;
 	InputPlayerNameScreen firstScreen; // Splashscreen later
 	static WattenScreen currentScreen;
 	MainMenuScreen mainMenuScreen;
@@ -45,10 +47,10 @@ public class WattenGame extends Game {
 
 		WTools.initiate();
 		// Visual Setup
-		float w = Gdx.graphics.getWidth();
-		float h = Gdx.graphics.getHeight();
+		screenWidth = Gdx.graphics.getWidth();
+		screenHeight = Gdx.graphics.getHeight();
 
-		camera = new OrthographicCamera(w, h);
+		camera = new OrthographicCamera(screenWidth, screenHeight);
 		batch = new SpriteBatch();
 
 		// Loading Skin for all visual items
@@ -150,11 +152,10 @@ public class WattenGame extends Game {
 			currentGame.addPlayer(player);
 		}
 	}
-	
+
 	public void removePlayerCurrentGame(String player) {
 		if (currentGame != null) {
-			if (currentPlayers.get(player) != getLocalPlayer())
-			{
+			if (currentPlayers.get(player) != getLocalPlayer()) {
 				currentPlayers.get(player).leaveTable();
 				currentPlayers.remove(player);
 			}
@@ -187,4 +188,11 @@ public class WattenGame extends Game {
 		}.start();
 	}
 
+	public float getScreenWidth() {
+		return screenWidth;
+	}
+
+	public float getScreenHeight() {
+		return screenHeight;
+	}
 }

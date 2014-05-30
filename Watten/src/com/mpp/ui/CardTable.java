@@ -1,12 +1,16 @@
 package com.mpp.ui;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.tools.PlayerLocation;
 import com.mpp.tools.WTools;
 import com.mpp.watten.WattenGame;
+import com.mpp.watten.cards.Card;
+import com.mpp.watten.cards.Rank;
 import com.mpp.watten.cards.Suit;
+import com.mpp.watten.logic.Player;
 
 public class CardTable extends Table {
 
@@ -50,18 +54,20 @@ public class CardTable extends Table {
 			columnHeight = maxCardHeight;
 		}
 		this.setPosition(0, 0);
+		this.setSize(_tableWidth, _tableHeight);
 		cardTableCells = new Cell[ROWS][COLUMNS];
 		localPlayerHand = new Cell[5];
 		playerCells = new Cell[4][2];
 		cardWidth = columnWidth * 0.9f;
 		cardHeight = columnHeight * 0.9f;
 		float verticalFiller = (_tableWidth - columnWidth * 6.5f) / 6f;
-		float horizontalFiller = (_tableHeight - columnHeight * 4.15f) / 4f;
-		sideColumnsWidth = (_tableWidth - columnWidth * 5) / 2;
+		float horizontalFiller = (_tableHeight - columnHeight * 4.15f) / 6f;
+		sideColumnsWidth = (_tableWidth - columnWidth * 5-verticalFiller*5) / 2;
 		Table table = new Table(WattenGame.getSkin());
-		table.setBackground(WTools.getTableImage().getDrawable());
-		table.debug();
+		table.setPosition(0, 0);
 		table.setSize(_tableWidth, _tableHeight);
+		this.setBackground(WTools.getTableImage().getDrawable());
+
 		for (int row = 0; row < ROWS; row++) {
 			for (int column = 0; column < COLUMNS; column++) {
 				if (column == 0 || column == 6) {
@@ -78,7 +84,7 @@ public class CardTable extends Table {
 								.width(columnWidth).height(columnHeight);
 
 					}
-					if (column != 5)
+					if (column != 6)
 						table.add("").width(verticalFiller);
 				}
 
@@ -94,16 +100,16 @@ public class CardTable extends Table {
 
 		System.out.println("cardWidth: " + cardWidth + " cardHeight: "
 				+ cardHeight + " side columns: " + sideColumnsWidth);
-
+		
 	}
-	public void refreshPoints(int team1, int team2){
+
+	public void refreshPoints(int team1, int team2) {
 		Table table = new Table(WattenGame.getSkin());
-		table.add("Team 1: "+ team1);
+		table.add("Team 1: " + team1);
 		table.row();
-		table.add("Team 2: "+team2);
+		table.add("Team 2: " + team2);
 		cardTableCells[0][0].setWidget(table);
 	}
-
 
 	// Add player to local table
 	public synchronized void addPlayer(PlayerUI player) {
@@ -111,13 +117,14 @@ public class CardTable extends Table {
 		// Local player is always south, so other players positions have to be
 		// rotated for local table
 		int tempPosition = player.getPlayerLocation().ordinal();
-		if(player.getPlayerLocation() == PlayerLocation.South ||player.getPlayerLocation() == PlayerLocation.North )
+		if (player.getPlayerLocation() == PlayerLocation.South
+				|| player.getPlayerLocation() == PlayerLocation.North)
 			player.setTeamNumber(1);
-		else{
+		else {
 			player.setTeamNumber(2);
 
 		}
-			
+
 		if (player.isLocalPlayer())
 			positionCorrection = 4 - tempPosition;
 
@@ -150,6 +157,8 @@ public class CardTable extends Table {
 			break;
 
 		}
+		System.out.println("Table width: " + this	.getWidth());
+		System.out.println("Table height: " + this.getHeight());
 	}
 
 	public float getTableWidth() {

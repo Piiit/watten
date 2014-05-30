@@ -1,6 +1,7 @@
 package com.mpp.ui.screens;
 
 import com.mpp.tools.PlayerLocation;
+import com.mpp.tools.WTools;
 import com.mpp.ui.CardTable;
 import com.mpp.watten.WattenGame;
 import com.badlogic.gdx.Gdx;
@@ -16,16 +17,23 @@ public class GameScreen extends WattenScreen {
 
 	public GameScreen(WattenGame game, String gameName) {
 		this.game = game;
-		wrapperTable = new Table(WattenGame.getSkin());
-		table = new CardTable(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		wrapperTable.add(table).width(Gdx.graphics.getWidth())
-				.height(Gdx.graphics.getHeight());
-		wrapperTable.setPosition(Gdx.graphics.getWidth() / 2,
-				Gdx.graphics.getHeight() / 2);
 		stage = new Stage();
-		stage.addActor(wrapperTable);
+
+		skin = WattenGame.getSkin();
+		layoutTable = new Table(skin);
+		layoutTable.setPosition(0, 0);
+		layoutTable.setSize(game.getScreenWidth(), game.getScreenHeight());
+		layoutTable.setBackground(WTools.getTableImage().getDrawable());
+		
+		table = new CardTable(game.getScreenWidth(), game.getScreenHeight());
+		layoutTable.add(table).fill();
 
 		game.setCurrentGame(table);
+		System.out.println("Table width: " + table.getWidth());
+		System.out.println("Table height: " + table.getHeight());
+		System.out.println("LTable width: " + layoutTable.getWidth());
+		System.out.println("LTable height: " + layoutTable.getHeight());
+		this.resize((int)game.getScreenWidth(), (int)game.getScreenHeight());
 	}
 
 	@Override
@@ -48,6 +56,7 @@ public class GameScreen extends WattenScreen {
 	public void show() {
 		super.show();
 		// TODO Auto-generated method stub
+		stage.addActor(layoutTable);
 		Gdx.input.setInputProcessor(stage);
 	}
 

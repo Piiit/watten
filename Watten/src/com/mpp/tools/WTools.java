@@ -58,5 +58,7 @@ public class WTools {
 	public  static Image getCardBackImage() {
 		return new Image(backTexture);
 	}
+	
+ 
 
 }

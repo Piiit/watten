@@ -124,6 +124,7 @@ public class Card2D extends Table {
 		parentCell.setWidget(null);
 		parentCell = null;
 		owningPlayer = null;
+		
 	}
 
 	private void addActionListener() {
@@ -141,7 +142,9 @@ public class Card2D extends Table {
 
 			int pointer, int button) {
 				if (owningPlayer != null) {
+					System.out.println("player not null: " + owningPlayer.getPlayerName());
 					if (owningPlayer.isPlaying()) {
+						System.out.println("Player playing");
 						playCard();
 					}
 					if (owningPlayer.isSelect_rank()) {
