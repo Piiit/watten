@@ -1,5 +1,7 @@
 package com.mpp.ui;
 
+import java.util.ArrayList;
+
 import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.tools.PlayerLocation;
 import com.mpp.ui.message.MessageDialog;
@@ -12,7 +14,7 @@ import com.mpp.watten.logic.Player;
 public class PlayerUI {
 
 	int teamNumber;
-	int roundWins; // Stich
+	int tricks; // Stich
 
 	boolean local = false;
 	boolean select_rank = false;
@@ -26,13 +28,13 @@ public class PlayerUI {
 	PlayedCardArea playedCardArea;
 	PlayerInfoTable playerInfoTable;
 	Player player;
-	Card2D[] handUI = new Card2D[5];
+	ArrayList<Card2D> handUI = new ArrayList<Card2D>();
 	WattenGame game;
 
 	public PlayerUI(Player player) {
 		// TODO Auto-generated constructor stub
 		this.player = player;
-		roundWins = 0;
+		tricks = 0;
 		handCells = new Cell[5];
 		playedCardArea = new PlayedCardArea(0, 0);
 		playerInfoTable = new PlayerInfoTable(this);
@@ -91,12 +93,12 @@ public class PlayerUI {
 	}
 
 	public int getRoundWins() {
-		return roundWins;
+		return tricks;
 	}
 
 	// Simple round tracking counter(stich)
-	public void winsRound() {
-		roundWins++;
+	public void winsTurn() {
+		tricks++;
 	}
 
 	public void setTeamNumber(int teamNumber) {
@@ -108,13 +110,29 @@ public class PlayerUI {
 		for (int i = 0; i < handCells.length; i++) {
 			handCells[i].setWidget(null);
 		}
-		handUI = new Card2D[5];
+		handUI = new ArrayList<Card2D>();
 		player.setHand(null);
 	}
 
 	public void resetForRound() {
-		roundWins = 0;
+		tricks = 0;
 		resetHand();
+	}
+
+	public void resetForTurn() {
+		playedCardArea.removeCard();
+
+	}
+
+	public void leaveTable() {
+		resetForTurn();
+		resetForRound();
+		this.playedCardCell.setWidget(null);
+		this.playerInfoCell.setWidget(null);
+
+		if (local)
+			game.toMainMenu();
+
 	}
 
 	public PlayerLocation getPlayerLocation() {
@@ -128,7 +146,7 @@ public class PlayerUI {
 	// Adds card to players hand
 	public void addCard(Card2D card, int handIndex) {
 		System.out.println("Cell counter");
-		handUI[handIndex] = card;
+		handUI.add(card) ;
 		if (local) {
 
 			card.setParentCell(handCells[handIndex]);
@@ -180,9 +198,9 @@ public class PlayerUI {
 	}
 
 	public void checkCardFacing() {
-		for (int i = 0; i < handUI.length; i++) {
-			if (handUI[i] != null)
-				handUI[i].flipCard();
+		for (int i = 0; i < handUI.size(); i++) {
+			if (handUI.get(i) != null)
+				handUI.get(i).flipCard();
 
 		}
 	}
@@ -215,9 +233,9 @@ public class PlayerUI {
 		return player.getHand().getIndex(card.getCard());
 
 	}
-	
-	public Card2D getCard2D(int index){
-		return handUI[index];
+
+	public Card2D getCard2D(int index) {
+		return handUI.get(index);
 	}
 
 	public void selectSuit(Card2D card) {
@@ -225,7 +243,8 @@ public class PlayerUI {
 			game.sendRequest("suit_selected " + getCardIndex(card));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			MessageDialog.createErrorDialog("Suit select error: " + e.getMessage());
+			MessageDialog.createErrorDialog("Suit select error: "
+					+ e.getMessage());
 		}
 	}
 
@@ -234,7 +253,8 @@ public class PlayerUI {
 			game.sendRequest("rank_selected " + getCardIndex(card));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			MessageDialog.createErrorDialog("Rank select error: " + e.getMessage());
+			MessageDialog.createErrorDialog("Rank select error: "
+					+ e.getMessage());
 		}
 	}
 
@@ -243,7 +263,8 @@ public class PlayerUI {
 			game.sendRequest("card_played " + getCardIndex(card));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			MessageDialog.createErrorDialog("Card play select error: " + e.getMessage());
+			MessageDialog.createErrorDialog("Card play select error: "
+					+ e.getMessage());
 		}
 	}
 

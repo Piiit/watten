@@ -24,10 +24,8 @@ import com.mpp.watten.cards.Suit;
 
 public class Card2D extends Table {
 
-	Texture frontTexture; // Later get as parameter directly from helper class
-							// creating image, reduce load
-	Texture backTexture; // Later get as parameter directly from helper class
-							// creating image, reduce load
+	
+	
 	Image frontImage;
 	Image backImage;
 	Suit cardSuit;
@@ -48,19 +46,16 @@ public class Card2D extends Table {
 		this.owningPlayer = owningPlayer;
 		played = false;
 
-		frontTexture = new Texture(Gdx.files.internal("data/weli.jpg"));
-		frontTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		
+		frontImage = WTools.getCard(cardRank, cardSuit);
 
-		frontImage = new Image(frontTexture);
-
-		backTexture = new Texture(Gdx.files.internal("data/cardback.png"));
-		backTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		backImage = new Image(backTexture);
+		
+		backImage = WTools.getCardBackImage();
 		this.setBounds(0, 0, getWidth(), getHeight());
 		this.setTouchable(Touchable.enabled);
-this.add(card.getSuit().toString());
-this.row();
-this.add(card.getRank().toString());
+		this.add(card.getSuit().toString());
+		this.row();
+		this.add(card.getRank().toString());
 		evaluateCardFacing();
 
 		addActionListener();
@@ -117,7 +112,7 @@ this.add(card.getRank().toString());
 	@Override
 	public void draw(Batch batch, float alpha) {
 		super.draw(batch, alpha);
-		
+
 	}
 
 	public void setParentCell(Cell cell) {

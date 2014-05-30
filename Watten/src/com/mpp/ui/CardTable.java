@@ -92,18 +92,18 @@ public class CardTable extends Table {
 		this.add(table).fill();
 		divideCardTable();
 
-		// TESTING
-		// addPlayer(new PlayerUI("me"), PlayerLocation.South);
-		// addPlayer(new PlayerUI("West"), PlayerLocation.West);
-		// addPlayer(new PlayerUI("North"), PlayerLocation.North);
-		// addPlayer(new PlayerUI("East"), PlayerLocation.East);
-		
-		// TESTING
-
 		System.out.println("cardWidth: " + cardWidth + " cardHeight: "
 				+ cardHeight + " side columns: " + sideColumnsWidth);
 
 	}
+	public void refreshPoints(int team1, int team2){
+		Table table = new Table(WattenGame.getSkin());
+		table.add("Team 1: "+ team1);
+		table.row();
+		table.add("Team 2: "+team2);
+		cardTableCells[0][0].setWidget(table);
+	}
+
 
 	// Add player to local table
 	public synchronized void addPlayer(PlayerUI player) {
@@ -111,22 +111,30 @@ public class CardTable extends Table {
 		// Local player is always south, so other players positions have to be
 		// rotated for local table
 		int tempPosition = player.getPlayerLocation().ordinal();
+		if(player.getPlayerLocation() == PlayerLocation.South ||player.getPlayerLocation() == PlayerLocation.North )
+			player.setTeamNumber(1);
+		else{
+			player.setTeamNumber(2);
+
+		}
+			
 		if (player.isLocalPlayer())
 			positionCorrection = 4 - tempPosition;
 
 		tempPosition = (positionCorrection + tempPosition) % 4;
 
 		PlayerLocation localTableLocation = PlayerLocation.get(tempPosition);
-		
-		System.out.println("player: " +player.getPlayerName()+" "+localTableLocation);
+
+		System.out.println("player: " + player.getPlayerName() + " "
+				+ localTableLocation);
 
 		switch (localTableLocation) {
-
 
 		case South:
 
 			player.addToTable(playerCells[localTableLocation.ordinal()][0],
-					playerCells[localTableLocation.ordinal()][1], localPlayerHand);
+					playerCells[localTableLocation.ordinal()][1],
+					localPlayerHand);
 			break;
 		case West:
 			player.addToTable(playerCells[localTableLocation.ordinal()][0],

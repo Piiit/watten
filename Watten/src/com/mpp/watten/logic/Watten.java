@@ -11,23 +11,20 @@ import com.mpp.watten.cards.Rank;
 import com.mpp.watten.cards.Suit;
 import com.mpp.watten.cards.WattenCardTools;
 
-
 /**
- * TURN
- * - select best card's rank
- * - select best card's suit
- * - every player plays a card
- * - calculate the winner of this turn
+ * TURN - select best card's rank - select best card's suit - every player plays
+ * a card - calculate the winner of this turn
+ * 
  * @author Peter Moser (pemoser)
  */
 public class Watten {
-	
+
 	public final static int NOTEAM = 0;
 	public final static int TEAM1 = 1;
 	public final static int TEAM2 = 2;
 	public final static boolean SURRENDER = false;
 	public final static boolean HOLD = true;
-	
+
 	private String name;
 	private int maxPoints = 2;
 	private Deck deck;
@@ -38,38 +35,40 @@ public class Watten {
 	private int team1Points = 0;
 	private int team2Points = 0;
 	private Card bestCard = null;
-	private int lastBetTeamNumber = NOTEAM; 
+	private int lastBetTeamNumber = NOTEAM;
 	private PlayerLocation turnWinnerPlayerLocation = null;
+	private int roundWinningTeam;
 	private WattenFeature status;
 	private List<WattenFeature> allowedStates = new ArrayList<WattenFeature>();
 	private Suit firstCardsSuit = null;
 	private int lastBet;
-	
 
 	public Watten(String name) throws Exception {
 		this.name = name;
 		deck = new Deck();
 		table = new Table();
-		
+		// Needed otherwise nullpointer when joining unstarted game
+		team1Points = 0;
+		team2Points = 0;
 		status = WattenFeature.INIT;
 		setConstraints(WattenFeature.GAME_START);
 	}
-	
+
 	public Player getTurnWinner() {
-		if(turnWinnerPlayerLocation == null) {
+		if (turnWinnerPlayerLocation == null) {
 			return null;
 		}
 		return table.getPlayer(turnWinnerPlayerLocation);
 	}
-	
+
 	public int getTurnTricksTeam1() {
 		return team1Tricks;
 	}
-	
+
 	public int getTurnTricksTeam2() {
 		return team2Tricks;
 	}
-	
+
 	public int getPointsTeam1() {
 		return team1Points;
 	}
@@ -77,60 +76,61 @@ public class Watten {
 	public int getPointsTeam2() {
 		return team2Points;
 	}
-	
+
 	public int getTeam(Player player) {
 		return getTeam(table.getPlayerLocation(player));
 	}
-	
+
 	public int getTeam(PlayerLocation playerLocation) {
-		if(playerLocation == PlayerLocation.North || playerLocation == PlayerLocation.South) {
+		if (playerLocation == PlayerLocation.North
+				|| playerLocation == PlayerLocation.South) {
 			return TEAM1;
-		} 
-		return TEAM2; 
+		}
+		return TEAM2;
 	}
-	
+
 	public int getTeam() throws Exception {
 		return getTeam(table.getPlayerLocation(table.getCurrentPlayer()));
 	}
-	
+
 	public void start() throws Exception {
 		stateGameEntry();
 	}
-	
+
 	private void stateGameEntry() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.GAME_START);
-		if(table.getPlayerCount() != 4) {
+		if (table.getPlayerCount() != 4) {
 			throw new Exception("We need 4 players to start the game!");
 		}
 		team1Points = 0;
 		team2Points = 0;
-		
+
 		setStatus(WattenFeature.GAME_START);
 		setConstraints(WattenFeature.ROUND_START);
 		stateRoundEntry();
 	}
-	
-	private void setConstraints(WattenFeature ... states) {
+
+	private void setConstraints(WattenFeature... states) {
 		allowedStates.clear();
-		for(WattenFeature state : states) {
+		for (WattenFeature state : states) {
 			allowedStates.add(state);
 		}
 	}
-	
-	private void throwExceptionIfNotAllowed(WattenFeature statusToCheck) throws Exception {
-		if(!allowedStates.contains(statusToCheck)) {
-			throw new Exception("Can not change to status " + statusToCheck + " from status " + status + ": allowed states = " + getConstraints());
+
+	private void throwExceptionIfNotAllowed(WattenFeature statusToCheck)
+			throws Exception {
+		if (!allowedStates.contains(statusToCheck)) {
+			throw new Exception("Can not change to status " + statusToCheck
+					+ " from status " + status + ": allowed states = "
+					+ getConstraints());
 		}
 	}
-	
+
 	/**
-	 * A new round means:
-	 * - remove cards from table;
-	 * - shuffle cards;
-	 * - next player is considered the new dealer;
-	 * - deal cards
-	 * - set tricks to zero
-	 * @throws Exception 
+	 * A new round means: - remove cards from table; - shuffle cards; - next
+	 * player is considered the new dealer; - deal cards - set tricks to zero
+	 * 
+	 * @throws Exception
 	 */
 	private void stateRoundEntry() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.ROUND_START);
@@ -140,17 +140,19 @@ public class Watten {
 		team2Tricks = 0;
 		lastBet = 2;
 		lastBetTeamNumber = NOTEAM;
-		if(cardDealerPlayerLocation == null || cardDealerPlayerLocation.getIndex() + 1 > 3) {
+		if (cardDealerPlayerLocation == null
+				|| cardDealerPlayerLocation.getIndex() + 1 > 3) {
 			cardDealerPlayerLocation = PlayerLocation.South;
 		} else {
-			cardDealerPlayerLocation = PlayerLocation.get(cardDealerPlayerLocation.getIndex() + 1);
+			cardDealerPlayerLocation = PlayerLocation
+					.get(cardDealerPlayerLocation.getIndex() + 1);
 		}
 		turnWinnerPlayerLocation = getSelectRankPlayer().getPlayerLocation();
 
-		//Deal cards...
-		for(Player p : table.getPlayers()) {
+		// Deal cards...
+		for (Player p : table.getPlayers()) {
 			p.getHand().clear();
-			for(int i = 1; i <= 5; i++) {
+			for (int i = 1; i <= 5; i++) {
 				p.addCard(deck.getNextCard());
 			}
 		}
@@ -159,25 +161,36 @@ public class Watten {
 		setConstraints(WattenFeature.TURN_START);
 		stateTurnEntry();
 	}
-	
+
 	/**
-	 * A new turn means:
-	 * - reset old best card values;
-	 * @throws Exception 
+	 * A new turn means: - reset old best card values;
+	 * 
+	 * @throws Exception
 	 */
 	private void stateTurnEntry() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.TURN_START);
-		if(bestCard == null) {
-			bestCard = new Card();
-		} else {
-			bestCard.setSuit(null);
-			bestCard.setRank(null);
-		}
+	
 		firstCardsSuit = null;
 		table.setCurrentPlayer(turnWinnerPlayerLocation);
 		table.resetCardList();
+
 		setStatus(WattenFeature.TURN_START);
-		setConstraints(WattenFeature.SELECT_RANK);
+		if (getTurnTricksTeam1() > 0 || getTurnTricksTeam2() > 0) {
+
+			setConstraints(WattenFeature.PLAY_CARD, WattenFeature.BET);
+
+		} else {
+			if (bestCard == null) {
+				bestCard = new Card();
+			} else {
+				bestCard.setSuit(null);
+				bestCard.setRank(null);
+			}
+
+			setConstraints(WattenFeature.SELECT_RANK);
+
+		}
+		
 	}
 
 	public int getMaxPoints() {
@@ -190,53 +203,59 @@ public class Watten {
 
 	@Override
 	public String toString() {
-		return String.format("Watten: %s\n%s", toStringInfo(),	table);
+		return String.format("Watten: %s\n%s", toStringInfo(), table);
 	}
-	
+
 	public String getName() {
-		return name; 
+		return name;
 	}
-	
+
 	public WattenFeature getStatus() {
 		return status;
 	}
-	
+
 	private void setStatus(WattenFeature status) {
-		System.out.println("Status switch from " + this.status + " to " + status);
+		System.out.println("Status switch from " + this.status + " to "
+				+ status);
 		this.status = status;
 	}
-	
+
 	public Table getTable() {
 		return table;
 	}
-	
+
 	public Deck getDeck() {
 		return deck;
 	}
-	
+
 	public void setDeck(Deck deck) {
 		this.deck = deck;
 	}
- 	
+
 	public void stateTurnPlayCard(Card card) throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.PLAY_CARD);
-		
-		if(table.getCurrentPlayerCard() != null) {
-			throw new Exception("Player " + table.getCurrentPlayer().getName() + " can not put another card!");
+
+		if (table.getCurrentPlayerCard() != null) {
+			throw new Exception("Player " + table.getCurrentPlayer().getName()
+					+ " can not put another card!");
 		}
 
-		//If first player throws a card with the same suit as the best card's suit, other players must throw a best suit card as well
-		//if existent, except "Guater" or "Rechter"
-		if(firstCardsSuit == bestCard.getSuit() && card.getSuit() != bestCard.getSuit()) {
+		// If first player throws a card with the same suit as the best card's
+		// suit, other players must throw a best suit card as well
+		// if existent, except "Guater" or "Rechter"
+		if (firstCardsSuit == bestCard.getSuit()
+				&& card.getSuit() != bestCard.getSuit()) {
 			boolean hasSuitCard = false;
 			MultipleCards hand = table.getCurrentPlayer().getHand();
-			for(int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
+			for (int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
 				Card c = hand.getCard(cardIndex);
-				if(c.getSuit() == bestCard.getSuit() && !WattenCardTools.isGuater(c, bestCard) && !WattenCardTools.isRechter(c, bestCard)) {
+				if (c.getSuit() == bestCard.getSuit()
+						&& !WattenCardTools.isGuater(c, bestCard)
+						&& !WattenCardTools.isRechter(c, bestCard)) {
 					hasSuitCard = true;
 				}
 			}
-			if(hasSuitCard) {
+			if (hasSuitCard) {
 				setStatus(WattenFeature.PLAY_CARD);
 				setConstraints(WattenFeature.PLAY_CARD);
 				throw new Exception("You must throw a best suit card!");
@@ -244,11 +263,11 @@ public class Watten {
 		}
 		table.putCardUpdatePlayer(card);
 		table.nextPlayer();
-		if(firstCardsSuit == null) {
+		if (firstCardsSuit == null) {
 			firstCardsSuit = card.getSuit();
 		}
-		
-		if(table.getCurrentPlayerCard() != null) {
+
+		if (table.getCurrentPlayerCard() != null) {
 			setConstraints(WattenFeature.TURN_FINISHED);
 			stateTurnExit();
 		} else {
@@ -256,70 +275,73 @@ public class Watten {
 			setConstraints(WattenFeature.PLAY_CARD, WattenFeature.BET);
 		}
 	}
-	
+
 	public MultipleCards getAllowedCards() throws Exception {
 		MultipleCards hand = table.getCurrentPlayer().getHand();
-		if(firstCardsSuit != bestCard.getSuit()) {
+		if (firstCardsSuit != bestCard.getSuit()) {
 			return hand;
 		}
-		
+
 		MultipleCards allowedCards = new MultipleCards();
-		for(int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
+		for (int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
 			Card c = hand.getCard(cardIndex);
-			if(c.getSuit() == bestCard.getSuit()) {
+			if (c.getSuit() == bestCard.getSuit()) {
 				allowedCards.addCard(c);
 			}
 		}
-		if(allowedCards.getCount() == 0) {
+		if (allowedCards.getCount() == 0) {
 			return hand;
 		}
 		return allowedCards;
 	}
-	
+
 	public void stateTurnBet(int team) throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.BET);
-		if(team != TEAM1 && team != TEAM2) {
-			throw new Exception("Team number must be 1 (north/south) or 2 (east/west)!");
+		if (team != TEAM1 && team != TEAM2) {
+			throw new Exception(
+					"Team number must be 1 (north/south) or 2 (east/west)!");
 		}
-		if(team == lastBetTeamNumber) {
+		if (team == lastBetTeamNumber) {
 			throw new Exception("Team " + team + " can not bet twice!");
 		}
 		lastBetTeamNumber = team;
 		setConstraints(WattenFeature.SURRENDER_OR_HOLD);
 	}
-	
+
 	public List<WattenFeature> getConstraints() {
 		return allowedStates;
 	}
-	
+
 	private void stateRoundExit() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.ROUND_FINISHED);
-		
-		if(lastBetTeamNumber == NOTEAM) {
-			if(getTurnTricksTeam1() >= 3) {
+		roundWinningTeam = 0;
+		if (lastBetTeamNumber == NOTEAM) {
+			if (getTurnTricksTeam1() >= 3) {
 				team1Points += getCurrentBet();
+				roundWinningTeam = 1;
 			} else {
 				team2Points += getCurrentBet();
+				roundWinningTeam = 2;
 			}
 		} else {
-			if(lastBetTeamNumber == TEAM1) {
+			if (lastBetTeamNumber == TEAM1) {
 				team1Points += getCurrentBet();
+				roundWinningTeam = 1;
 			} else {
 				team2Points += getCurrentBet();
+				roundWinningTeam = 2;
+
 			}
 		}
-		
+
 		setStatus(WattenFeature.ROUND_FINISHED);
-		
-		if(team1Points >= getMaxPoints() || team2Points >= getMaxPoints()) {
-			setConstraints(WattenFeature.GAME_FINISHED);
-			stateGameExit();
-		} else {
-			setConstraints(WattenFeature.ROUND_START);
-			stateRoundEntry();
-		}
+
 	}
-	
+
+	public int getRoundWinningTeam() {
+		return roundWinningTeam;
+	}
+
 	private void stateGameExit() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.GAME_FINISHED);
 		setStatus(WattenFeature.GAME_FINISHED);
@@ -336,9 +358,9 @@ public class Watten {
 		setStatus(WattenFeature.SELECT_SUIT);
 		setConstraints(WattenFeature.PLAY_CARD, WattenFeature.BET);
 		table.setCurrentPlayer(getSelectRankPlayer().getPlayerLocation());
-		
+
 	}
-	
+
 	public void stateSelectBestCardRank(Rank rank) throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.SELECT_RANK);
 		bestCard.setRank(rank);
@@ -346,14 +368,13 @@ public class Watten {
 		setConstraints(WattenFeature.SELECT_SUIT);
 		table.setCurrentPlayer(getSelectSuitPlayer().getPlayerLocation());
 
-
 	}
-	
+
 	private void stateTurnExit() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.TURN_FINISHED);
-		
+
 		table.setCurrentPlayer(cardDealerPlayerLocation);
-		
+
 		Card card1 = table.getCurrentPlayerCard();
 		table.nextPlayer();
 		Card card2 = table.getCurrentPlayerCard();
@@ -362,51 +383,68 @@ public class Watten {
 		table.nextPlayer();
 		Card card4 = table.getCurrentPlayerCard();
 		table.nextPlayer();
-		
+
 		Card betterCard = card1;
 		int bestPlayerIndex = 0;
-		if(WattenCardTools.isBetterCardChronological(card1, card2, bestCard) == false) {
+		if (WattenCardTools.isBetterCardChronological(card1, card2, bestCard) == false) {
 			betterCard = card2;
 			bestPlayerIndex = 1;
 		}
-		if(WattenCardTools.isBetterCardChronological(betterCard, card3, bestCard) == false) {
+		if (WattenCardTools.isBetterCardChronological(betterCard, card3,
+				bestCard) == false) {
 			betterCard = card3;
 			bestPlayerIndex = 2;
 		}
-		if(WattenCardTools.isBetterCardChronological(betterCard, card4, bestCard) == false) {
+		if (WattenCardTools.isBetterCardChronological(betterCard, card4,
+				bestCard) == false) {
 			betterCard = card4;
 			bestPlayerIndex = 3;
 		}
-		
+
 		bestPlayerIndex = (cardDealerPlayerLocation.getIndex() + bestPlayerIndex) % 4;
-		if(PlayerLocation.get(bestPlayerIndex) == PlayerLocation.North || PlayerLocation.get(bestPlayerIndex) == PlayerLocation.South) {
+		if (PlayerLocation.get(bestPlayerIndex) == PlayerLocation.North
+				|| PlayerLocation.get(bestPlayerIndex) == PlayerLocation.South) {
 			team1Tricks++;
 		} else {
 			team2Tricks++;
 		}
 		turnWinnerPlayerLocation = PlayerLocation.get(bestPlayerIndex);
-		
+
 		setStatus(WattenFeature.TURN_FINISHED);
-		
-		if(getTurnTricksTeam1() >= 3 || getTurnTricksTeam2() >= 3) {
+
+	}
+
+	public void evaluateTricks() throws Exception {
+		if (getTurnTricksTeam1() >= 3 || getTurnTricksTeam2() >= 3) {
 			setConstraints(WattenFeature.ROUND_FINISHED);
 			stateRoundExit();
 		} else {
 			setConstraints(WattenFeature.TURN_START);
 			stateTurnEntry();
 		}
+	}
 
+	public void evaluatePoints() throws Exception {
+		if (team1Points >= getMaxPoints() || team2Points >= getMaxPoints()) {
+			setConstraints(WattenFeature.GAME_FINISHED);
+			stateGameExit();
+		} else {
+			setConstraints(WattenFeature.ROUND_START);
+			stateRoundEntry();
+		}
 	}
 
 	public Player[] getWinners() {
-		if(status != WattenFeature.GAME_FINISHED) {
-			return null;	
+		if (status != WattenFeature.GAME_FINISHED) {
+			return null;
 		}
-		
-		if(getPointsTeam1() >= getMaxPoints()) {
-			return new Player[]{table.getPlayer(PlayerLocation.North), table.getPlayer(PlayerLocation.South)};
+
+		if (getPointsTeam1() >= getMaxPoints()) {
+			return new Player[] { table.getPlayer(PlayerLocation.North),
+					table.getPlayer(PlayerLocation.South) };
 		}
-		return new Player[]{table.getPlayer(PlayerLocation.West), table.getPlayer(PlayerLocation.East)};
+		return new Player[] { table.getPlayer(PlayerLocation.West),
+				table.getPlayer(PlayerLocation.East) };
 	}
 
 	public String getWinnersAsString() {
@@ -416,7 +454,7 @@ public class Watten {
 
 	public void stateTurnSurrenderOrHold(boolean hold) throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.SURRENDER_OR_HOLD);
-		if(hold) {
+		if (hold) {
 			lastBet++;
 			setConstraints(WattenFeature.PLAY_CARD);
 		} else {
@@ -426,35 +464,31 @@ public class Watten {
 	}
 
 	public String toStringInfo() {
-		return String.format(
-				"name=%s; max. points=%d; status=%s; best=%s; tricks1=%d; tricks2=%d; winner=%s; points1=%d; points2=%d; bet=%d; betTeam=%d", 
-				getName(), 
-				maxPoints,
-				getStatus(),
-				bestCard == null ? "n/a" : bestCard.toStringFaceUp(), 
-				getTurnTricksTeam1(),
-				getTurnTricksTeam2(),
-				getTurnWinner() == null ? "n/a" : getTurnWinner().getName(),
-				getPointsTeam1(),
-				getPointsTeam2(),
-				lastBet,
-				lastBetTeamNumber
-				);
+		return String
+				.format("name=%s; max. points=%d; status=%s; best=%s; tricks1=%d; tricks2=%d; winner=%s; points1=%d; points2=%d; bet=%d; betTeam=%d",
+						getName(), maxPoints, getStatus(),
+						bestCard == null ? "n/a" : bestCard.toStringFaceUp(),
+						getTurnTricksTeam1(), getTurnTricksTeam2(),
+						getTurnWinner() == null ? "n/a" : getTurnWinner()
+								.getName(), getPointsTeam1(), getPointsTeam2(),
+						lastBet, lastBetTeamNumber);
 	}
 
 	public void kickPlayer(Player player) throws Exception {
 		getTable().removePlayer(player);
 		System.out.println("A player left the table: " + player.getName());
-		if(getStatus() != WattenFeature.INIT && getStatus() != WattenFeature.PAUSE) {
+		if (getStatus() != WattenFeature.INIT
+				&& getStatus() != WattenFeature.PAUSE) {
 			setConstraints(WattenFeature.PAUSE);
 			statePause();
 		}
 	}
-	
+
 	public void addPlayer(Player player) throws Exception {
 		getTable().addPlayer(player);
 		System.out.println("New player joined the table: " + player.getName());
-		if(getStatus() == WattenFeature.PAUSE && getTable().getPlayerCount() == 4) {
+		if (getStatus() == WattenFeature.PAUSE
+				&& getTable().getPlayerCount() == 4) {
 			stateResume();
 		}
 	}
@@ -464,24 +498,29 @@ public class Watten {
 		setStatus(WattenFeature.PAUSE);
 		setConstraints(WattenFeature.RESUME);
 	}
-	
+
 	private void stateResume() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.RESUME);
-		if(getTable().getPlayerCount() != 4) {
-			throw new Exception("Can not resume this game. We need 4 players to continue...");
+		if (getTable().getPlayerCount() != 4) {
+			throw new Exception(
+					"Can not resume this game. We need 4 players to continue...");
 		}
 		setStatus(WattenFeature.RESUME);
 		setConstraints(WattenFeature.ROUND_START);
 		stateRoundEntry();
 	}
-	
-	public int getPlayerCount(){
+
+	public int getPlayerCount() {
 		return table.getPlayerCount();
 	}
-	public Player getSelectRankPlayer(){
-		return table.getPlayer(PlayerLocation.get(cardDealerPlayerLocation.getIndex()+1));
+
+	public Player getSelectRankPlayer() {
+		return table.getPlayer(PlayerLocation.get(cardDealerPlayerLocation
+				.getIndex() + 1));
 	}
-	public Player getSelectSuitPlayer(){
-		return table.getPlayer(PlayerLocation.get(cardDealerPlayerLocation.getIndex()));
+
+	public Player getSelectSuitPlayer() {
+		return table.getPlayer(PlayerLocation.get(cardDealerPlayerLocation
+				.getIndex()));
 	}
 }

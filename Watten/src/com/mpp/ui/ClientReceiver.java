@@ -96,7 +96,12 @@ public class ClientReceiver extends Thread {
 											xml.root.getNode("name").getData()));
 									game.addPlayerCurrentGame(game
 											.getLocalPlayer());
-
+									int team1points = Integer.parseInt(xml.root
+											.getNode("team1points").getData());
+									int team2points = Integer.parseInt(xml.root
+											.getNode("team2points").getData());
+									game.getCurrentGame().refreshPoints(
+											team1points, team2points);
 									game.sendRequest("other_players "
 											+ xml.root.getNode("name")
 													.getData());
@@ -126,6 +131,17 @@ public class ClientReceiver extends Thread {
 							}
 						});
 
+						break;
+
+					case "player_left":
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+								game.removePlayerCurrentGame(xml.root.getNode(
+										"name").getData());
+							}
+						});
 						break;
 
 					case "other_players":
@@ -158,8 +174,6 @@ public class ClientReceiver extends Thread {
 					case "start_game":
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
-
-							// No idea what to put here
 
 						} else if ("NAK".equalsIgnoreCase(xml.root.getNode(
 								"type").getData())) {
@@ -257,7 +271,7 @@ public class ClientReceiver extends Thread {
 					case "play_card":
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
-							
+
 							Gdx.app.postRunnable(new Runnable() {
 
 								@Override
@@ -272,8 +286,8 @@ public class ClientReceiver extends Thread {
 									game.getLocalPlayer().setPlaying(false);
 								}
 							});
-						}else if ("NAK".equalsIgnoreCase(xml.root.getNode("type")
-								.getData())) {
+						} else if ("NAK".equalsIgnoreCase(xml.root.getNode(
+								"type").getData())) {
 							error(xml);
 						}
 						break;
@@ -296,15 +310,106 @@ public class ClientReceiver extends Thread {
 																	Rank.valueOf(xml.root
 																			.getNode(
 																					"rank")
-																			.getData()),false ),
+																			.getData()),
+																	false),
 															game.getPlayer(xml.root
 																	.getNode(
 																			"name")
 																	.getData())));
 								} catch (Exception e) {
 									// TODO Auto-generated catch block
-									MessageDialog.createErrorDialog(e.getMessage());
+									MessageDialog.createErrorDialog(e
+											.getMessage());
 								}
+							}
+						});
+						break;
+					case "turn_finished":
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+
+									for (PlayerUI player : game.getPlayers()) {
+										if (player.getPlayerName().equals(
+												xml.root.getNode("winner")
+														.getData()))
+											player.winsTurn();
+										player.resetForTurn();
+
+										
+									}
+									if (game.getLocalPlayerName().equals(
+											xml.root.getNode("winner")
+													.getData())) {
+										MessageDialog
+												.createMessageDialog("You have the highest card, your turn!");
+									}
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									MessageDialog.createErrorDialog(e
+											.getMessage());
+								}
+							}
+						});
+						break;
+
+					case "round_finished":
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									MessageDialog.createMessageDialog("Team "
+											+ xml.root.getNode("winners")
+													.getData()
+											+ "won this round!");
+									int team1points = Integer.parseInt(xml.root
+											.getNode("team1points").getData());
+									int team2points = Integer.parseInt(xml.root
+											.getNode("team2points").getData());
+									game.getCurrentGame().refreshPoints(
+											team1points, team2points);
+									for (PlayerUI player : game.getPlayers()) {
+										player.resetForRound();
+
+									}
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									MessageDialog.createErrorDialog(e
+											.getMessage());
+								}
+							}
+						});
+						break;
+					case "game_finished":
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+								String winner1 = xml.root.getNode("winner1")
+										.getData();
+								String winner2 = xml.root.getNode("winner2")
+										.getData();
+								String messageString = "";
+								if (winner1.equals(game.getLocalPlayerName())) {
+									messageString = "Congratulations, you and"
+											+ winner2 + "won!";
+								} else if (winner2.equals(game
+										.getLocalPlayerName())) {
+									messageString = "Congratulations, you and"
+											+ winner1 + "won!";
+								} else {
+									messageString = winner1 + " and" + winner2
+											+ "won!";
+
+								}
+								MessageDialog
+										.createMessageDialog(messageString);
+								if (winner1.equals(game.getLocalPlayerName()))
+									game.sendRequest("start_game");
+
 							}
 						});
 						break;
@@ -345,7 +450,7 @@ public class ClientReceiver extends Thread {
 	}
 
 	public void error(SimpleXML xml) {
-		 MessageDialog.createErrorDialog("ERROR: "
+		MessageDialog.createErrorDialog("ERROR: "
 				+ unescape(xml.root.getNode("message").getData()));
 
 	}

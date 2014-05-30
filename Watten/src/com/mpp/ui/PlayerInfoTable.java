@@ -29,7 +29,10 @@ public class PlayerInfoTable extends Table {
 	public void draw(Batch batch, float parentAlpha){
 		super.draw(batch, parentAlpha);
 		roundWins = "Stich: " + player.getRoundWins();
+		team = "Team " + this.player.getTeamNumber();
+		
 	}
+
 	
 
 }

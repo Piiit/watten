@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.mpp.tools.xml.SimpleXML;
+import com.mpp.watten.cards.Card;
 import com.mpp.watten.logic.Player;
 import com.mpp.watten.logic.Watten;
 import com.mpp.watten.logic.WattenFeature;
@@ -193,7 +194,7 @@ public class ServerThread extends Thread {
 				sendResponse(command, "type", "ACK", "message",
 						"You joined the game " + games.get(gameName), "name",
 						gameName, "position", ""
-								+ player.getPlayerLocation().getIndex());
+								+ player.getPlayerLocation().getIndex(),"team1points", ""+games.get(gameName).getPointsTeam1(), "team2points", ""+games.get(gameName).getPointsTeam2());
 
 				sendResponseToOthersInGame(gameName, "player_joined", "name",
 						player.getName(), "position", ""
@@ -203,7 +204,8 @@ public class ServerThread extends Thread {
 						+ player.getName() + "] joined your game!");
 
 				// Tells current player that game can be started
-				System.out.println("Current playerCount: "+games.get(gameName).getPlayerCount() );
+				System.out.println("Current playerCount: "
+						+ games.get(gameName).getPlayerCount());
 				if (games.get(gameName).getPlayerCount() == 4) {
 					sendResponseTo(player.getName(), "game_ready", "type",
 							"ACK");
@@ -237,7 +239,7 @@ public class ServerThread extends Thread {
 				sendResponse(command, "type", "ACK");
 				for (Player p : currentGame.getTable().getPlayers()) {
 					String hand = p.getHand().serialize();
-				
+
 					sendResponseTo(p.getName(), "start_round", "hand", hand);
 				}
 
@@ -301,31 +303,29 @@ public class ServerThread extends Thread {
 			if (isCurrentPlayer) {
 				int cardIndex = Integer.parseInt(xml.root.getNode("card_index")
 						.getData());
-				try{
-				currentGame.stateTurnPlayCard(currentPlayer.getHand().getCard(
-						cardIndex));
-				}catch(Exception e){
-					sendResponse(command, "type", "NAK", "message", e.getMessage());
+				Card playedCard = currentPlayer.getHand().getCard(cardIndex);
+				try {
+					currentGame.stateTurnPlayCard(playedCard);
+				} catch (Exception e) {
+					sendResponse(command, "type", "NAK", "message",
+							e.getMessage());
 					break;
 				}
-				// sendResponse(command, "type", "ACK");
-				// Add if's or switch to check game status, then depending on
-				// status send command
-				// if(currentGame.getStatus() ==WattenFeature.ROUND_FINISHED){
-				// sendResponseToAll("round_finished", "winner",
-				// currentGame.getTurnWinner().getName());
-				// }
-				sendResponseTo(player.getName(), "play_card", "type", "ACK","card_index", ""
-						+ cardIndex);
+
+				sendResponseTo(player.getName(), "play_card", "type", "ACK",
+						"card_index", "" + cardIndex);
 				sendResponseToOthers("card_played", "name", player.getName(),
-						"rank", player.getHand().getCard(cardIndex).getRank()
+						"rank", playedCard.getRank()
 								.toString(), "suit",
-						player.getHand().getCard(cardIndex).getSuit()
+								playedCard.getSuit()
 								.toString());
+
+				evaluateGameStatus(currentGame, player);
 				
-				System.err.println("Current status: "+currentGame.getStatus());
-				sendResponseTo(currentGame.getTable().getCurrentPlayer()
-						.getName(), "your_turn");
+
+				System.err
+						.println("Current status: " + currentGame.getStatus());
+				
 			} else {
 				sendResponse(command, "type", "NAK", "message",
 						"You are not allowed to play this card ! It's "
@@ -527,6 +527,50 @@ public class ServerThread extends Thread {
 				}
 			}
 		}
+	}
+
+	public void evaluateGameStatus(Watten currentGame, Player player)
+			throws Exception {
+		if (currentGame != null)
+			System.out.println(currentGame.getStatus());
+			switch (currentGame.getStatus()) {
+			case GAME_START:
+				
+				break;
+			case PLAY_CARD:
+				sendResponseTo(currentGame.getTable().getCurrentPlayer()
+						.getName(), "your_turn");
+				break;
+			case TURN_START:
+				sendResponseTo(currentGame.getTable().getCurrentPlayer()
+						.getName(), "your_turn");
+				break;
+			case TURN_FINISHED:
+				sendResponseToAll("turn_finished", "winner", currentGame
+						.getTurnWinner().getName());
+				currentGame.evaluateTricks();
+				evaluateGameStatus(currentGame, player);
+				break;
+			case ROUND_START:
+				sendResponseTo(currentGame.getSelectRankPlayer().getName(),
+						"select_rank");
+				break;
+			case ROUND_FINISHED:
+				sendResponseToAll("round_finished", "winners", ""+currentGame
+						.getRoundWinningTeam(),"team1points", ""+currentGame.getPointsTeam1(), "team2points", ""+currentGame.getPointsTeam2());
+				currentGame.evaluatePoints();
+				evaluateGameStatus(currentGame, player);
+				break;
+			case GAME_FINISHED:
+				sendResponseToAll("game_finished", "winner1", currentGame
+						.getWinners()[0].getName(),"winner2", currentGame
+						.getWinners()[1].getName());
+				evaluateGameStatus(currentGame, player);
+				break;
+				
+			}
+		
+
 	}
 
 }

@@ -31,7 +31,7 @@ public class PlayedCardArea extends Table {
 	//Add card if played
 	public void addCard(Card2D card){
 		this.clear();
-		this.add(card);
+		this.add(card).width(CardTable.getCardWidth()).height( CardTable.getCardHeight());
 		this.setSize(CardTable.getCardWidth(), CardTable.getCardHeight());
 	}
 	

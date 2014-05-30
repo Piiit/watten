@@ -1,6 +1,7 @@
 package com.mpp.watten;
 
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -136,6 +137,10 @@ public class WattenGame extends Game {
 		this.currentGame = currentGame;
 	}
 
+	public CardTable getCurrentGame() {
+		return this.currentGame;
+	}
+
 	public void addPlayerCurrentGame(PlayerUI player) {
 		if (currentGame != null) {
 			if (player != getLocalPlayer())
@@ -143,6 +148,16 @@ public class WattenGame extends Game {
 
 			player.setWattenGame(this);
 			currentGame.addPlayer(player);
+		}
+	}
+	
+	public void removePlayerCurrentGame(String player) {
+		if (currentGame != null) {
+			if (currentPlayers.get(player) != getLocalPlayer())
+			{
+				currentPlayers.get(player).leaveTable();
+				currentPlayers.remove(player);
+			}
 		}
 	}
 
@@ -156,6 +171,10 @@ public class WattenGame extends Game {
 
 	private WattenGame returnThisGame() {
 		return this;
+	}
+
+	public Collection<PlayerUI> getPlayers() {
+		return currentPlayers.values();
 	}
 
 	public void startClientNetworkingThread() {

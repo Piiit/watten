@@ -74,6 +74,8 @@ public class InputPlayerNameScreen extends WattenScreen {
 		layoutTable.add(confirmNameButton).width(300f).height(50f);
 //		try {
 //			layoutTable.add(new Card2D(new Card(Suit.ACORNS, Rank.ACE),new PlayerUI(new Player("me"))));
+//			layoutTable.add(new Card2D(new Card(Suit.BELLS, Rank.WELI),new PlayerUI(new Player("me"))));
+//
 //		} catch (Exception e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
