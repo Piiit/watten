@@ -204,6 +204,8 @@ public class ClientReceiver extends Thread {
 
 								game.getLocalPlayer().handReveal();
 								game.getLocalPlayer().setSelect_rank(true);
+								MessageDialog.createMessageDialog("Select rank!");
+
 							}
 						});
 						break;
@@ -229,6 +231,7 @@ public class ClientReceiver extends Thread {
 
 								game.getLocalPlayer().handReveal();
 								game.getLocalPlayer().setSelect_suit(true);
+								MessageDialog.createMessageDialog("Select suit!");
 							}
 						});
 						break;
@@ -275,6 +278,7 @@ public class ClientReceiver extends Thread {
 						System.out.println("my turn");
 
 						game.getLocalPlayer().setPlaying(true);
+						MessageDialog.createMessageDialog("Your turn!");
 						break;
 					case "play_card":
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
@@ -350,7 +354,7 @@ public class ClientReceiver extends Thread {
 											xml.root.getNode("winner")
 													.getData())) {
 										MessageDialog
-												.createMessageDialog("You have the highest card, your turn!");
+												.createMessageDialog("You had the highest card!");
 									}
 								} catch (Exception e) {
 									// TODO Auto-generated catch block
@@ -370,7 +374,7 @@ public class ClientReceiver extends Thread {
 									MessageDialog.createMessageDialog("Team "
 											+ xml.root.getNode("winners")
 													.getData()
-											+ "won this round!");
+											+ " won this round!");
 									int team1points = Integer.parseInt(xml.root
 											.getNode("team1points").getData());
 									int team2points = Integer.parseInt(xml.root
