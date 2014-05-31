@@ -106,17 +106,23 @@ public class PlayerUI {
 	}
 
 	public void resetHand() {
-
-		for (int i = 0; i < handCells.length; i++) {
-			handCells[i].setWidget(null);
+		if (local) {
+			for (int i = 0; i < handCells.length; i++) {
+				handCells[i].setWidget(null);
+			}
+			player.clearHand();
+			player.setHand(null);
 		}
 		handUI = new ArrayList<Card2D>();
-		player.setHand(null);
+		handUI.clear();
+		System.out.println("reset hand");
+
 	}
 
 	public void resetForRound() {
 		tricks = 0;
 		resetHand();
+		System.out.println("Reset for round!");
 	}
 
 	public void resetForTurn() {
@@ -146,7 +152,7 @@ public class PlayerUI {
 	// Adds card to players hand
 	public void addCard(Card2D card, int handIndex) {
 		System.out.println("Cell counter");
-		handUI.add(card) ;
+		handUI.add(card);
 		if (local) {
 
 			card.setParentCell(handCells[handIndex]);
@@ -158,12 +164,16 @@ public class PlayerUI {
 
 	public void addHand(MultipleCards hand) {
 		player.setHand(hand);
-
+		if (handUI != null)
+			System.out.println("HandUI lenght before add: " + handUI.size());
+		else
+			System.out.println("HandUI null");
 		for (int i = 0; i < hand.getAllCards().size(); i++)
 			addCard(new Card2D(hand.getCard(i), this), i);
 
-		System.out.println(hand.toString());
 		System.out.println("Hand added");
+		System.out.println("HandUI lenght after add: " + handUI.size());
+
 	}
 
 	/*
@@ -171,14 +181,16 @@ public class PlayerUI {
 	 * playable goes here
 	 */
 	public void playCard(Card2D card) {
-		setPlaying(false);
+
 		if (local) {
 			card.removeFromParent();
+			player.removeCard(card.getCard());
+			handUI.remove(card);
+
 		}
-		player.removeCard(card.getCard());
 		// Add card to playedcard area
 		playedCardArea.addCard(card);
-		handUI.remove(card);
+		// setPlaying(false);
 	}
 
 	public boolean isLocalPlayer() {
@@ -227,9 +239,9 @@ public class PlayerUI {
 		return playing;
 	}
 
-	public void setPlaying(boolean playing) {
+	public synchronized void setPlaying(boolean playing) {
 		this.playing = playing;
-		System.out.println("playing: "+this.playing);
+		System.out.println("playing: " + this.playing);
 	}
 
 	public int getCardIndex(Card2D card) throws Exception {

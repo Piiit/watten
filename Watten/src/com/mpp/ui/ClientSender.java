@@ -60,6 +60,7 @@ public class ClientSender {
 					String parts[] = userRequest.split(regex);
 
 					String cmd = parts[0];
+					System.out.println("Command:" + cmd);
 					String gameName = "";
 
 					switch (cmd) {
@@ -118,6 +119,9 @@ public class ClientSender {
 						break;
 					case "card_played":
 						sendRequest("card_played", "card_index", parts[1]);
+						break;
+					default:
+						System.out.println("Command not matched: "+ cmd);
 						break;
 
 					}

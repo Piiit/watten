@@ -10,11 +10,13 @@ import com.mpp.watten.cards.MultipleCards;
 public class Player implements Loadable {
 
 	private String playerName;
-	private MultipleCards hand = new MultipleCards();
+	private MultipleCards hand;
 	private PlayerLocation playerLocation;
 	
 	public Player(String name) {
 		playerName = name;
+		hand = new MultipleCards();
+		
 	}
 
 	public String getName() {
@@ -61,6 +63,10 @@ public class Player implements Loadable {
 	}
 	public MultipleCards getHand() {
 		return hand;
+	}
+	
+	public void clearHand(){
+		hand.clear();
 	}
 
 	@Override

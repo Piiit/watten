@@ -26,7 +26,7 @@ public class Watten {
 	public final static boolean HOLD = true;
 
 	private String name;
-	private int maxPoints = 18;
+	private int maxPoints = 6;
 	private Deck deck;
 	private Table table;
 	private PlayerLocation cardDealerPlayerLocation = null;
@@ -340,7 +340,7 @@ public class Watten {
 
 			}
 		}
-
+		table.clearPlayerHands();
 		setStatus(WattenFeature.ROUND_FINISHED);
 
 	}
@@ -525,8 +525,11 @@ public class Watten {
 	}
 
 	public Player getSelectRankPlayer() {
-		return table.getPlayer(PlayerLocation.get(cardDealerPlayerLocation
-				.getIndex() + 1));
+		if (cardDealerPlayerLocation.getIndex() + 1 >= 3)
+			return table.getPlayer(PlayerLocation.get(0));
+		else
+			return table.getPlayer(PlayerLocation.get(cardDealerPlayerLocation
+					.getIndex() + 1));
 	}
 
 	public Player getSelectSuitPlayer() {

@@ -147,7 +147,6 @@ public class WattenGame extends Game {
 		if (currentGame != null) {
 			if (player != getLocalPlayer())
 				currentPlayers.put(player.getPlayerName(), player);
-
 			player.setWattenGame(this);
 			currentGame.addPlayer(player);
 		}

@@ -73,6 +73,8 @@ public class ClientReceiver extends Thread {
 											xml.root.getNode("name").getData()));
 									game.addPlayerCurrentGame(game
 											.getLocalPlayer());
+									game.getCurrentGame().refreshPoints(
+											0, 0);
 								}
 							});
 
@@ -204,7 +206,8 @@ public class ClientReceiver extends Thread {
 
 								game.getLocalPlayer().handReveal();
 								game.getLocalPlayer().setSelect_rank(true);
-								MessageDialog.createMessageDialog("Select rank!");
+								MessageDialog
+										.createMessageDialog("Select rank!");
 
 							}
 						});
@@ -231,7 +234,8 @@ public class ClientReceiver extends Thread {
 
 								game.getLocalPlayer().handReveal();
 								game.getLocalPlayer().setSelect_suit(true);
-								MessageDialog.createMessageDialog("Select suit!");
+								MessageDialog
+										.createMessageDialog("Select suit!");
 							}
 						});
 						break;
@@ -297,6 +301,7 @@ public class ClientReceiver extends Thread {
 													cardIndex));
 								}
 							});
+							game.getLocalPlayer().setPlaying(false);
 						} else if ("NAK".equalsIgnoreCase(xml.root.getNode(
 								"type").getData())) {
 							error(xml);
@@ -308,30 +313,34 @@ public class ClientReceiver extends Thread {
 
 							@Override
 							public void run() {
-								try {
-									game.getPlayer(
-											xml.root.getNode("name").getData())
-											.playCard(
-													new Card2D(
-															new Card(
-																	Suit.valueOf(xml.root
-																			.getNode(
-																					"suit")
-																			.getData()),
-																	Rank.valueOf(xml.root
-																			.getNode(
-																					"rank")
-																			.getData()),
-																	false),
-															game.getPlayer(xml.root
-																	.getNode(
-																			"name")
-																	.getData())));
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									MessageDialog.createErrorDialog(e
-											.getMessage());
-								}
+								
+									try {
+										game.getPlayer(
+												xml.root.getNode("name").getData())
+												.playCard(
+														new Card2D(
+																new Card(
+																		Suit.valueOf(xml.root
+																				.getNode(
+																						"suit")
+																				.getData()),
+																		Rank.valueOf(xml.root
+																				.getNode(
+																						"rank")
+																				.getData()),
+																		false),
+																game.getPlayer(xml.root
+																		.getNode(
+																				"name")
+																		.getData())));
+									} catch (IllegalArgumentException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} catch (Exception e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+							
 							}
 						});
 						break;
@@ -358,8 +367,9 @@ public class ClientReceiver extends Thread {
 									}
 								} catch (Exception e) {
 									// TODO Auto-generated catch block
-									MessageDialog.createErrorDialog(e
-											.getMessage());
+									MessageDialog
+											.createErrorDialog("Turn finished: "
+													+ e.getMessage());
 								}
 							}
 						});
@@ -370,7 +380,7 @@ public class ClientReceiver extends Thread {
 
 							@Override
 							public void run() {
-								try {
+								
 									MessageDialog.createMessageDialog("Team "
 											+ xml.root.getNode("winners")
 													.getData()
@@ -385,11 +395,7 @@ public class ClientReceiver extends Thread {
 										player.resetForRound();
 
 									}
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									MessageDialog.createErrorDialog(e
-											.getMessage());
-								}
+								
 							}
 						});
 						break;

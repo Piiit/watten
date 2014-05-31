@@ -535,12 +535,19 @@ public class ServerThread extends Thread {
 					"your_turn");
 			break;
 		case TURN_START:
+			System.out.println("Switch roundstart");
+
 			if (currentGame.evaluateRoundFirstTurnStart()) {
 				sendResponseTo(currentGame.getSelectRankPlayer().getName(),
 						"select_rank");
+				System.out.println("Switch roundstart select_rank sent");
+
 			} else {
 				sendResponseTo(currentGame.getTable().getCurrentPlayer()
 						.getName(), "your_turn");
+				System.out.println("Switch roundstart your_turn sent to "+ currentGame.getTable().getCurrentPlayer()
+						.getName());
+
 			}
 			break;
 		case TURN_FINISHED:
