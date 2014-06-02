@@ -144,9 +144,14 @@ public class WattenGame extends Game {
 
 	public void removePlayerCurrentGame(String player) {
 		if (currentGame != null) {
-			if (currentPlayers.get(player) != getLocalPlayer()) {
+			if (!player.equals(getLocalPlayerName())) {
 				currentPlayers.get(player).leaveTable();
 				currentPlayers.remove(player);
+				System.out.println("Removed remote player");
+			}else{
+				toMainMenu();
+				System.out.println("Removed local player");
+
 			}
 		}
 	}

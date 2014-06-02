@@ -141,6 +141,12 @@ public class ClientReceiver extends Thread {
 							public void run() {
 								game.removePlayerCurrentGame(xml.root.getNode(
 										"name").getData());
+
+								for (PlayerUI player : game.getPlayers()) {
+									if (player != null)
+										player.resetForRound();
+
+								}
 							}
 						});
 						break;
@@ -179,7 +185,8 @@ public class ClientReceiver extends Thread {
 
 								@Override
 								public void run() {
-									game.getCurrentGame().removeStartGameButton();
+									game.getCurrentGame()
+											.removeStartGameButton();
 									System.out.println("game_ready ACK");
 								}
 							});
@@ -435,7 +442,7 @@ public class ClientReceiver extends Thread {
 								MessageDialog
 										.createMessageDialog(messageString);
 								if (winner1.equals(game.getLocalPlayerName()))
-									game.sendRequest("start_game");
+									game.getCurrentGame().addStartGameButton();
 
 							}
 						});

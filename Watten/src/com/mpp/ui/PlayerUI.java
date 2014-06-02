@@ -112,6 +112,7 @@ public class PlayerUI {
 	 */
 	public void resetForRound() {
 		tricks = 0;
+		resetForTurn();
 		resetHand();
 		System.out.println("Reset for round!");
 	}
@@ -133,10 +134,10 @@ public class PlayerUI {
 		this.playedCardCell.setWidget(null);
 		this.playerInfoCell.setWidget(null);
 
-		if (local)
+		if (local) {
 			chatWidget = null;
 			game.toMainMenu();
-		
+		}
 
 	}
 

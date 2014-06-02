@@ -76,10 +76,9 @@ public class ServerThread extends Thread {
 
 		String line = "";
 
-		sendResponse("chat", "message", "Welcome [" + player.getName()
-				+ "]! Type H to see all commands.");
-//		sendResponseToOthers("chat", "message", "[" + player.getName()
-//				+ "] entered the lobby...");
+		sendResponse("chat", "message", "Welcome [" + player.getName() + "]!");
+		// sendResponseToOthers("chat", "message", "[" + player.getName()
+		// + "] entered the lobby...");
 
 		try {
 			while (!socket.isClosed()) {
@@ -94,8 +93,7 @@ public class ServerThread extends Thread {
 			e.printStackTrace(System.err);
 			System.out.println("SERVER: Client [" + player.getName()
 					+ "] @ port " + socket.getPort() + " left the room!");
-//			sendResponseToOthers("chat", "message", "[" + player.getName()
-//					+ "] left the lobby...");
+			sendResponseToOthers("player_left", "name", player.getName());
 		} finally {
 			try {
 				input.close();
