@@ -13,7 +13,7 @@ import com.mpp.watten.cards.Suit;
 
 public class MessageDialog extends Dialog {
 
-	private static MessageDialog mD;
+
 
 	private MessageDialog(String title) {
 
@@ -21,7 +21,7 @@ public class MessageDialog extends Dialog {
 	}
 
 	public static void createErrorDialog(String message) {
-		mD = new MessageDialog("ERROR!");
+		final MessageDialog mD = new MessageDialog("ERROR!");
 		mD.setSkin(WattenGame.getSkin());
 
 		mD.text(message);
@@ -43,7 +43,7 @@ public class MessageDialog extends Dialog {
 	}
 
 	public static void createMessageDialog(String message) {
-		mD = new MessageDialog("INFO:");
+		final MessageDialog mD = new MessageDialog("INFO:");
 		mD.setSkin(WattenGame.getSkin());
 
 		mD.text(message);
@@ -66,7 +66,7 @@ public class MessageDialog extends Dialog {
 
 	public static void createCardShownDialog(Suit shownSuit, Rank shownRank,
 			Suit bestSuit, Rank bestRank) {
-		mD = new MessageDialog("INFO:");
+		final MessageDialog mD = new MessageDialog("INFO:");
 		mD.setSkin(WattenGame.getSkin());
 		mD.clear();
 		mD.add("Card shown:");
