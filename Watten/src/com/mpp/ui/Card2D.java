@@ -44,9 +44,9 @@ public class Card2D extends Table {
 		backImage = WTools.getCardBackImage();
 		this.setBounds(0, 0, getWidth(), getHeight());
 		this.setTouchable(Touchable.enabled);
-		this.add(card.getSuit().toString());
-		this.row();
-		this.add(card.getRank().toString());
+//		this.add(card.getSuit().toString());
+//		this.row();
+//		this.add(card.getRank().toString());
 		evaluateCardFacing();
 
 		addActionListener();

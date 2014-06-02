@@ -309,43 +309,40 @@ public class ClientReceiver extends Thread {
 						break;
 
 					case "card_played":
-						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
-								.getData())) {
-							Gdx.app.postRunnable(new Runnable() {
-	
-								@Override
-								public void run() {
-									
-										try {
-											game.getPlayer(
-													xml.root.getNode("name").getData())
-													.playCard(
-															new Card2D(
-																	new Card(
-																			Suit.valueOf(xml.root
-																					.getNode(
-																							"suit")
-																					.getData()),
-																			Rank.valueOf(xml.root
-																					.getNode(
-																							"rank")
-																					.getData()),
-																			false),
-																	game.getPlayer(xml.root
-																			.getNode(
-																					"name")
-																			.getData())));
-										} catch (IllegalArgumentException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										} catch (Exception e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										}
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
 								
-								}
-							});
-						}
+									try {
+										game.getPlayer(
+												xml.root.getNode("name").getData())
+												.playCard(
+														new Card2D(
+																new Card(
+																		Suit.valueOf(xml.root
+																				.getNode(
+																						"suit")
+																				.getData()),
+																		Rank.valueOf(xml.root
+																				.getNode(
+																						"rank")
+																				.getData()),
+																		false),
+																game.getPlayer(xml.root
+																		.getNode(
+																				"name")
+																		.getData())));
+									} catch (IllegalArgumentException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} catch (Exception e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+							
+							}
+						});
 						break;
 					case "turn_finished":
 						Gdx.app.postRunnable(new Runnable() {
