@@ -152,12 +152,11 @@ public class Watten {
 		team2Tricks = 0;
 		lastBet = 2;
 		lastBetTeamNumber = NOTEAM;
-		if (cardDealerPlayerLocation == null
-				|| cardDealerPlayerLocation.getIndex() + 1 > 3) {
+		if (cardDealerPlayerLocation == null) {
 			cardDealerPlayerLocation = PlayerLocation.South;
 		} else {
 			cardDealerPlayerLocation = PlayerLocation
-					.get(cardDealerPlayerLocation.getIndex() + 1);
+					.get((cardDealerPlayerLocation.getIndex() + 1) % 4);
 		}
 		turnWinnerPlayerLocation = getSelectRankPlayer().getPlayerLocation();
 

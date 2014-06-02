@@ -49,6 +49,9 @@ public class WTools {
 	}
 
 	public static Image getCard(Rank rank, Suit suit) {
+		if(rank == Rank.WELI) {
+			return new Image(cardsImages[rank.ordinal()][Suit.BELLS.ordinal()]);
+		}
 		return new Image(cardsImages[rank.ordinal()][suit.ordinal()]);
 
 	}
