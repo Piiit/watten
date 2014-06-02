@@ -73,8 +73,7 @@ public class ClientReceiver extends Thread {
 											xml.root.getNode("name").getData()));
 									game.addPlayerCurrentGame(game
 											.getLocalPlayer());
-									game.getCurrentGame().refreshPoints(
-											0, 0);
+									game.getCurrentGame().refreshPoints(0, 0);
 								}
 							});
 
@@ -176,7 +175,14 @@ public class ClientReceiver extends Thread {
 					case "start_game":
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
+							Gdx.app.postRunnable(new Runnable() {
 
+								@Override
+								public void run() {
+									game.getCurrentGame().removeStartGameButton();
+									System.out.println("game_ready ACK");
+								}
+							});
 						} else if ("NAK".equalsIgnoreCase(xml.root.getNode(
 								"type").getData())) {
 
@@ -185,17 +191,23 @@ public class ClientReceiver extends Thread {
 						}
 						break;
 					case "game_ready":
+
 						System.out.println("game ready switch");
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData())) {
-							game.sendRequest("start_game");
-							System.out.println("game_ready ACK");
+							Gdx.app.postRunnable(new Runnable() {
+
+								@Override
+								public void run() {
+									game.getCurrentGame().addStartGameButton();
+									System.out.println("game_ready ACK");
+								}
+							});
 						} else {
-							game.sendRequest("start_game");
-							System.out
-									.println("game_ready NACK but still started");
+							System.out.println("game_ready NACK");
 
 						}
+
 						break;
 
 					case "select_rank":
@@ -313,34 +325,34 @@ public class ClientReceiver extends Thread {
 
 							@Override
 							public void run() {
-								
-									try {
-										game.getPlayer(
-												xml.root.getNode("name").getData())
-												.playCard(
-														new Card2D(
-																new Card(
-																		Suit.valueOf(xml.root
-																				.getNode(
-																						"suit")
-																				.getData()),
-																		Rank.valueOf(xml.root
-																				.getNode(
-																						"rank")
-																				.getData()),
-																		false),
-																game.getPlayer(xml.root
-																		.getNode(
-																				"name")
-																		.getData())));
-									} catch (IllegalArgumentException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									} catch (Exception e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-							
+
+								try {
+									game.getPlayer(
+											xml.root.getNode("name").getData())
+											.playCard(
+													new Card2D(
+															new Card(
+																	Suit.valueOf(xml.root
+																			.getNode(
+																					"suit")
+																			.getData()),
+																	Rank.valueOf(xml.root
+																			.getNode(
+																					"rank")
+																			.getData()),
+																	false),
+															game.getPlayer(xml.root
+																	.getNode(
+																			"name")
+																	.getData())));
+								} catch (IllegalArgumentException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+
 							}
 						});
 						break;
@@ -380,22 +392,21 @@ public class ClientReceiver extends Thread {
 
 							@Override
 							public void run() {
-								
-									MessageDialog.createMessageDialog("Team "
-											+ xml.root.getNode("winners")
-													.getData()
-											+ " won this round!");
-									int team1points = Integer.parseInt(xml.root
-											.getNode("team1points").getData());
-									int team2points = Integer.parseInt(xml.root
-											.getNode("team2points").getData());
-									game.getCurrentGame().refreshPoints(
-											team1points, team2points);
-									for (PlayerUI player : game.getPlayers()) {
-										player.resetForRound();
 
-									}
-								
+								MessageDialog.createMessageDialog("Team "
+										+ xml.root.getNode("winners").getData()
+										+ " won this round!");
+								int team1points = Integer.parseInt(xml.root
+										.getNode("team1points").getData());
+								int team2points = Integer.parseInt(xml.root
+										.getNode("team2points").getData());
+								game.getCurrentGame().refreshPoints(
+										team1points, team2points);
+								for (PlayerUI player : game.getPlayers()) {
+									player.resetForRound();
+
+								}
+
 							}
 						});
 						break;
@@ -431,6 +442,29 @@ public class ClientReceiver extends Thread {
 						break;
 					case "help":
 					case "list_games":
+					case "selected_card":
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+								System.out.println("Second best card selected");
+								Rank shownRank = Rank.valueOf(xml.root.getNode(
+										"shownRank").getData());
+								Rank bestRank = Rank.valueOf(xml.root.getNode(
+										"bestRank").getData());
+
+								Suit shownSuit = Suit.valueOf(xml.root.getNode(
+										"shownSuit").getData());
+
+								Suit bestSuit = Suit.valueOf(xml.root.getNode(
+										"bestSuit").getData());
+
+								MessageDialog.createCardShownDialog(shownSuit,
+										shownRank, bestSuit, bestRank);
+
+							}
+						});
+						break;
 					case "info":
 						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
 								.getData()))
@@ -438,8 +472,17 @@ public class ClientReceiver extends Thread {
 									"message").getData()));
 						break;
 					case "chat":
-						System.out.println(unescape(xml.root.getNode("message")
-								.getData()));
+						Gdx.app.postRunnable(new Runnable() {
+
+							@Override
+							public void run() {
+								String msg = xml.root.getNode("message")
+										.getData();
+								System.out.println(msg);
+								game.getLocalPlayer().postChatMessage(msg);
+							}
+						});
+
 						break;
 					default:
 						System.err.println(line);

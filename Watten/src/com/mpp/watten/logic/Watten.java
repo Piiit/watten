@@ -19,7 +19,7 @@ import com.mpp.watten.cards.WattenCardTools;
  */
 /**
  * @author Peter Moser (pemoser)
- *
+ * 
  */
 public class Watten {
 
@@ -39,6 +39,8 @@ public class Watten {
 	private int team1Points = 0;
 	private int team2Points = 0;
 	private Card bestCard = null;
+	private Card suitCard = null;
+	private Card rankCard = null;
 	private int lastBetTeamNumber = NOTEAM;
 	private PlayerLocation turnWinnerPlayerLocation = null;
 	private int roundWinningTeam;
@@ -181,6 +183,7 @@ public class Watten {
 	 * A new turn means: 
 	 * - reset old best card values;
 	 * </pre>
+	 * 
 	 * @throws Exception
 	 */
 	private void stateTurnEntry() throws Exception {
@@ -206,7 +209,8 @@ public class Watten {
 				bestCard.setSuit(null);
 				bestCard.setRank(null);
 			}
-
+			suitCard = null;
+			rankCard = null;
 			setConstraints(WattenFeature.SELECT_RANK);
 			return true;
 		}
@@ -262,7 +266,9 @@ public class Watten {
 		// If first player throws a card with the same suit as the best card's
 		// suit, other players must throw a best suit card as well
 		// if existent, except "Guater" or "Rechter"
-		if (firstThrownCard != null && firstThrownCard.getSuit() == bestCard.getSuit()	&& card.getSuit() != bestCard.getSuit()) {
+		if (firstThrownCard != null
+				&& firstThrownCard.getSuit() == bestCard.getSuit()
+				&& card.getSuit() != bestCard.getSuit()) {
 			boolean hasSuitCard = false;
 			MultipleCards hand = table.getCurrentPlayer().getHand();
 			for (int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
@@ -293,9 +299,10 @@ public class Watten {
 			setConstraints(WattenFeature.PLAY_CARD, WattenFeature.BET);
 		}
 	}
-	
+
 	public MultipleCards getAllowedCards() throws Exception {
-		return WattenCardTools.getAllowedCards(table.getCurrentPlayer().getHand(), firstThrownCard, bestCard);
+		return WattenCardTools.getAllowedCards(table.getCurrentPlayer()
+				.getHand(), firstThrownCard, bestCard);
 	}
 
 	public void stateTurnBet(int team) throws Exception {
@@ -530,5 +537,24 @@ public class Watten {
 	public Player getSelectSuitPlayer() {
 		return table.getPlayer(PlayerLocation.get(cardDealerPlayerLocation
 				.getIndex()));
+	}
+
+	public void setSuitCard(Card card) {
+		suitCard = card;
+	}
+	
+	public void setRankCard(Card card){
+		rankCard = card;
+	}
+	
+	public Card getBestCard(){
+		return bestCard;
+	}
+	
+	public Card getSuitCard(){
+		return suitCard;
+	}
+	public Card getRankCard(){
+		return rankCard;
 	}
 }

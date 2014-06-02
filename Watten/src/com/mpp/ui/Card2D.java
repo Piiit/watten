@@ -22,7 +22,6 @@ public class Card2D extends Table {
 	Suit cardSuit;
 	Rank cardRank;
 	boolean facingDown;
-	boolean played;
 	PlayerUI owningPlayer;
 	Card card;
 	Cell parentCell;
@@ -35,18 +34,17 @@ public class Card2D extends Table {
 		cardRank = card.getRank();
 		this.facingDown = card.isFaceDown();
 		this.owningPlayer = owningPlayer;
-		played = false;
 
 		
 		frontImage = WTools.getCard(cardRank, cardSuit);
 
 		
 		backImage = WTools.getCardBackImage();
-		this.setBounds(0, 0, getWidth(), getHeight());
+//		this.setBounds(0, 0, CardTable.getCardWidth(), CardTable.getCardHeight());
+		this.setSize(CardTable.getCardWidth(), CardTable.getCardHeight());
+
 		this.setTouchable(Touchable.enabled);
-//		this.add(card.getSuit().toString());
-//		this.row();
-//		this.add(card.getRank().toString());
+
 		evaluateCardFacing();
 
 		addActionListener();
@@ -70,10 +68,7 @@ public class Card2D extends Table {
 	// So players which are not selecting can't see their cards
 	public void flipCard() {
 		facingDown = card.isFaceDown();
-		// if (facingDown)
-		// card.faceUp();
-		// else
-		// card.faceDown();
+		
 		evaluateCardFacing();
 
 	}
@@ -145,10 +140,6 @@ public class Card2D extends Table {
 						selectAsSuit();
 					}
 
-					// if (!played) {
-					// playCard();
-					// played = true;
-					// }
 				}
 
 			}

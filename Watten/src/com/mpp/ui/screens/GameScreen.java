@@ -23,14 +23,10 @@ public class GameScreen extends WattenScreen {
 		layoutTable.setSize(game.getScreenWidth(), game.getScreenHeight());
 		layoutTable.setBackground(WTools.getTableImage().getDrawable());
 		
-		table = new CardTable(game.getScreenWidth(), game.getScreenHeight());
+		table = new CardTable(game);
 		layoutTable.add(table).fill();
 
 		game.setCurrentGame(table);
-		System.out.println("Table width: " + table.getWidth());
-		System.out.println("Table height: " + table.getHeight());
-		System.out.println("LTable width: " + layoutTable.getWidth());
-		System.out.println("LTable height: " + layoutTable.getHeight());
 		this.resize((int)game.getScreenWidth(), (int)game.getScreenHeight());
 	}
 

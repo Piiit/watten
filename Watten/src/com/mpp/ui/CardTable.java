@@ -1,5 +1,8 @@
 package com.mpp.ui;
 
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.tools.PlayerLocation;
@@ -23,19 +26,21 @@ public class CardTable extends Table {
 	Cell[][] playerCells;
 	Cell[] localPlayerHand;
 	int positionCorrection;
+	Button startGameBtn;
 	boolean seatTaken[] = { false, false, false, false };
 	PlayerUI[] players = new PlayerUI[4];
+	WattenGame game;
 
 	/*
-	 * A class that might get a UI component(stage?), which is the highest
-	 * playing area. It contains the card areas, one for each of the four
+	 * A class that contains the card areas, the player info areas and local player cards, one for each of the four
 	 * players.
 	 */
 
-	public CardTable(float _tableWidth, float _tableHeight) {
+	public CardTable(WattenGame game) {
 		super(WattenGame.getSkin());
-		float maxCardWidth = _tableWidth / 6.5f;
-		float maxCardHeight = _tableHeight / 4.15f;
+		this.game = game;
+		float maxCardWidth = game.getScreenWidth()/ 6.5f;
+		float maxCardHeight = game.getScreenHeight() / 4.15f;
 
 		positionCorrection = 0;
 
@@ -47,18 +52,18 @@ public class CardTable extends Table {
 			columnHeight = maxCardHeight;
 		}
 		this.setPosition(0, 0);
-		this.setSize(_tableWidth, _tableHeight);
+		this.setSize(game.getScreenWidth(), game.getScreenHeight());
 		cardTableCells = new Cell[ROWS][COLUMNS];
 		localPlayerHand = new Cell[5];
 		playerCells = new Cell[4][2];
 		cardWidth = columnWidth * 0.9f;
 		cardHeight = columnHeight * 0.9f;
-		float verticalFiller = (_tableWidth - columnWidth * 6.5f) / 6f;
-		float horizontalFiller = (_tableHeight - columnHeight * 4.15f) / 6f;
-		sideColumnsWidth = (_tableWidth - columnWidth * 5-verticalFiller*5) / 2;
+		float verticalFiller = (game.getScreenWidth() - columnWidth * 6.5f) / 6f;
+		float horizontalFiller = (game.getScreenHeight() - columnHeight * 4.15f) / 6f;
+		sideColumnsWidth = (game.getScreenWidth() - columnWidth * 5-verticalFiller*5) / 2;
 		Table table = new Table(WattenGame.getSkin());
 		table.setPosition(0, 0);
-		table.setSize(_tableWidth, _tableHeight);
+		table.setSize(game.getScreenWidth(), game.getScreenHeight());
 		this.setBackground(WTools.getTableImage().getDrawable());
 
 		for (int row = 0; row < ROWS; row++) {
@@ -134,19 +139,19 @@ public class CardTable extends Table {
 
 			player.addToTable(playerCells[localTableLocation.ordinal()][0],
 					playerCells[localTableLocation.ordinal()][1],
-					localPlayerHand);
+					localPlayerHand,cardTableCells[2][1]);
 			break;
 		case West:
 			player.addToTable(playerCells[localTableLocation.ordinal()][0],
-					playerCells[localTableLocation.ordinal()][1], null);
+					playerCells[localTableLocation.ordinal()][1], null, null);
 			break;
 		case North:
 			player.addToTable(playerCells[localTableLocation.ordinal()][0],
-					playerCells[localTableLocation.ordinal()][1], null);
+					playerCells[localTableLocation.ordinal()][1], null, null);
 			break;
 		case East:
 			player.addToTable(playerCells[localTableLocation.ordinal()][0],
-					playerCells[localTableLocation.ordinal()][1], null);
+					playerCells[localTableLocation.ordinal()][1], null, null);
 			break;
 
 		}
@@ -203,5 +208,28 @@ public class CardTable extends Table {
 		// East Player
 		playerCells[PlayerLocation.East.ordinal()][0] = cardTableCells[1][4];
 		playerCells[PlayerLocation.East.ordinal()][1] = cardTableCells[1][5];
+	}
+	public void addStartGameButton(){
+		startGameBtn = new Button(WattenGame.getSkin());
+		startGameBtn.add("Start Game");
+		startGameBtn.addListener(new InputListener() {
+			public boolean touchDown(InputEvent event, float x, float y,
+					int pointer, int button) {
+
+				return true;
+			}
+
+			public void touchUp(InputEvent event, float x, float y,
+					int pointer, int button) {
+				game.sendRequest("start_game");
+
+			}
+		});
+		startGameBtn.setSize(getCardWidth(), getCardHeight()/2f);
+		cardTableCells[1][3].setWidget(startGameBtn);
+	}
+	public void removeStartGameButton(){
+		cardTableCells[1][3].setWidget(null);
+
 	}
 }

@@ -78,8 +78,8 @@ public class ServerThread extends Thread {
 
 		sendResponse("chat", "message", "Welcome [" + player.getName()
 				+ "]! Type H to see all commands.");
-		sendResponseToOthers("chat", "message", "[" + player.getName()
-				+ "] entered the lobby...");
+//		sendResponseToOthers("chat", "message", "[" + player.getName()
+//				+ "] entered the lobby...");
 
 		try {
 			while (!socket.isClosed()) {
@@ -94,8 +94,8 @@ public class ServerThread extends Thread {
 			e.printStackTrace(System.err);
 			System.out.println("SERVER: Client [" + player.getName()
 					+ "] @ port " + socket.getPort() + " left the room!");
-			sendResponseToOthers("chat", "message", "[" + player.getName()
-					+ "] left the lobby...");
+//			sendResponseToOthers("chat", "message", "[" + player.getName()
+//					+ "] left the lobby...");
 		} finally {
 			try {
 				input.close();
@@ -255,13 +255,16 @@ public class ServerThread extends Thread {
 			break;
 		case "rank_selected":
 			if (isCurrentPlayer) {
+				Card selectedRankCard = currentPlayer.getHand().getCard(
+						Integer.parseInt(xml.root.getNode("card_index")
+								.getData()));
 				currentGame.stateSelectBestCardRank(currentPlayer
 						.getHand()
 						.getCard(
 								Integer.parseInt(xml.root.getNode("card_index")
 										.getData())).getRank());
 				sendResponse(command, "type", "ACK");
-
+				currentGame.setRankCard(selectedRankCard);
 				sendResponseTo(currentGame.getSelectSuitPlayer().getName(),
 						"select_suit");
 
@@ -273,6 +276,9 @@ public class ServerThread extends Thread {
 			break;
 		case "suit_selected":
 			if (isCurrentPlayer) {
+				Card selectedSuitCard = currentPlayer.getHand().getCard(
+						Integer.parseInt(xml.root.getNode("card_index")
+								.getData()));
 				currentGame.stateSelectBestCardSuit(currentPlayer
 						.getHand()
 						.getCard(
@@ -280,6 +286,31 @@ public class ServerThread extends Thread {
 										.getData())).getSuit());
 
 				sendResponse(command, "type", "ACK");
+
+				currentGame.setSuitCard(selectedSuitCard);
+				/*
+				 * Return card that was selected by rank selector to suit
+				 * selecting player and second best card
+				 */
+				sendResponseTo(currentGame.getSelectSuitPlayer().getName(),
+						"selected_card", "shownRank", currentGame.getRankCard()
+								.getRank().toString(), "shownSuit", currentGame
+								.getRankCard().getSuit().toString(),
+						"bestRank", currentGame.getBestCard().getRank()
+								.toString(), "bestSuit", currentGame
+								.getBestCard().getSuit().toString());
+
+				/*
+				 * Return card that was selected by suit selector to rank
+				 * selecting player and second best card
+				 */
+				sendResponseTo(currentGame.getSelectRankPlayer().getName(),
+						"selected_card", "shownRank", currentGame.getSuitCard()
+								.getRank().toString(), "shownSuit", currentGame
+								.getSuitCard().getSuit().toString(),
+						"bestRank", currentGame.getBestCard().getRank()
+								.toString(), "bestSuit", currentGame
+								.getBestCard().getSuit().toString());
 				sendResponseToOthersInGame(gameName, "reveal_hand", "");
 				sendResponseTo(currentGame.getTable().getCurrentPlayer()
 						.getName(), "your_turn");
@@ -545,8 +576,8 @@ public class ServerThread extends Thread {
 			} else {
 				sendResponseTo(currentGame.getTable().getCurrentPlayer()
 						.getName(), "your_turn");
-				System.out.println("Switch roundstart your_turn sent to "+ currentGame.getTable().getCurrentPlayer()
-						.getName());
+				System.out.println("Switch roundstart your_turn sent to "
+						+ currentGame.getTable().getCurrentPlayer().getName());
 
 			}
 			break;

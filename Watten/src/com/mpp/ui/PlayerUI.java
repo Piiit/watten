@@ -21,9 +21,11 @@ public class PlayerUI {
 	Cell[] handCells;
 	Cell playedCardCell;
 	Cell playerInfoCell;
+	Cell chatCell;
 
 	PlayedCardArea playedCardArea;
 	PlayerInfoTable playerInfoTable;
+	ChatWidget chatWidget;
 	Player player;
 	ArrayList<Card2D> handUI = new ArrayList<Card2D>();
 	WattenGame game;
@@ -40,7 +42,7 @@ public class PlayerUI {
 
 	// Adds player to table
 	public void addToTable(Cell playedCardCell, Cell playerInfoCell,
-			Cell[] handCells) {
+			Cell[] handCells, Cell chatWidgetCell) {
 		this.playedCardCell = playedCardCell;
 		this.playedCardCell.setWidget(playedCardArea);
 
@@ -49,21 +51,9 @@ public class PlayerUI {
 
 		if (local) {
 			this.handCells = handCells;
-
-			// TESTING
-			try {
-
-				// addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true),
-				// this));
-				// addCard(new Card2D(new Card(Suit.ACORNS, Rank.ACE, true),
-				// this));
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			System.out.println("cards added");
-			// TESTING
+			this.chatCell = chatWidgetCell;
+			chatWidget = new ChatWidget(game);
+			this.chatCell.setWidget(chatWidget);
 		}
 
 	}
@@ -93,7 +83,7 @@ public class PlayerUI {
 		return tricks;
 	}
 
-	// Simple round tracking counter(stich)
+	// Simple turn win tracking counter(stich)
 	public void winsTurn() {
 		tricks++;
 	}
@@ -102,6 +92,7 @@ public class PlayerUI {
 		this.teamNumber = teamNumber;
 	}
 
+	// Clears all of the data regarding the players hand(cards)
 	public void resetHand() {
 		if (local) {
 			for (int i = 0; i < handCells.length; i++) {
@@ -116,17 +107,26 @@ public class PlayerUI {
 
 	}
 
+	/*
+	 * Resets the players tricks and his hand after a round
+	 */
 	public void resetForRound() {
 		tricks = 0;
 		resetHand();
 		System.out.println("Reset for round!");
 	}
 
+	/*
+	 * Resets the players playedcardarea removing any card he played last time
+	 */
 	public void resetForTurn() {
 		playedCardArea.removeCard();
 
 	}
 
+	/*
+	 * Removes the player from the current table, works for remote ones too
+	 */
 	public void leaveTable() {
 		resetForTurn();
 		resetForRound();
@@ -134,7 +134,9 @@ public class PlayerUI {
 		this.playerInfoCell.setWidget(null);
 
 		if (local)
+			chatWidget = null;
 			game.toMainMenu();
+		
 
 	}
 
@@ -146,19 +148,24 @@ public class PlayerUI {
 		player.setPlayerLocation(location);
 	}
 
-	// Adds card to players hand
+	/*
+	 * Adds card to players hand, if the player is local it adds it to the
+	 * screen
+	 */
+
 	public void addCard(Card2D card, int handIndex) {
-		System.out.println("Cell counter");
 		handUI.add(card);
 		if (local) {
 
 			card.setParentCell(handCells[handIndex]);
 			handCells[handIndex].setWidget(card);
-			System.out.println("Adding card to table");
 		}
 
 	}
 
+	/*
+	 * Adds an entire hand
+	 */
 	public void addHand(MultipleCards hand) {
 		player.setHand(hand);
 		if (handUI != null)
@@ -168,14 +175,11 @@ public class PlayerUI {
 		for (int i = 0; i < hand.getAllCards().size(); i++)
 			addCard(new Card2D(hand.getCard(i), this), i);
 
-		System.out.println("Hand added");
-		System.out.println("HandUI lenght after add: " + handUI.size());
-
 	}
 
 	/*
-	 * Adds card to playedcardarea, if local removes from hand, checks if card
-	 * playable goes here
+	 * Adds card to playedcardarea, if local removes from hand, checks if card.
+	 * Only called if a play actions is receives an ACK from the server
 	 */
 	public void playCard(Card2D card) {
 
@@ -185,9 +189,8 @@ public class PlayerUI {
 			handUI.remove(card);
 
 		}
-		// Add card to playedcard area
+		// Add card to playedcardarea, same for all players
 		playedCardArea.addCard(card);
-		// setPlaying(false);
 	}
 
 	public boolean isLocalPlayer() {
@@ -250,6 +253,9 @@ public class PlayerUI {
 		return handUI.get(index);
 	}
 
+	/*
+	 * Sends a suit_selected request to the server
+	 */
 	public void selectSuit(Card2D card) {
 		try {
 			game.sendRequest("suit_selected " + getCardIndex(card));
@@ -260,6 +266,9 @@ public class PlayerUI {
 		}
 	}
 
+	/*
+	 * Sends a rank_selected request to the server
+	 */
 	public void selectRank(Card2D card) {
 		try {
 			game.sendRequest("rank_selected " + getCardIndex(card));
@@ -270,6 +279,9 @@ public class PlayerUI {
 		}
 	}
 
+	/*
+	 * Sends a card_played request to the server
+	 */
 	public void requestCardPlay(Card2D card) {
 		try {
 			game.sendRequest("card_played " + getCardIndex(card));
@@ -278,6 +290,14 @@ public class PlayerUI {
 			MessageDialog.createErrorDialog("Card play select error: "
 					+ e.getMessage());
 		}
+	}
+
+	/*
+	 * Appends a new message to the chatwidget
+	 */
+	public void postChatMessage(String text) {
+		if (local && chatWidget != null)
+			chatWidget.addMessage(text);
 	}
 
 	public void setWattenGame(WattenGame game) {

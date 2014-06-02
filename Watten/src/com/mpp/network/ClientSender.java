@@ -15,7 +15,7 @@ public class ClientSender {
 	private static BufferedReader input = null;
 	private static Socket socket = null;
 	private static final int PORT = 9999;
-//	private static final String ADDRESS = "192.168.178.22";
+	// private static final String ADDRESS = "192.168.178.22";
 	private static final String ADDRESS = "127.0.0.1";
 	String userRequest;
 	WattenGame game;
@@ -39,10 +39,15 @@ public class ClientSender {
 			boolean playerAccepted = false;
 			while (!playerAccepted && !socket.isClosed()) {
 				String answer = input.readLine();
+				
+				/*
+				 * Asks the server if the name chosen is already taken
+				 */
 				if ("NACK".equals(answer)) {
 					MessageDialog.createErrorDialog(input.readLine());
 					socket.close();
 				} else if ("ACK".equals(answer)) {
+					
 					game.toMainMenu();
 					ClientReceiver clientOut = new ClientReceiver(socket, game);
 					clientOut.start();
@@ -57,6 +62,7 @@ public class ClientSender {
 
 					String regex = "\\s";
 					String parts[] = userRequest.split(regex);
+					
 
 					String cmd = parts[0];
 					System.out.println("Command:" + cmd);
@@ -99,7 +105,7 @@ public class ClientSender {
 						String msg = "";
 						if (parts.length > 1) {
 							for (int i = 1; i < parts.length; i++)
-								msg += parts[i];
+								msg += parts[i]+" ";
 						}
 						sendRequest("chat", "message", msg);
 						break;
@@ -120,7 +126,7 @@ public class ClientSender {
 						sendRequest("card_played", "card_index", parts[1]);
 						break;
 					default:
-						System.out.println("Command not matched: "+ cmd);
+						System.out.println("Command not matched: " + cmd);
 						break;
 
 					}
@@ -136,9 +142,11 @@ public class ClientSender {
 		} finally {
 			try {
 				System.out.println("Closing connection.");
-				output.close();
-				input.close();
-				if (!socket.isClosed()) {
+				if (output != null)
+					output.close();
+				if (input != null)
+					input.close();
+				if (socket != null && !socket.isClosed()) {
 					socket.close();
 				}
 			} catch (IOException e) {
