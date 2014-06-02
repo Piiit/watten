@@ -17,6 +17,10 @@ import com.mpp.watten.cards.WattenCardTools;
  * 
  * @author Peter Moser (pemoser)
  */
+/**
+ * @author Peter Moser (pemoser)
+ *
+ */
 public class Watten {
 
 	public final static int NOTEAM = 0;
@@ -40,7 +44,7 @@ public class Watten {
 	private int roundWinningTeam;
 	private WattenFeature status;
 	private List<WattenFeature> allowedStates = new ArrayList<WattenFeature>();
-	private Suit firstCardsSuit = null;
+	private Card firstThrownCard = null;
 	private int lastBet;
 
 	public Watten(String name) throws Exception {
@@ -127,8 +131,14 @@ public class Watten {
 	}
 
 	/**
-	 * A new round means: - remove cards from table; - shuffle cards; - next
-	 * player is considered the new dealer; - deal cards - set tricks to zero
+	 * <pre>
+	 * A new round means: 
+	 * - remove cards from table; 
+	 * - shuffle cards; 
+	 * - next player is considered the new dealer; 
+	 * - deal cards 
+	 * - set tricks to zero
+	 * </pre>
 	 * 
 	 * @throws Exception
 	 */
@@ -167,14 +177,16 @@ public class Watten {
 	}
 
 	/**
-	 * A new turn means: - reset old best card values;
-	 * 
+	 * <pre>
+	 * A new turn means: 
+	 * - reset old best card values;
+	 * </pre>
 	 * @throws Exception
 	 */
 	private void stateTurnEntry() throws Exception {
 		throwExceptionIfNotAllowed(WattenFeature.TURN_START);
 
-		firstCardsSuit = null;
+		firstThrownCard = null;
 		table.setCurrentPlayer(turnWinnerPlayerLocation);
 		table.resetCardList();
 
@@ -250,8 +262,7 @@ public class Watten {
 		// If first player throws a card with the same suit as the best card's
 		// suit, other players must throw a best suit card as well
 		// if existent, except "Guater" or "Rechter"
-		if (firstCardsSuit == bestCard.getSuit()
-				&& card.getSuit() != bestCard.getSuit()) {
+		if (firstThrownCard != null && firstThrownCard.getSuit() == bestCard.getSuit()	&& card.getSuit() != bestCard.getSuit()) {
 			boolean hasSuitCard = false;
 			MultipleCards hand = table.getCurrentPlayer().getHand();
 			for (int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
@@ -270,8 +281,8 @@ public class Watten {
 		}
 		table.putCardUpdatePlayer(card);
 		table.nextPlayer();
-		if (firstCardsSuit == null) {
-			firstCardsSuit = card.getSuit();
+		if (firstThrownCard == null) {
+			firstThrownCard = card;
 		}
 
 		if (table.getCurrentPlayerCard() != null) {
@@ -282,24 +293,9 @@ public class Watten {
 			setConstraints(WattenFeature.PLAY_CARD, WattenFeature.BET);
 		}
 	}
-
+	
 	public MultipleCards getAllowedCards() throws Exception {
-		MultipleCards hand = table.getCurrentPlayer().getHand();
-		if (firstCardsSuit != bestCard.getSuit()) {
-			return hand;
-		}
-
-		MultipleCards allowedCards = new MultipleCards();
-		for (int cardIndex = hand.getIndex(); cardIndex < hand.getCount(); cardIndex++) {
-			Card c = hand.getCard(cardIndex);
-			if (c.getSuit() == bestCard.getSuit()) {
-				allowedCards.addCard(c);
-			}
-		}
-		if (allowedCards.getCount() == 0) {
-			return hand;
-		}
-		return allowedCards;
+		return WattenCardTools.getAllowedCards(table.getCurrentPlayer().getHand(), firstThrownCard, bestCard);
 	}
 
 	public void stateTurnBet(int team) throws Exception {
@@ -374,7 +370,6 @@ public class Watten {
 		setStatus(WattenFeature.SELECT_RANK);
 		setConstraints(WattenFeature.SELECT_SUIT);
 		table.setCurrentPlayer(getSelectSuitPlayer().getPlayerLocation());
-
 	}
 
 	private void stateTurnExit() throws Exception {

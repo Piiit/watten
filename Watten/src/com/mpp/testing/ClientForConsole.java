@@ -1,11 +1,11 @@
-package com.mpp.network;
+package com.mpp.testing;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-
+import com.mpp.tools.UserInterface;
 import com.mpp.tools.xml.SimpleXML;
 
 public class ClientForConsole {
@@ -31,9 +31,13 @@ public class ClientForConsole {
 				e.printStackTrace();
 			}
 			
+
 			ClientThread clientOut = new ClientThread(socket);
 			clientOut.start();
-			
+
+			String loginName = UserInterface.inputField("Please enter your name");
+			sendRequest("login", "name", loginName);
+
 			String line = "";
 			while(!socket.isClosed()) {
 				try {

@@ -1,7 +1,6 @@
 package com.mpp.ui.screens;
 
-import com.mpp.watten.WattenGame;
-import com.badlogic.gdx.Screen;
+import com.mpp.ui.WattenGame;
 
 public class SelectGameScreen  extends WattenScreen {
 

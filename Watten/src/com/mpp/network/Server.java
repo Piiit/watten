@@ -31,7 +31,7 @@ public class Server {
 //					System.out.println("Client likes to connected @ local port " + clientSocket.getLocalPort());
 					
 					ServerThread clientHandler = new ServerThread(clientSocket, clients, games, MAXCLIENTS);
-					clientHandler.start();
+					clientHandler.start(); 
 					
 	            } catch(IOException e) {  
 	            	e.getStackTrace();

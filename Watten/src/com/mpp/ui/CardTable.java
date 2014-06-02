@@ -1,16 +1,9 @@
 package com.mpp.ui;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.tools.PlayerLocation;
 import com.mpp.tools.WTools;
-import com.mpp.watten.WattenGame;
-import com.mpp.watten.cards.Card;
-import com.mpp.watten.cards.Rank;
-import com.mpp.watten.cards.Suit;
-import com.mpp.watten.logic.Player;
 
 public class CardTable extends Table {
 

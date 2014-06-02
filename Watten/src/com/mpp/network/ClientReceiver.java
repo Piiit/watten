@@ -1,17 +1,17 @@
-package com.mpp.ui;
+package com.mpp.network;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-
 import com.badlogic.gdx.Gdx;
 import com.mpp.tools.PlayerLocation;
 import com.mpp.tools.xml.SimpleXML;
+import com.mpp.ui.Card2D;
+import com.mpp.ui.PlayerUI;
+import com.mpp.ui.WattenGame;
 import com.mpp.ui.message.MessageDialog;
-import com.mpp.ui.message.MessageType;
 import com.mpp.ui.screens.GameScreen;
-import com.mpp.watten.WattenGame;
 import com.mpp.watten.cards.Card;
 import com.mpp.watten.cards.MultipleCards;
 import com.mpp.watten.cards.Rank;
@@ -309,40 +309,43 @@ public class ClientReceiver extends Thread {
 						break;
 
 					case "card_played":
-						Gdx.app.postRunnable(new Runnable() {
-
-							@Override
-							public void run() {
+						if ("ACK".equalsIgnoreCase(xml.root.getNode("type")
+								.getData())) {
+							Gdx.app.postRunnable(new Runnable() {
+	
+								@Override
+								public void run() {
+									
+										try {
+											game.getPlayer(
+													xml.root.getNode("name").getData())
+													.playCard(
+															new Card2D(
+																	new Card(
+																			Suit.valueOf(xml.root
+																					.getNode(
+																							"suit")
+																					.getData()),
+																			Rank.valueOf(xml.root
+																					.getNode(
+																							"rank")
+																					.getData()),
+																			false),
+																	game.getPlayer(xml.root
+																			.getNode(
+																					"name")
+																			.getData())));
+										} catch (IllegalArgumentException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										} catch (Exception e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
 								
-									try {
-										game.getPlayer(
-												xml.root.getNode("name").getData())
-												.playCard(
-														new Card2D(
-																new Card(
-																		Suit.valueOf(xml.root
-																				.getNode(
-																						"suit")
-																				.getData()),
-																		Rank.valueOf(xml.root
-																				.getNode(
-																						"rank")
-																				.getData()),
-																		false),
-																game.getPlayer(xml.root
-																		.getNode(
-																				"name")
-																		.getData())));
-									} catch (IllegalArgumentException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									} catch (Exception e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-							
-							}
-						});
+								}
+							});
+						}
 						break;
 					case "turn_finished":
 						Gdx.app.postRunnable(new Runnable() {

@@ -1,26 +1,16 @@
-package com.mpp.watten;
+package com.mpp.ui;
 
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Net.Protocol;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.net.Socket;
-import com.badlogic.gdx.net.SocketHints;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.mpp.tools.PlayerLocation;
+import com.mpp.network.ClientSender;
 import com.mpp.tools.WTools;
-import com.mpp.ui.CardTable;
-import com.mpp.ui.ClientReceiver;
-import com.mpp.ui.ClientSender;
-import com.mpp.ui.PlayerUI;
 
 import com.mpp.ui.screens.InputPlayerNameScreen;
 import com.mpp.ui.screens.MainMenuScreen;
@@ -162,7 +152,7 @@ public class WattenGame extends Game {
 	}
 
 	public void setCurrentScreen(WattenScreen currentScreen) {
-		this.currentScreen = currentScreen;
+		WattenGame.currentScreen = currentScreen;
 	}
 
 	public static WattenScreen getCurrentScreen() {

@@ -1,15 +1,13 @@
-package com.mpp.ui;
+package com.mpp.network;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-
 import com.mpp.tools.xml.SimpleXML;
+import com.mpp.ui.WattenGame;
 import com.mpp.ui.message.MessageDialog;
-import com.mpp.ui.message.MessageType;
-import com.mpp.watten.WattenGame;
 
 public class ClientSender {
 
@@ -17,7 +15,8 @@ public class ClientSender {
 	private static BufferedReader input = null;
 	private static Socket socket = null;
 	private static final int PORT = 9999;
-	private static final String ADDRESS = "192.168.178.22";
+//	private static final String ADDRESS = "192.168.178.22";
+	private static final String ADDRESS = "127.0.0.1";
 	String userRequest;
 	WattenGame game;
 
@@ -40,10 +39,10 @@ public class ClientSender {
 			boolean playerAccepted = false;
 			while (!playerAccepted && !socket.isClosed()) {
 				String answer = input.readLine();
-				if (answer.equals("NACK")) {
+				if ("NACK".equals(answer)) {
 					MessageDialog.createErrorDialog(input.readLine());
 					socket.close();
-				} else if (answer.equals("ACK")) {
+				} else if ("ACK".equals(answer)) {
 					game.toMainMenu();
 					ClientReceiver clientOut = new ClientReceiver(socket, game);
 					clientOut.start();

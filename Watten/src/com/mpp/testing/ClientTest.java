@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.UUID;
 
-import com.mpp.network.ClientThread;
 import com.mpp.tools.xml.SimpleXML;
 
 public class ClientTest {
@@ -37,6 +37,9 @@ public class ClientTest {
 			ClientThread clientOut = new ClientThread(socket);
 			clientOut.start();
 			
+			String name = UUID.randomUUID().toString();
+			sendRequest("login", "name", name);
+			
 			String line = "";
 			if(!socket.isClosed()) {
 				try {
@@ -46,7 +49,6 @@ public class ClientTest {
 					
 					//TODO wait for ACK...
 					sendRequest("join_game", "name", "Watten");
-					
 					
 					while(!socket.isClosed()) {
 						try {

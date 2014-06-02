@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import com.esotericsoftware.tablelayout.Cell;
 import com.mpp.tools.PlayerLocation;
 import com.mpp.ui.message.MessageDialog;
-import com.mpp.ui.message.MessageType;
-import com.mpp.watten.WattenGame;
 import com.mpp.watten.cards.MultipleCards;
-import com.mpp.watten.cards.Suit;
 import com.mpp.watten.logic.Player;
 
 public class PlayerUI {

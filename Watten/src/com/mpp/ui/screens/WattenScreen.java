@@ -4,7 +4,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.mpp.watten.WattenGame;
+import com.mpp.ui.WattenGame;
 
 public class WattenScreen implements Screen {
 	Skin skin;

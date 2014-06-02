@@ -1,12 +1,10 @@
 package com.mpp.ui.message;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.mpp.ui.Card2D;
-import com.mpp.watten.WattenGame;
+import com.mpp.ui.WattenGame;
 
 public class MessageDialog extends Dialog {
 

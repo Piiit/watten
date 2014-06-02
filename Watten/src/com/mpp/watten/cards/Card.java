@@ -11,9 +11,11 @@ public class Card implements Comparable<Card>, Loadable {
 	boolean faceDown;
 	
 	public Card (Suit suit, Rank rank, boolean faceDown) throws Exception {
-		if(rank == Rank.WELI && suit != Suit.BELLS) {
-			throw new Exception("WELI must have BELLS as suit!");
-		}
+		
+		//Check removed, because best card can be WELI with other suits...
+//		if(rank == Rank.WELI && suit != Suit.BELLS) {
+//			throw new Exception("WELI must have BELLS as suit!");
+//		}
 		this.rank = rank;
 		this.suit = suit;
 		this.faceDown = faceDown;
@@ -86,6 +88,9 @@ public class Card implements Comparable<Card>, Loadable {
 	}
 	
 	public boolean equals(Card card) {
+		if(card == null) {
+			return false;
+		}
 		if (getRank() == card.getRank() && getSuit() == card.getSuit()) {
 			return true;
 		}

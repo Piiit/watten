@@ -3,7 +3,6 @@ package com.mpp.ui;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.mpp.watten.WattenGame;
 
 public class PlayerInfoTable extends Table {
 	PlayerUI player;

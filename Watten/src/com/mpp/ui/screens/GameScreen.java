@@ -1,11 +1,9 @@
 package com.mpp.ui.screens;
 
-import com.mpp.tools.PlayerLocation;
 import com.mpp.tools.WTools;
 import com.mpp.ui.CardTable;
-import com.mpp.watten.WattenGame;
+import com.mpp.ui.WattenGame;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
